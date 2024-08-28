@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    // Example
+    "Example - All Options": {
+      "commandName": "Project",
+      "commandLineArgs": "example -f ./ -s ../ -t ../../../"
+    },
+    "Example - No Options": {
+      "commandName": "Project",
+      "commandLineArgs": "example"
+    }
+  }
+}

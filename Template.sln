@@ -3,21 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34916.146
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.CLI", "Template.CLI\Template.CLI.csproj", "{288BAC3E-7038-42AF-A3F7-501FB2929498}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.CLI", "Template.CLI\Template.CLI.csproj", "{288BAC3E-7038-42AF-A3F7-501FB2929498}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B2C1815-B7E2-46DA-B8CC-2D8BD536862C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Domain", "Template.Domain\Template.Domain.csproj", "{9EE6E520-E599-4052-AF34-E4D928FFB0C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.Domain", "Template.Domain\Template.Domain.csproj", "{9EE6E520-E599-4052-AF34-E4D928FFB0C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Application", "Template.Application\Template.Application.csproj", "{F06A47D6-C2F4-4A17-B73C-26912E97765B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.Application", "Template.Application\Template.Application.csproj", "{F06A47D6-C2F4-4A17-B73C-26912E97765B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Infrastructure", "Template.Infrastructure\Template.Infrastructure.csproj", "{9A6E79D1-CC5B-4EDA-9984-547E5E6E2CF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.Infrastructure", "Template.Infrastructure\Template.Infrastructure.csproj", "{9A6E79D1-CC5B-4EDA-9984-547E5E6E2CF9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{D81ED4CD-E2EF-45F4-A860-E7DADD9C9BC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Infrastructure.Test", "Template.Infrastructure.Test\Template.Infrastructure.Test.csproj", "{716DCA55-BFDC-48E7-A5F1-39A471481AB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.Infrastructure.Test", "Template.Infrastructure.Test\Template.Infrastructure.Test.csproj", "{716DCA55-BFDC-48E7-A5F1-39A471481AB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Domain.Test", "Template.Domain.Test\Template.Domain.Test.csproj", "{6FB3F381-71F7-4B23-AC71-D47C1D4A2613}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Template.Domain.Test", "Template.Domain.Test\Template.Domain.Test.csproj", "{6FB3F381-71F7-4B23-AC71-D47C1D4A2613}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Template.Domain", "Template.Domain", "{1DBDC0DE-04E2-4399-BA0D-19486AA63131}"
 EndProject
@@ -25,6 +25,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Template.Infrastructure", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "info", "info", "{E2C4DB10-1BD2-476F-9E35-90E86C88C3B8}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.git\COMMIT_EDITMSG = .git\COMMIT_EDITMSG
+		.git\config = .git\config
+		.git\description = .git\description
+		.git\FETCH_HEAD = .git\FETCH_HEAD
+		.git\HEAD = .git\HEAD
+		.git\index = .git\index
+		.git\ORIG_HEAD = .git\ORIG_HEAD
 		README.md = README.md
 	EndProjectSection
 EndProject

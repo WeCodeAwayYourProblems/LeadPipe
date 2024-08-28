@@ -1,0 +1,20 @@
+#b
+**/bin
+
+#i
+# .info is my personal favorite custom folder and file name that I use to hide files from git
+# All you have to do is name a folder or file with .info at the beginning and that folder or file will automatically be ignored
+# For example, .info=ThisFileContainsSecrets.ext will automatically be ignored, and .info=ThisFolderContainsSecrets will also be ignored
+.info/ 
+/.info
+**/.info
+**/.info**
+**/.info**/
+
+#o
+**/obj
+
+#v
+/.vs
+
+# Added Later

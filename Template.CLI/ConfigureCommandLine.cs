@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Template.Application;
-using Infrastructure;
+using Template.Infrastructure;
 
-namespace CLI;
+namespace Template.CLI;
 
 internal static class ConfigureCommandLine
 {

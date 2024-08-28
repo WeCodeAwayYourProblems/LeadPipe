@@ -4,7 +4,7 @@ using CommandLine;
 using Template.CLI.Verbs;
 using Microsoft.Extensions.Hosting;
 
-namespace CLI
+namespace Template.CLI
 {
     internal class Program
     {

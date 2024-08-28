@@ -1,7 +1,7 @@
 ﻿using Template.Application.InfrastructureInterfaces;
 using CsvHelper.Configuration;
 using Template.Infrastructure.CsvService;
-using Infrastructure.JsonService;
+using Template.Infrastructure.JsonService;
 
 namespace Template.Infrastructure.JsonConvertService;
 

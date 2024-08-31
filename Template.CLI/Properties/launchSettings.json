@@ -1,13 +1,19 @@
 {
   "profiles": {
     // Example
-    "Example - All Options": {
+    "Example - All Options Dev": {
       "commandName": "Project",
-      "commandLineArgs": "example -f ./ -s ../ -t ../../../"
+      "commandLineArgs": "example -f ./ -s ../ -t ../../../",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     },
     "Example - No Options": {
       "commandName": "Project",
-      "commandLineArgs": "example"
+      "commandLineArgs": "example",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     }
   }
 }

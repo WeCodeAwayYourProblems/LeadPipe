@@ -11,9 +11,9 @@ namespace Template.CLI
         static void Main(string[] args)
         {
             IHostBuilder builder = Host.CreateDefaultBuilder(args)
-                .ConfigureServices(services =>
+                .ConfigureServices((context, services) =>
                 {
-                    services.ConfigureCli();
+                    services.ConfigureCli(context.Configuration);
                 });
             IHost host = builder.Build();
             IServiceProvider service = host.Services.CreateScope().ServiceProvider;

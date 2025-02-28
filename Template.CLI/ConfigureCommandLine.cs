@@ -11,6 +11,8 @@ internal static class ConfigureCommandLine
     {
         Settings settings = new();
         configuration.Bind(settings);
-        services.AddInfrastructure().AddApplication();
+
+        typeof(Settings).GetInterfaces().ToList().ForEach(t => services.AddSingleton(t, settings));
+        services.AddInfrastructure(settings).AddApplication();
     }
 }

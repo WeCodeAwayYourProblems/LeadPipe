@@ -1,7 +1,15 @@
-﻿namespace Template.CLI;
+﻿using Template.Infrastructure.SettingsInterfaces;
 
-internal class Settings
+namespace Template.CLI;
+
+internal class Settings : IInfrastructureSettings
 {
-    public string Secret1 { get; set; }
-    public string Secret2 { get; set; }
+    // IDwhSettings
+    public string? SqlConnectionString1 { get; set; }
+    public string? SqlConnectionString2 { get; set; }
+
+    // Named Http Clients
+    public string? Name1 { get; set; }
+    public string? Name1Token { get; set; }
+    public string? Name1AccountId { get; set; }
 }

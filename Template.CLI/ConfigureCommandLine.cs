@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Template.Application;
 using Template.Infrastructure;
 
@@ -13,6 +14,11 @@ internal static class ConfigureCommandLine
         configuration.Bind(settings);
 
         typeof(Settings).GetInterfaces().ToList().ForEach(t => services.AddSingleton(t, settings));
+        services.AddLogging(builder =>
+        {
+            builder.AddDebug();
+            builder.AddConsole();
+        });
         services.AddInfrastructure(settings).AddApplication();
     }
 }

@@ -38,7 +38,7 @@ internal static class JsonRw
 
     #region Private
     private static readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
-    private static Result<List<T>> Deserialize<T>(string jsonStr)
+    internal/*fortestingonly*/ static Result<List<T>> Deserialize<T>(string jsonStr)
     {
         try
         {

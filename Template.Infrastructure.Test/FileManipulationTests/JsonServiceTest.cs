@@ -32,11 +32,11 @@ public class JsonServiceTest
     public void JsonService_WritesToFile(string id, string name, string dateTime)
     {
         // Assemble
-        string jsonFile = TestFileHelper.AccessTestFile(TestFileType.Json);
+        FileInfo jsonFile = new(TestFileHelper.AccessTestFile(TestFileType.Json));
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        JsonRw.SerializeToFile(jsonFile, [content]);
+        JsonRw.WriteToFile(jsonFile, [content]);
 
         // Assert
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
@@ -78,11 +78,11 @@ public class JsonServiceTest
         string rawJson = AssembleRawJson(id, name, dateTime);
 
         // Act
-        List<TestFile> result = JsonRw.Deserialize<TestFile>(rawJson);
+        var result = JsonRw.Deserialize<TestFile>(rawJson);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.True(result.Count != 0);
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value.Count != 0);
     }
     #endregion
 
@@ -91,16 +91,17 @@ public class JsonServiceTest
     public void JsonService_ReadsFromFile()
     {
         // Assemble
-        string jsonFile = TestFileHelper.AccessTestFile(TestFileType.Json);
+        FileInfo jsonFile = new(TestFileHelper.AccessTestFile(TestFileType.Json));
 
         // Act
-        List<TestFile> result = JsonRw.DeserializeFile<TestFile>(jsonFile);
+        var result = JsonRw.ReadFile<TestFile>(jsonFile);
 
         // Assert
-        Assert.NotNull(result);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
     }
     #endregion
-    
+
     #region Private
     private static string AssembleRawJson(string id, string name, string dateTime)
     {

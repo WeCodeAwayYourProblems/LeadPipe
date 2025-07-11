@@ -16,13 +16,13 @@ public class CsvServiceTest
     {
         // Assemble
         // Create the File name
-        string fileName = TestFileHelper.AccessTestFile(TestFileType.Csv);
+        FileInfo fileName = new(TestFileHelper.AccessTestFile(TestFileType.Csv));
 
         // Create the actual object to be saved to file
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        CsvRw.WriteToCsv<TestFile, TestFileMap>(fileName, [content]);
+        CsvRw.Write<TestFile, TestFileMap>(fileName, [content]);
 
         // Assert
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
@@ -41,13 +41,14 @@ public class CsvServiceTest
     {
         // Assemble
         // Create the file name
-        string fileName = TestFileHelper.AccessTestFile(TestFileType.Csv);
+        FileInfo fileName = new(TestFileHelper.AccessTestFile(TestFileType.Csv));
 
         // Act
-        List<TestFile> contents = CsvRw.ParseFromCsv<TestFile>(fileName);
+        var contents = CsvRw.Parse<TestFile>(fileName);
 
         // Assert
-        Assert.NotNull(contents);
+        Assert.True(contents.IsSuccess);
+        Assert.NotNull(contents.Value);
     }
     #endregion
 
@@ -77,13 +78,13 @@ public class CsvServiceTest
     public void CsvService_AppendsToCsv(string id, string name, string dateTime)
     {
         // Assemble
-        string fileName = TestFileHelper.AccessTestFile(TestFileType.Csv);
+        FileInfo fileName = new(TestFileHelper.AccessTestFile(TestFileType.Csv));
         
         // Create the actual object to be saved to file
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        CsvRw.AppendToCsv<TestFile, TestFileMap>(fileName, [content]);
+        CsvRw.Append<TestFile, TestFileMap>(fileName, [content]);
 
         // Assert
         // Assert

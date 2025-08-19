@@ -23,23 +23,17 @@
 
 ### 2. Pack your template using the dotnet CLI:
 
-    ```bash 
-    dotnet new -i <path-to-your-template-folder>
-    ```
+```dotnet new -i <path-to-your-template-folder>```
 
    Alternatively, if you want to pack it as a NuGet package:
 
-    ```bash 
-    dotnet pack
-    ```
+```dotnet pack```
 
 ## Using the Template
 ------------------
 ### 1. After installing the template, you can create a new project using:
 
-    ```bash
-    dotnet new clean-arch-template -n MyNewProject
-    ```
+```dotnet new clean-arch-template -n MyNewProject```
 
    This will create a new project named 'MyNewProject' using your custom template.
 
@@ -48,9 +42,7 @@
 
 ### 2. To uninstall the template:
 
-    ```bash 
-    dotnet new -u <path-to-your-template-folder> or <template-package-name>
-    ```
+```dotnet new -u <path-to-your-template-folder> or <template-package-name>```
 
 ## Notes
 -----
@@ -58,8 +50,7 @@
 - You can test your template locally before publishing it to NuGet.
 
 
-================================================================================
-================================================================================
+-----
 
 # EF Core Migrations Guide for Template Users
 
@@ -74,22 +65,18 @@ By default, these contexts are *generic*, which makes them great for simple quer
 ## 1. Install EF Core Tools
 Make sure you have the EF Core CLI tools installed:
 
-```bash
-dotnet tool install --global dotnet-ef
-```
+```dotnet tool install --global dotnet-ef```
 
 Verify installation:
 
-```bash
-dotnet ef --version
-```
+```dotnet ef --version```
 
 ---
 
 ## 2. Install Database Providers
 The project already references MySQL and SQLite EF Core providers. If needed, install them manually:
 
-```bash
+```
 dotnet add package MySQl.EntityFrameworkCore
 dotnet add package Microsoft.EntityFrameworkCore.Sqlite
 ```
@@ -102,8 +89,7 @@ Generic contexts (like `DwhContext<T>` or `SqliteContext<T>`) are not well-suite
 
 To use migrations, create a concrete `DbContext` that includes **all entities you want in the migration**:
 
-```csharp
-public class MySqlMigrationContext : DbContext
+```public class MySqlMigrationContext : DbContext
 {
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Order> Orders { get; set; }
@@ -135,15 +121,11 @@ Run the following from the project root:
 
 ### For MySQL
 
-```bash
-dotnet ef migrations add InitMySql -c MySqlMigrationContext -o Migrations/MySql
-```
+```dotnet ef migrations add InitMySql -c MySqlMigrationContext -o Migrations/MySql```
 
 ### For SQLite
 
-```bash
-dotnet ef migrations add InitSqlite -c SqliteMigrationContext -o Migrations/Sqlite
-```
+```dotnet ef migrations add InitSqlite -c SqliteMigrationContext -o Migrations/Sqlite```
 
 ---
 
@@ -152,15 +134,11 @@ Apply migrations to the database:
 
 ### For MySQL
 
-```bash
-dotnet ef database update -c MySqlMigrationContext
-```
+```dotnet ef database update -c MySqlMigrationContext```
 
 ### For SQLite
 
-```bash
-dotnet ef database update -c SqliteMigrationContext
-```
+```dotnet ef database update -c SqliteMigrationContext```
 
 ---
 
@@ -170,9 +148,7 @@ dotnet ef database update -c SqliteMigrationContext
 - Each provider (MySQL, SQLite) should have its own separate migrations folder.
 - If you only need lightweight/local SQLite storage, you can skip migrations and just call:
 
-  ```csharp
-  context.Database.EnsureCreated();
-  ```
+```context.Database.EnsureCreated();```
 
 ---
 

@@ -30,7 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "info", "info", "{E2C4DB10-1
 		.git\index = .git\index
 		.git\ORIG_HEAD = .git\ORIG_HEAD
 		README.md = README.md
-		TemplateInstructions.txt = TemplateInstructions.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Translation", "Template.Translation\Template.Translation.csproj", "{CAF567E6-E506-4CCF-A207-A19D54855F4D}"

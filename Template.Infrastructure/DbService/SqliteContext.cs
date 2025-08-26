@@ -16,7 +16,7 @@ public class SqliteContext<T>(FileInfo location) : DbContext where T : class
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        // Ensure the directory iexists before trying to create the db file
+        // Ensure the directory exists before trying to create the db file
         if (!Location.Directory!.Exists)
             Location.Directory.Create();
 

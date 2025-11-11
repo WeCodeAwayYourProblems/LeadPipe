@@ -1,18 +1,18 @@
-# Instructions for Creating and Using a Custom C# Project Template with dotnet CLI
+# Instructions for Creating and Using a Custom C# Project LeadPipe with dotnet CLI
 ================================================================================
 
-## Creating the Template
+## Creating the LeadPipe
 ---------------------
-### 1. Ensure the root folder of your C# project contains a `.template.config` folder with a `template.json` file.
-   Example `template.json` content:
+### 1. Ensure the root folder of your C# project contains a `.leadpipe.config` folder with a `leadpipe.json` file.
+   Example `leadpipe.json` content:
 
    ```{
-      "$schema": "https://json.schemastore.org/template",
+      "$schema": "https://json.schemastore.org/leadpipe",
       "author": "WeCodeAwayYourProblems",
-      "identity": "CleanArch.Template",
-      "name": "Clean Architecture Template",
-      "shortName": "clean-arch-template",
-      "sourceName": "Template", // Template will be replaced throughout the solution with whatever name you choose for your new solution
+      "identity": "CleanArch.LeadPipe",
+      "name": "Clean Architecture LeadPipe",
+      "shortName": "clean-arch-leadpipe",
+      "sourceName": "LeadPipe", // LeadPipe will be replaced throughout the solution with whatever name you choose for your new solution
       "preferNameDirectory": true,
       "tags": {
          "language": "C#",
@@ -21,43 +21,43 @@
    }
    ```
 
-### 2. Pack your template using the dotnet CLI:
+### 2. Pack your leadpipe using the dotnet CLI:
 
-```dotnet new install <path-to-your-template-root-folder>```
+```dotnet new install <path-to-your-leadpipe-root-folder>```
 
-    Also, if you would like to update the existing template, use
-```dotnet new install <path-to-your-template-root-folder> --force```
+    Also, if you would like to update the existing leadpipe, use
+```dotnet new install <path-to-your-leadpipe-root-folder> --force```
 
    Alternatively, if you want to pack it as a NuGet package:
 
 ```dotnet pack```
 
-## Using the Template
+## Using the LeadPipe
 ------------------
-### 1. After installing the template, you can create a new project using:
+### 1. After installing the leadpipe, you can create a new project using:
 
-```dotnet new clean-arch-template -n MyNewProject```
+```dotnet new clean-arch-leadpipe -n MyNewProject```
 
-   This will create a new project named 'MyNewProject' using your custom template.
+   This will create a new project named 'MyNewProject' using your custom leadpipe.
 
    This will also replace whatever you put as "sourceName" with 'MyNewProject'.
-   In explanation, if you put "sourceName": "Template" in your template.json, then every instance of Template will be replaced with 'MyNewProject'.
+   In explanation, if you put "sourceName": "LeadPipe" in your leadpipe.json, then every instance of LeadPipe will be replaced with 'MyNewProject'.
 
-### 2. To uninstall the template:
+### 2. To uninstall the leadpipe:
 
-```dotnet new -u <path-to-your-template-folder> or <template-package-name>```
+```dotnet new -u <path-to-your-leadpipe-folder> or <leadpipe-package-name>```
 
 ## Notes
 -----
-- Make sure your template folder is structured correctly and includes all necessary files.
-- You can test your template locally before publishing it to NuGet.
+- Make sure your leadpipe folder is structured correctly and includes all necessary files.
+- You can test your leadpipe locally before publishing it to NuGet.
 
 
 -----
 
-# EF Core Migrations Guide for Template Users
+# EF Core Migrations Guide for LeadPipe Users
 
-This template includes two database context patterns:
+This leadpipe includes two database context patterns:
 - **DwhContext<T>** (for MySQL)
 - **SqliteContext<T>** (for SQLite)
 

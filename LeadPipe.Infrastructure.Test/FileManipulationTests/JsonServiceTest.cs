@@ -1,4 +1,4 @@
-using LeadPipe.Infrastructure.JsonService;
+using LeadPipe.Infrastructure.Services;
 using LeadPipe.Infrastructure.Test.FileManipulationTests.FileHelpers;
 
 namespace LeadPipe.Infrastructure.Test.FileManipulationTests;
@@ -36,7 +36,7 @@ public class JsonServiceTest
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        JsonRw.WriteToFile(jsonFile, [content]);
+        JsonRwService.WriteToFile(jsonFile, [content]);
 
         // Assert
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
@@ -78,7 +78,7 @@ public class JsonServiceTest
         string rawJson = AssembleRawJson(id, name, dateTime);
 
         // Act
-        var result = JsonRw.Deserialize<TestFile>(rawJson);
+        var result = JsonRwService.Deserialize<TestFile>(rawJson);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -94,7 +94,7 @@ public class JsonServiceTest
         FileInfo jsonFile = new(TestFileHelper.AccessTestFile(TestFileType.Json));
 
         // Act
-        var result = JsonRw.ReadFile<TestFile>(jsonFile);
+        var result = JsonRwService.ReadFile<TestFile>(jsonFile);
 
         // Assert
         Assert.True(result.IsSuccess);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace LeadPipe.Infrastructure.DbService;
+namespace LeadPipe.Infrastructure.DbContext;
 
 public class SqliteContext<T>(FileInfo location) : DbContext where T : class
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace LeadPipe.Infrastructure.DbService;
+namespace LeadPipe.Infrastructure.DbContext;
 
 internal static class DwhContextHelper
 {

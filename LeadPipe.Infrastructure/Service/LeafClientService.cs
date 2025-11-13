@@ -3,8 +3,9 @@ using System.Net.Http.Json;
 using LeadPipe.Application.Services;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Application.DataInterfaces.Dto;
+using LeadPipe.Infrastructure.SettingsInterfaces;
 
-namespace LeadPipe.Infrastructure.LeafApiService;
+namespace LeadPipe.Infrastructure.Services;
 
 internal class LeafClientService(ILeafSettings settings) : ILeafClientService
 {

@@ -3,9 +3,9 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
 
-namespace LeadPipe.Infrastructure.CsvService;
+namespace LeadPipe.Infrastructure.Services;
 
-internal static class CsvRw
+internal static class CsvRwService
 {
     #region Private
     private static readonly CultureInfo _cultureInfo = CultureInfo.InvariantCulture;

@@ -1,4 +1,4 @@
-﻿using LeadPipe.Infrastructure.CsvService;
+﻿using LeadPipe.Infrastructure.Services;
 using LeadPipe.Infrastructure.Test.FileManipulationTests.FileHelpers;
 
 namespace LeadPipe.Infrastructure.Test.FileManipulationTests;
@@ -22,7 +22,7 @@ public class CsvServiceTest
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        CsvRw.Write<TestFile, TestFileMap>(fileName, [content]);
+        CsvRwService.Write<TestFile, TestFileMap>(fileName, [content]);
 
         // Assert
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
@@ -44,7 +44,7 @@ public class CsvServiceTest
         FileInfo fileName = new(TestFileHelper.AccessTestFile(TestFileType.Csv));
 
         // Act
-        var contents = CsvRw.Parse<TestFile>(fileName);
+        var contents = CsvRwService.Parse<TestFile>(fileName);
 
         // Assert
         Assert.True(contents.IsSuccess);
@@ -84,7 +84,7 @@ public class CsvServiceTest
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        CsvRw.Append<TestFile, TestFileMap>(fileName, [content]);
+        CsvRwService.Append<TestFile, TestFileMap>(fileName, [content]);
 
         // Assert
         // Assert

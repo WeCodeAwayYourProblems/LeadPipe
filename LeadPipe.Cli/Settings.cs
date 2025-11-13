@@ -1,4 +1,4 @@
-﻿using LeadPipe.Infrastructure.SettingsInterfaces;
+﻿using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Cli;
 

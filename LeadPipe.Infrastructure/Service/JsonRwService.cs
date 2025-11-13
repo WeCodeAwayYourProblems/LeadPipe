@@ -1,10 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
 using System.Text.Json;
 
-namespace LeadPipe.Infrastructure.JsonService;
+namespace LeadPipe.Infrastructure.Services;
 
 // All exceptions should be throw by the caller, because we don't have sufficient context in this class to understand WHY the error was thrown.
-internal static class JsonRw
+internal static class JsonRwService
 {
     internal static Result<List<T>> ReadFile<T>(FileInfo path)
     {

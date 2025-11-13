@@ -1,4 +1,4 @@
-﻿namespace LeadPipe.Infrastructure.LeafApiService;
+﻿namespace LeadPipe.Infrastructure.SettingsInterfaces;
 
 public interface ILeafSettings
 {

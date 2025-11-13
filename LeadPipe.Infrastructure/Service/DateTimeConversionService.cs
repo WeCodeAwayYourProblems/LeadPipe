@@ -1,9 +1,9 @@
-﻿namespace LeadPipe.Infrastructure.DateTimeConvertService;
+﻿namespace LeadPipe.Infrastructure.Services;
 
-internal static class DateTimeConversions
+internal static class DateTimeConversionService
 {
     #region Public
-    public static DateTimeOffset ConvertLocalToDTOffset(DateTime localTime, TimeZoneEnum zone)
+    public static DateTimeOffset ConvertLocalToDTOffset(DateTime localTime, TimeZone zone)
     {
         string timeZoneName = ConvertTimeZoneToTimeZoneId(zone);
 
@@ -13,7 +13,7 @@ internal static class DateTimeConversions
         return ConvertLocalToDTOffset(localTime, timeZone);
     }
 
-    public static bool ConvertLocalToDTOffset(DateTime localTime, TimeZoneEnum zone, out DateTimeOffset result)
+    public static bool ConvertLocalToDTOffset(DateTime localTime, TimeZone zone, out DateTimeOffset result)
     {
         // Find the TimeZoneInfo for the specified time zone name
         bool returnVal;
@@ -29,19 +29,27 @@ internal static class DateTimeConversions
     }
 
     public static DateTimeOffset ConvertLocalToDTOffset(DateTime date, TimeSpan offset) => new(date, offset);
+    
+    public enum TimeZone
+    {
+        Pacific,
+        Mountain,
+        Central,
+        Eastern
+    }
     #endregion
 
     #region Internal
-    private static TimeZoneEnum StringToZone(string zoneStr) => zoneStr.ToLower().Split(" ")[0] switch
+    private static TimeZone StringToZone(string zoneStr) => zoneStr.ToLower().Split(" ")[0] switch
     {
-        "pacific" => TimeZoneEnum.Pacific,
-        "mountain" => TimeZoneEnum.Mountain,
-        "central" => TimeZoneEnum.Central,
-        "eastern" or "east" => TimeZoneEnum.Eastern,
-        _ => TimeZoneEnum.Mountain
+        "pacific" => TimeZone.Pacific,
+        "mountain" => TimeZone.Mountain,
+        "central" => TimeZone.Central,
+        "eastern" or "east" => TimeZone.Eastern,
+        _ => TimeZone.Mountain
     };
 
-    private static string ConvertTimeZoneToTimeZoneId(TimeZoneEnum zone)
+    private static string ConvertTimeZoneToTimeZoneId(TimeZone zone)
         => $"{zone} Standard Time";
 
     private static DateTimeOffset ConvertLocalToDTOffset(DateTime date, TimeZoneInfo timeZone)
@@ -62,7 +70,7 @@ internal static class DateTimeConversions
         return result;
     }
 
-    private static DateTimeOffset DLSConversion(DateTime date, TimeZoneEnum zone)
+    private static DateTimeOffset DLSConversion(DateTime date, TimeZone zone)
     {
         TimeSpan oneHour = TimeSpan.FromHours(1);
         TimeSpan timeZone = ConvertToTimeSpan(zone);
@@ -78,7 +86,7 @@ internal static class DateTimeConversions
 
         return new(returnDate, finalZone);
     }
-    private static DateTimeOffset DLSConversion(DateTime date, TimeZoneEnum zone, out TimeSpan finalZone)
+    private static DateTimeOffset DLSConversion(DateTime date, TimeZone zone, out TimeSpan finalZone)
     {
         TimeSpan oneHour = TimeSpan.FromHours(1);
         TimeSpan timeZone = ConvertToTimeSpan(zone);
@@ -91,14 +99,14 @@ internal static class DateTimeConversions
 
         return DLSConversion(date, zone);
     }
-    private static TimeSpan ConvertToTimeSpan(TimeZoneEnum zone) =>
+    private static TimeSpan ConvertToTimeSpan(TimeZone zone) =>
         zone switch
         {
-            TimeZoneEnum.Pacific => TimeSpan.FromHours(-8),
-            TimeZoneEnum.Mountain => TimeSpan.FromHours(-7),
-            TimeZoneEnum.Central => TimeSpan.FromHours(-6),
-            TimeZoneEnum.Eastern => TimeSpan.FromHours(-5),
-            _ => throw new ArgumentException($"The {nameof(DLSConversion)} method only accepts the following time zones from the lower 48 states of the US: {nameof(TimeZoneEnum.Pacific)}, {nameof(TimeZoneEnum.Mountain)}, {nameof(TimeZoneEnum.Central)}, {nameof(TimeZoneEnum.Eastern)}.")
+            TimeZone.Pacific => TimeSpan.FromHours(-8),
+            TimeZone.Mountain => TimeSpan.FromHours(-7),
+            TimeZone.Central => TimeSpan.FromHours(-6),
+            TimeZone.Eastern => TimeSpan.FromHours(-5),
+            _ => throw new ArgumentException($"The {nameof(DLSConversion)} method only accepts the following time zones from the lower 48 states of the US: {nameof(TimeZone.Pacific)}, {nameof(TimeZone.Mountain)}, {nameof(TimeZone.Central)}, {nameof(TimeZone.Eastern)}.")
         };
     #endregion
 

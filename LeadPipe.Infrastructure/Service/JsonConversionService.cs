@@ -1,14 +1,12 @@
 ﻿using CsvHelper.Configuration;
-using LeadPipe.Infrastructure.CsvService;
-using LeadPipe.Infrastructure.JsonService;
 using CSharpFunctionalExtensions;
 using LeadPipe.Application.Services;
 
-namespace LeadPipe.Infrastructure.AppServices;
+namespace LeadPipe.Infrastructure.Services;
 
 internal class JsonConversionService : IJsonConversionService
 {
-    public Result<List<T>> Extract<T>(FileInfo jsonFile) => JsonRw.ReadFile<T>(jsonFile);
+    public Result<List<T>> Extract<T>(FileInfo jsonFile) => JsonRwService.ReadFile<T>(jsonFile);
 
     public Result<FileInfo> SaveToCsv<T, TMap>(Result<List<T>> entities, FileInfo csvFile) where TMap : ClassMap<T>
     {
@@ -17,7 +15,7 @@ internal class JsonConversionService : IJsonConversionService
             if (entities.IsSuccess)
             {
                 List<T> values = entities.Value;
-                Result wrote = CsvRw.Write<T, TMap>(csvFile, values);
+                Result wrote = CsvRwService.Write<T, TMap>(csvFile, values);
                 Result<FileInfo> result = wrote.IsSuccess ? csvFile : Result.Failure<FileInfo>(wrote.Error);
                 return result;
             }

@@ -1,4 +1,4 @@
-﻿namespace LeadPipe.Infrastructure.DbService;
+﻿namespace LeadPipe.Infrastructure.Settings;
 
 public interface IDwhSettings
 {

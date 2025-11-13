@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LeadPipe.Infrastructure.DbContext;
+namespace LeadPipe.Infrastructure.Database;
 
 internal class PlumbingContext : DbContext
 {

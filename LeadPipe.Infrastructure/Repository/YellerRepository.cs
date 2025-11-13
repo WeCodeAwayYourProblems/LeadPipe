@@ -1,6 +1,6 @@
 ﻿
 using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.DbContext;
+using LeadPipe.Infrastructure.Database;
 using LeadPipe.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 

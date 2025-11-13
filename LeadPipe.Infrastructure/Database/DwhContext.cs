@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 
-namespace LeadPipe.Infrastructure.DbContext;
+namespace LeadPipe.Infrastructure.Database;
 
 internal class DwhContext<T>(string connectionStr) : DbContext where T : class
 {

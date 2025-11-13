@@ -36,7 +36,7 @@ public static class FolderFinder
     /// <returns></returns>
     public static string GetLocalFile(string projectContainingLocalFolder, string localFolderToFind, string fileName) =>
         GetLocalFolder(projectContainingLocalFolder, _relativePath, localFolderToFind) + fileName;
-    
+
     public static string GetMemberName(object origin, [CallerMemberName] string memberName = "")
     {
         string fullName = origin.GetType().FullName!;

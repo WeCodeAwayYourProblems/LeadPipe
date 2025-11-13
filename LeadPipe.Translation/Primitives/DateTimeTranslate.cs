@@ -1,8 +1,8 @@
 ﻿using LeadPipe.Application.Service;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Translation.Primitives;
 
-internal class DateTimeConversionService : IDateTimeConversionService
+internal class DateTimeTranslate : IDateTimeTranslate
 {
     #region Public
     public DateTimeOffset Convert(DateTime localTime, ETimeZone zone)

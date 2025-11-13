@@ -1,6 +1,6 @@
-﻿namespace LeadPipe.Application.Service;
+﻿namespace LeadPipe.Translation.Primitives;
 
-public interface IDateTimeConversionService
+public interface IDateTimeTranslate
 {
     DateTimeOffset Convert(DateTime date, TimeSpan offset);
     DateTimeOffset Convert(DateTime localTime, ETimeZone zone);

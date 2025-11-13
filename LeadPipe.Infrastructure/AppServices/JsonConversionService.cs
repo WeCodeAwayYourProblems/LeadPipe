@@ -1,8 +1,8 @@
-﻿using LeadPipe.Application.InfrastructureInterfaces;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using LeadPipe.Infrastructure.CsvService;
 using LeadPipe.Infrastructure.JsonService;
 using CSharpFunctionalExtensions;
+using LeadPipe.Application.Services;
 
 namespace LeadPipe.Infrastructure.AppServices;
 

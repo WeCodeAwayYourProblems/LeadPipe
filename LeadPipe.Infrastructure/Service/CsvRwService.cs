@@ -1,22 +1,23 @@
 ﻿using CSharpFunctionalExtensions;
 using CsvHelper;
 using CsvHelper.Configuration;
+using LeadPipe.Application.Service;
 using System.Globalization;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal static class CsvRwService
+internal class CsvRwService : ICsvRwService
 {
     #region Private
     private static readonly CultureInfo _cultureInfo = CultureInfo.InvariantCulture;
     private const string _delimiter = ",";
-    private static readonly CsvConfiguration _config = new(_cultureInfo)
+    private readonly CsvConfiguration _config = new(_cultureInfo)
     {
         Delimiter = _delimiter,
         HasHeaderRecord = true,
         NewLine = Environment.NewLine
     };
-    private static readonly CsvConfiguration _noHeader = new(_cultureInfo)
+    private readonly CsvConfiguration _noHeader = new(_cultureInfo)
     {
         Delimiter = _delimiter,
         HasHeaderRecord = false,
@@ -26,8 +27,8 @@ internal static class CsvRwService
         => $"Failed to perform the following action on the csv file: {action}\nFile path: {path}\nException message: {ex.Message}";
     #endregion
 
-    #region Internal
-    internal static Result<List<T>> Parse<T>(FileInfo path)
+    #region Public
+    public Result<List<T>> Parse<T>(FileInfo path)
     {
         try
         {
@@ -39,7 +40,7 @@ internal static class CsvRwService
         catch (Exception ex)
         { return Result.Failure<List<T>>(CsvException(path.FullName, ex, nameof(Parse))); }
     }
-    internal static Result Write<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsedObject) where TMap : ClassMap<TClass>
+    public Result Write<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsedObject) where TMap : ClassMap<TClass>
     {
         try
         {
@@ -55,7 +56,7 @@ internal static class CsvRwService
             return Result.Failure(exception);
         }
     }
-    internal static Result Write<TClass>(IEnumerable<TClass> unparsedObject, FileInfo path)
+    public Result Write<TClass>(IEnumerable<TClass> unparsedObject, FileInfo path)
     {
         try
         {
@@ -70,7 +71,7 @@ internal static class CsvRwService
             return Result.Failure(exception);
         }
     }
-    internal static Result Append<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsed) where TMap : ClassMap<TClass>
+    public Result Append<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsed) where TMap : ClassMap<TClass>
     {
         try
         {

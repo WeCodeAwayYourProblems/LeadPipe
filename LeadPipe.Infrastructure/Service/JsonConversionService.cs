@@ -4,8 +4,9 @@ using LeadPipe.Application.Service;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal class JsonConversionService : IJsonConversionService
+internal class JsonConversionService(ICsvRwService csv) : IJsonConversionService
 {
+    private ICsvRwService _csv = csv;
     public Result<List<T>> Extract<T>(FileInfo jsonFile) => JsonRwService.ReadFile<T>(jsonFile);
 
     public Result<FileInfo> SaveToCsv<T, TMap>(Result<List<T>> entities, FileInfo csvFile) where TMap : ClassMap<T>
@@ -15,7 +16,7 @@ internal class JsonConversionService : IJsonConversionService
             if (entities.IsSuccess)
             {
                 List<T> values = entities.Value;
-                Result wrote = CsvRwService.Write<T, TMap>(csvFile, values);
+                Result wrote = _csv.Write<T, TMap>(csvFile, values);
                 Result<FileInfo> result = wrote.IsSuccess ? csvFile : Result.Failure<FileInfo>(wrote.Error);
                 return result;
             }

@@ -1,5 +1,7 @@
-﻿namespace LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Application.DataInterfaces.Dto;
 
-internal class CalliDto
+namespace LeadPipe.Infrastructure.Dto;
+
+internal class CalliDto : ICalliDto
 {
 }

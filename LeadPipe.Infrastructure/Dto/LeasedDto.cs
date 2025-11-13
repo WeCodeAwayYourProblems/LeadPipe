@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LeadPipe.Application.DataInterfaces.Dto;
 
-namespace LeadPipe.Infrastructure.Dto
+namespace LeadPipe.Infrastructure.Dto;
+
+internal class LeasedDto:ILeasedDto
 {
-    internal class LeasedDto
-    {
-    }
 }

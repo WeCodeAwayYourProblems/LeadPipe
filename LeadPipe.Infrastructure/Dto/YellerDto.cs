@@ -1,5 +1,7 @@
-﻿namespace LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Application.DataInterfaces.Dto;
 
-internal class YellerDto
+namespace LeadPipe.Infrastructure.Dto;
+
+internal class YellerDto : IYellerDto
 {
 }

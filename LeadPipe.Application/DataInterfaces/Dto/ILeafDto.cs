@@ -20,7 +20,7 @@ public interface ILeafDto
     public DateTime reminder { get; set; }
 }
 
-#region Others
+#region Properties
 public interface IAssignee
 {
     public string? uuid { get; set; }

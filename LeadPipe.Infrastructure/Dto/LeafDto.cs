@@ -22,6 +22,7 @@ public class LeafDto : ILeafDto
     public DateTime reminder { get; set; }
 }
 
+#region Properties
 public class Assignee : IAssignee
 {
     public string? uuid { get; set; }
@@ -76,5 +77,6 @@ public class Sender : ISender
     public string? first_name { get; set; }
     public string? last_name { get; set; }
 }
+#endregion
 
 #pragma warning restore IDE1006 // Naming Styles

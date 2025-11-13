@@ -2,6 +2,6 @@
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class LabDto:ILabDto
+internal class LabDto : ILabDto
 {
 }

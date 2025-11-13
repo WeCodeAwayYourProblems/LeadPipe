@@ -6,7 +6,7 @@ namespace LeadPipe.Infrastructure.Service;
 
 internal class JsonConversionService(ICsvRwService csv) : IJsonConversionService
 {
-    private ICsvRwService _csv = csv;
+    private readonly ICsvRwService _csv = csv;
     public Result<List<T>> Extract<T>(FileInfo jsonFile) => JsonRwService.ReadFile<T>(jsonFile);
 
     public Result<FileInfo> SaveToCsv<T, TMap>(Result<List<T>> entities, FileInfo csvFile) where TMap : ClassMap<T>

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "WeCodeAwayYourProblems",
+  "identity": "CleanArch.Template.Dev",
+  "name": "Clean Architecture Template Development",
+  "shortName": "clean-arch-template-dev",
+  "sourceName": "LeadPipe",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  }
+}

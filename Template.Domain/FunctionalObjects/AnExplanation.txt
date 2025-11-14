@@ -1,8 +1,0 @@
-﻿What are Functional Objects?
-
-This is an idea that I came up with. 
-Often, certain functionality needs to be reused throughout an entire solution.
-But as you may have noticed, project dependency only goes in one direction.
-So, if you have functionality that needs to be tested -- and tested thoroughly -- and used throughout an entire solution, from Domain to Infrastructure, then FunctionalObjects is where they will go. 
-
-Functional objects are objects that perform a specific function(s) that may be used throughout the solution by any part of the solution.

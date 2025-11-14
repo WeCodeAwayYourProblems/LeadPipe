@@ -2,6 +2,6 @@
 
 namespace LeadPipe.Infrastructure.Settings;
 
-public interface IInfrastructureSettings : IDwhSettings,ILeafSettings
+public interface IInfrastructureSettings : IDwhSettings, ILeafSettings
 {
 }

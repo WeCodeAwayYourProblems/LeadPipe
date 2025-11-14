@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using CommandLine;
 using LeadPipe.Cli.Verbs;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace LeadPipe.Cli;
 
@@ -11,6 +12,8 @@ internal class Program
     static void Main(string[] args)
     {
         IHostBuilder builder = Host.CreateDefaultBuilder(args)
+            .UseSerilog((context, services, configuration) =>
+                configuration.ReadFrom.Configuration(context.Configuration))
             .ConfigureServices((context, services) =>
             {
                 services.ConfigureCli(context.Configuration);

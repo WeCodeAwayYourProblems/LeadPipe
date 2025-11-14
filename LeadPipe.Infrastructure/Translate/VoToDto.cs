@@ -1,4 +1,4 @@
-﻿namespace LeadPipe.Translation.Data;
+﻿namespace LeadPipe.Infrastructure.Translate;
 
 internal class VoToDto : IVoToDto
 {

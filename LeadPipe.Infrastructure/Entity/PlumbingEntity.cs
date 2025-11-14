@@ -4,11 +4,11 @@ namespace LeadPipe.Infrastructure.Entity;
 
 internal class PlumbingEntity
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public long PhoneNumber { get; set; }
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }
     public string? Contents { get; set; }
     public Source Source { get; set; }
-    public ICollection<SubsEntity> SubsEntities { get; set; } = [];
+    public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];
 }

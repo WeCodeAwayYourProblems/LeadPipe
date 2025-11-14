@@ -7,40 +7,42 @@ internal class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCo
 {
     public DbSet<SubsEntity> SubsEntities { get; set; }
     public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
+    public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // SubsEntity configuration
         var sub = modelBuilder.Entity<SubsEntity>();
         sub.HasKey(s => s.Id);
-        sub.HasIndex(s => s.PhoneNumber);
+        sub.HasIndex(s => s.Number);
+        sub.HasIndex(s => s.Number2);
 
         // PlumbingEntity configuration
         var plumb = modelBuilder.Entity<PlumbingEntity>();
         plumb.HasKey(p => p.Id);
+        plumb.Property(p => p.Id)
+            .ValueGeneratedOnAdd();
         plumb.HasIndex(p => p.PhoneNumber);
         plumb.Property(p => p.Source)
-            .HasConversion<string>();
+             .HasConversion<string>();
 
-        // Many-to-many relationship
-        modelBuilder.Entity<SubsEntity>()
-            .HasMany(p => p.PlumbingEntities)
-            .WithMany(s => s.SubsEntities)
-            .UsingEntity<Dictionary<string, object>>(
-                "SubsPlumbing",
-                j => j.HasOne<PlumbingEntity>()
-                      .WithMany()
-                      .HasForeignKey("PlumbingEntityId")
-                      .OnDelete(DeleteBehavior.Cascade),
-                j => j.HasOne<SubsEntity>()
-                      .WithMany()
-                      .HasForeignKey("SubsEntityId")
-                      .OnDelete(DeleteBehavior.Cascade),
-                j =>
-                {
-                    j.HasKey("SubsEntityId", "PlumbingEntityId");
-                    j.HasIndex("SubsEntityId");
-                    j.HasIndex("PlumbingEntityId");
-                });
+        // SubsPlumbingLink configuration (join table)
+        var link = modelBuilder.Entity<SubsPlumbingLink>();
+        link.HasKey(l => new { l.SubsId, l.PlumbingId });
+        link.HasIndex(l => l.SubsId);
+        link.HasIndex(l => l.PlumbingId);
+
+        link.HasOne(l => l.SubsEntity)
+            .WithMany(s => s.SubsPlumbingLinks)
+            .HasForeignKey(l => l.SubsId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        link.HasOne(l => l.PlumbingEntity)
+            .WithMany(p => p.SubsPlumbingLinks)
+            .HasForeignKey(l => l.PlumbingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        link.Property(l => l.MatchingSubPhone)
+            .IsRequired();
     }
 }

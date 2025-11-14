@@ -10,15 +10,15 @@ internal class SubsRepository(PlumbingContext context)
     private readonly PlumbingContext _context = context;
     public async Task<Result<SubsEntity>> GetAsync(SubsEntity entity)
     {
-        var result = await GetByPhoneNumberAsync(entity.PhoneNumber);
+        var result = await GetByIdAsync(entity.Id);
         return result;
     }
 
-    public async Task<Result<SubsEntity>> GetByPhoneNumberAsync(long phoneNumber)
+    public async Task<Result<SubsEntity>> GetByIdAsync(long id)
     {
-        SubsEntity? found = await _context.SubsEntities.FindAsync(phoneNumber);
+        SubsEntity? found = await _context.SubsEntities.FindAsync(id);
         if (found is null)
-            return Result.Failure<SubsEntity>($"Entity with phone number {phoneNumber} was not found");
+            return Result.Failure<SubsEntity>($"Entity with phone number {id} was not found");
         return found;
     }
 
@@ -37,16 +37,30 @@ internal class SubsRepository(PlumbingContext context)
         return await GetAsync(entity);
     }
 
-    public async Task<Result> UpdateAsync(SubsEntity entity)
+    public async Task<Result> HardUpdateAsync(SubsEntity entity)
     {
         // Check for existence
         SubsEntity? exists = await _context.SubsEntities
-            .FirstOrDefaultAsync(e => e.PhoneNumber == entity.PhoneNumber);
+            .FirstOrDefaultAsync(e => e.Id == entity.Id);
         if (exists is null)
             return Result.Failure("The desired entity does not exist");
 
         // Update
         _context.SubsEntities.Update(entity);
+        await _context.SaveChangesAsync();
+        return Result.Success();
+    }
+
+    public async Task<Result> UpdateValuesAsync(SubsEntity entity)
+    {
+        // Check for existence
+        SubsEntity? exists = await _context.SubsEntities
+            .FirstOrDefaultAsync(e => e.Id == entity.Id);
+        if (exists is null)
+            return Result.Failure("The desired entity does not exist");
+
+        // Update
+        _context.Entry(exists).CurrentValues.SetValues(entity);
         await _context.SaveChangesAsync();
         return Result.Success();
     }
@@ -65,6 +79,6 @@ internal class SubsRepository(PlumbingContext context)
     }
     public async Task<Result> DeleteAsync(SubsEntity entity)
     {
-        return await DeleteAsync(entity.PhoneNumber);
+        return await DeleteAsync(entity.Id);
     }
 }

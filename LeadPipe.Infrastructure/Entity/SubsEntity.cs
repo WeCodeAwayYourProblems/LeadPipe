@@ -1,21 +1,29 @@
-﻿namespace LeadPipe.Infrastructure.Entity;
+﻿using LeadPipe.Domain.ValueObjects;
+
+namespace LeadPipe.Infrastructure.Entity;
 
 internal class SubsEntity
 {
-    public int Id { get; set; }
-    public long PhoneNumber { get; set; }
-    public DateTime CustDate { get; set; }
+    public long Id { get; set; }
+    public long CustomerId { get; set; }
+    public DateTime Date { get; set; }
+    public long UnixDate { get; set; }
     public DateTime SubDate { get; set; }
-
-    // Foreign keys for associations
-    public long? CalliPhoneNumber { get; set; }
-    public long? LabPhoneNumber { get; set; }
-    public long? LeasedPhoneNumber { get; set; }
-    public long? LeafPhoneNumber { get; set; }
-    public long? LibacionPhoneNumber { get; set; }
-    public long? PanPhoneNumber { get; set; }
-    public long? YellerPhoneNumber { get; set; }
+    public long UnixSubDate { get; set; }
+    public long Number { get; set; }
+    public long Number2 { get; set; }
+    public DateTime CancelDate { get; set; }
+    public long UnixCancelDate { get; set; }
+    public DateTime SubCancelDate { get; set; }
+    public long UnixSubCancelDate { get; set; }
+    public bool Active { get; set; }
+    public bool SubActive { get; set; }
+    public bool Complete { get; set; }
+    public double Value { get; set; }
+    public string? Seller { get; set; }
+    public string? Seller2 { get; set; }
+    public string? Seller3 { get; set; }
 
     // Navigation properties
-    public ICollection<PlumbingEntity> PlumbingEntities { get; set; } = [];
+    public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];
 }

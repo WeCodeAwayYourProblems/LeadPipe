@@ -10,15 +10,15 @@ internal class PlumbingRepository(PlumbingContext context)
     private readonly PlumbingContext _context = context;
     public async Task<Result<PlumbingEntity>> GetAsync(PlumbingEntity entity)
     {
-        var result = await GetByPhoneNumberAsync(entity.PhoneNumber);
+        var result = await GetByIdAsync(entity.Id);
         return result;
     }
 
-    public async Task<Result<PlumbingEntity>> GetByPhoneNumberAsync(long phoneNumber)
+    public async Task<Result<PlumbingEntity>> GetByIdAsync(long id)
     {
-        PlumbingEntity? found = await _context.PlumbingEntities.FindAsync(phoneNumber);
+        PlumbingEntity? found = await _context.PlumbingEntities.FindAsync(id);
         if (found is null)
-            return Result.Failure<PlumbingEntity>($"Entity with phone number {phoneNumber} was not found");
+            return Result.Failure<PlumbingEntity>($"Entity with phone number {id} was not found");
         return found;
     }
 
@@ -37,11 +37,11 @@ internal class PlumbingRepository(PlumbingContext context)
         return await GetAsync(entity);
     }
 
-    public async Task<Result> UpdateAsync(PlumbingEntity entity)
+    public async Task<Result> HardUpdateAsync(PlumbingEntity entity)
     {
         // Check for existence
         PlumbingEntity? exists = await _context.PlumbingEntities
-            .FirstOrDefaultAsync(e => e.PhoneNumber == entity.PhoneNumber);
+            .FirstOrDefaultAsync(e => e.Id == entity.Id);
         if (exists is null)
             return Result.Failure("The desired entity does not exist");
 
@@ -51,9 +51,23 @@ internal class PlumbingRepository(PlumbingContext context)
         return Result.Success();
     }
 
-    public async Task<Result> DeleteAsync(long phoneNumber)
+    public async Task<Result> UpdateValuesAsync(PlumbingEntity entity)
     {
-        var entity = await _context.PlumbingEntities.FindAsync(phoneNumber);
+        // Check for existence
+        PlumbingEntity? exists = await _context.PlumbingEntities
+            .FirstOrDefaultAsync(e => e.Id == entity.Id);
+        if (exists is null)
+            return Result.Failure("The desired entity does not exist");
+
+        // Update
+        _context.Entry(exists).CurrentValues.SetValues(entity);
+        await _context.SaveChangesAsync();
+        return Result.Success();
+    }
+
+    public async Task<Result> DeleteAsync(long id)
+    {
+        var entity = await _context.PlumbingEntities.FindAsync(id);
         if (entity != null)
         {
             _context.PlumbingEntities.Remove(entity);
@@ -65,6 +79,6 @@ internal class PlumbingRepository(PlumbingContext context)
     }
     public async Task<Result> DeleteAsync(PlumbingEntity entity)
     {
-        return await DeleteAsync(entity.PhoneNumber);
+        return await DeleteAsync(entity.Id);
     }
 }

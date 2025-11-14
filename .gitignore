@@ -18,3 +18,4 @@
 /.vs
 
 # Added Later
+/LeadPipe.Cli/Properties/appsettings.Development.json

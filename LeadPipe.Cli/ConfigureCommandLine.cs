@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using LeadPipe.Application;
 using LeadPipe.Infrastructure;
 using LeadPipe.Translation;
-using LeadPipe.Domain;
 
 namespace LeadPipe.Cli;
 
@@ -21,6 +20,6 @@ internal static class ConfigureCommandLine
             builder.AddDebug();
             builder.AddConsole();
         });
-        services.AddInfrastructure(settings, configuration).AddTranslation().AddApplication().AddDomain(configuration);
+        services.AddInfrastructure(settings, configuration).AddTranslation().AddApplication();
     }
 }

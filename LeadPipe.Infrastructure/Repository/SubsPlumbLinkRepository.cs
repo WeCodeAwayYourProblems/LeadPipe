@@ -10,7 +10,7 @@ internal class SubsPlumbLinkRepository(PlumbingContext context) : ISubsPlumbLink
     private readonly PlumbingContext _context = context;
     public async Task<Result<SubsPlumbingLink>> GetAsync(SubsPlumbingLink entity)
     {
-        var result = await GetByIdAsync(entity.SubsId, entity.PlumbingId);
+        Result<SubsPlumbingLink> result = await GetByIdAsync(entity.SubsId, entity.PlumbingId);
         return result;
     }
 
@@ -39,13 +39,13 @@ internal class SubsPlumbLinkRepository(PlumbingContext context) : ISubsPlumbLink
 
     public async Task<Result> AddRangeAsync(List<SubsPlumbingLink> entities)
     {
-        if (entities == null || entities.Count == 0)
+        if (entities is null || entities.Count == 0)
             return Result.Failure("No link entities provided.");
 
         await _context.SubsPlumbingLinks.AddRangeAsync(entities);
         await _context.SaveChangesAsync();
 
-        var allLinksExist = entities.All(l =>
+        bool allLinksExist = entities.All(l =>
             _context.SubsPlumbingLinks.Any(dbLink =>
                 dbLink.SubsId == l.SubsId && dbLink.PlumbingId == l.PlumbingId));
 
@@ -85,12 +85,12 @@ internal class SubsPlumbLinkRepository(PlumbingContext context) : ISubsPlumbLink
 
     public async Task<Result> DeleteAsync(long subsId, long plumbId)
     {
-        var entity = await _context.SubsPlumbingLinks.FindAsync(subsId, plumbId);
-        if (entity != null)
+        SubsPlumbingLink? entity = await _context.SubsPlumbingLinks.FindAsync(subsId, plumbId);
+        if (entity is not null)
         {
             _context.SubsPlumbingLinks.Remove(entity);
             await _context.SaveChangesAsync();
-            var deleted = await GetAsync(entity);
+            Result<SubsPlumbingLink> deleted = await GetAsync(entity);
             return deleted.IsSuccess ? Result.Failure("Failed to delete entity") : Result.Success();
         }
         return Result.Success();

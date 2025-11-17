@@ -10,7 +10,7 @@ internal class SubsRepository(PlumbingContext context) : ISubsRepository
     private readonly PlumbingContext _context = context;
     public async Task<Result<SubsEntity>> GetAsync(SubsEntity entity)
     {
-        var result = await GetByIdAsync(entity.Id);
+        Result<SubsEntity> result = await GetByIdAsync(entity.Id);
         return result;
     }
 
@@ -39,14 +39,14 @@ internal class SubsRepository(PlumbingContext context) : ISubsRepository
 
     public async Task<Result> AddRangeAsync(List<SubsEntity> entities)
     {
-        if (entities == null || entities.Count == 0)
+        if (entities is null || entities.Count == 0)
             return Result.Failure("No subscription entities provided.");
 
         await _context.SubsEntities.AddRangeAsync(entities);
         await _context.SaveChangesAsync();
 
-        var ids = entities.Select(e => e.Id).ToList();
-        var savedEntities = await _context.SubsEntities
+        List<long> ids = entities.Select(e => e.Id).ToList();
+        List<SubsEntity> savedEntities = await _context.SubsEntities
             .Where(e => ids.Contains(e.Id))
             .ToListAsync();
 
@@ -87,11 +87,11 @@ internal class SubsRepository(PlumbingContext context) : ISubsRepository
     public async Task<Result> DeleteAsync(long phoneNumber)
     {
         var entity = await _context.SubsEntities.FindAsync(phoneNumber);
-        if (entity != null)
+        if (entity is not null)
         {
             _context.SubsEntities.Remove(entity);
             await _context.SaveChangesAsync();
-            var deleted = await GetAsync(entity);
+            Result<SubsEntity> deleted = await GetAsync(entity);
             return deleted.IsSuccess ? Result.Failure("Failed to delete entity") : Result.Success();
         }
         return Result.Success();

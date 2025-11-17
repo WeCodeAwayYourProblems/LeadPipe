@@ -10,7 +10,7 @@ internal class PlumbingRepository(PlumbingContext context) : IPlumbingRepository
     private readonly PlumbingContext _context = context;
     public async Task<Result<PlumbingEntity>> GetAsync(PlumbingEntity entity)
     {
-        var result = await GetByIdAsync(entity.Id);
+        Result<PlumbingEntity> result = await GetByIdAsync(entity.Id);
         return result;
     }
 
@@ -39,15 +39,15 @@ internal class PlumbingRepository(PlumbingContext context) : IPlumbingRepository
 
     public async Task<Result> AddRangeAsync(List<PlumbingEntity> entities)
     {
-        if (entities == null || entities.Count == 0)
+        if (entities is null || entities.Count == 0)
             return Result.Failure("No plumbing entities provided.");
 
         await _context.PlumbingEntities.AddRangeAsync(entities);
         await _context.SaveChangesAsync();
 
         // Verify all entities exist
-        var ids = entities.Select(e => e.Id).ToList();
-        var savedEntities = await _context.PlumbingEntities
+        List<long> ids = entities.Select(e => e.Id).ToList();
+        List<PlumbingEntity> savedEntities = await _context.PlumbingEntities
             .Where(e => ids.Contains(e.Id))
             .ToListAsync();
 
@@ -87,12 +87,12 @@ internal class PlumbingRepository(PlumbingContext context) : IPlumbingRepository
 
     public async Task<Result> DeleteAsync(long id)
     {
-        var entity = await _context.PlumbingEntities.FindAsync(id);
-        if (entity != null)
+        PlumbingEntity? entity = await _context.PlumbingEntities.FindAsync(id);
+        if (entity is not null)
         {
             _context.PlumbingEntities.Remove(entity);
             await _context.SaveChangesAsync();
-            var deleted = await GetAsync(entity);
+            Result<PlumbingEntity> deleted = await GetAsync(entity);
             return deleted.IsSuccess ? Result.Failure("Failed to delete entity") : Result.Success();
         }
         return Result.Success();

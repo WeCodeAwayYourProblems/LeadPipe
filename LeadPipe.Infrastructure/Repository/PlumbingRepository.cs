@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.Repository;
 
-internal class PlumbingRepository(PlumbingContext context)
+internal class PlumbingRepository(PlumbingContext context) : IPlumbingRepository
 {
     private readonly PlumbingContext _context = context;
     public async Task<Result<PlumbingEntity>> GetAsync(PlumbingEntity entity)
@@ -36,6 +36,26 @@ internal class PlumbingRepository(PlumbingContext context)
         await _context.SaveChangesAsync();
         return await GetAsync(entity);
     }
+
+    public async Task<Result> AddRangeAsync(List<PlumbingEntity> entities)
+    {
+        if (entities == null || entities.Count == 0)
+            return Result.Failure("No plumbing entities provided.");
+
+        await _context.PlumbingEntities.AddRangeAsync(entities);
+        await _context.SaveChangesAsync();
+
+        // Verify all entities exist
+        var ids = entities.Select(e => e.Id).ToList();
+        var savedEntities = await _context.PlumbingEntities
+            .Where(e => ids.Contains(e.Id))
+            .ToListAsync();
+
+        return savedEntities.Count == entities.Count
+            ? Result.Success()
+            : Result.Failure("Not all plumbing entities were saved successfully.");
+    }
+
 
     public async Task<Result> HardUpdateAsync(PlumbingEntity entity)
     {
@@ -77,7 +97,7 @@ internal class PlumbingRepository(PlumbingContext context)
         }
         return Result.Success();
     }
-    
+
     public async Task<Result> DeleteAsync(PlumbingEntity entity)
     {
         return await DeleteAsync(entity.Id);

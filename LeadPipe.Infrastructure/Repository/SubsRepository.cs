@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.Repository;
 
-internal class SubsRepository(PlumbingContext context)
+internal class SubsRepository(PlumbingContext context) : ISubsRepository
 {
     private readonly PlumbingContext _context = context;
     public async Task<Result<SubsEntity>> GetAsync(SubsEntity entity)
@@ -36,6 +36,25 @@ internal class SubsRepository(PlumbingContext context)
         await _context.SaveChangesAsync();
         return await GetAsync(entity);
     }
+
+    public async Task<Result> AddRangeAsync(List<SubsEntity> entities)
+    {
+        if (entities == null || entities.Count == 0)
+            return Result.Failure("No subscription entities provided.");
+
+        await _context.SubsEntities.AddRangeAsync(entities);
+        await _context.SaveChangesAsync();
+
+        var ids = entities.Select(e => e.Id).ToList();
+        var savedEntities = await _context.SubsEntities
+            .Where(e => ids.Contains(e.Id))
+            .ToListAsync();
+
+        return savedEntities.Count == entities.Count
+            ? Result.Success()
+            : Result.Failure("Not all subscription entities were saved successfully.");
+    }
+
 
     public async Task<Result> HardUpdateAsync(SubsEntity entity)
     {
@@ -77,7 +96,7 @@ internal class SubsRepository(PlumbingContext context)
         }
         return Result.Success();
     }
-    
+
     public async Task<Result> DeleteAsync(SubsEntity entity)
     {
         return await DeleteAsync(entity.Id);

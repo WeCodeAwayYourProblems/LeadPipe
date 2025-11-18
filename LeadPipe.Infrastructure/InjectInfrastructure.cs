@@ -31,6 +31,9 @@ public static class InjectInfrastructure
         services.AddScoped<IVoToDto, VoToDto>();
         services.AddScoped<IVoToEntity, VoToEntity>();
 
+        // Logging
+        services.AddTransient<LeafClientService>();
+
         // Add Leaf Client
         services.AddHttpClient();
         services.AddHttpClient(settings.LeafName!, c =>

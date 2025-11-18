@@ -22,6 +22,7 @@ public static class InjectInfrastructure
         services.AddScoped<ILeafClientService, LeafClientService>();
         services.AddScoped<IYellerClientService, YellerClientService>();
         services.AddScoped<ICalliUpdateService, CalliUpdateFromFileService>();
+        services.AddScoped<IFileService, FileService>();
 
         // Translations 
         services.AddScoped<IDtoToEntity, DtoToEntity>();

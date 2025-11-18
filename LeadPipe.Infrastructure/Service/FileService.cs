@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace LeadPipe.Domain.FunctionalObjects;
+namespace LeadPipe.Infrastructure.Service;
 
-public static class FolderFinder
+internal class FileService : IFileService
 {
     #region Public Members
     /// <summary>
@@ -18,7 +18,7 @@ public static class FolderFinder
     /// <param name="projectContainingLocalFolder"></param>
     /// <param name="localFolderToFind"></param>
     /// <returns></returns>
-    public static string GetLocalFolder(string projectContainingLocalFolder, string localFolderToFind) =>
+    public string GetLocalFolder(string projectContainingLocalFolder, string localFolderToFind) =>
         GetLocalFolder(projectContainingLocalFolder, _relativePath, localFolderToFind);
 
     /// <summary>
@@ -34,10 +34,10 @@ public static class FolderFinder
     /// <param name="localFolderToFind"></param>
     /// <param name="fileName"></param>
     /// <returns></returns>
-    public static string GetLocalFile(string projectContainingLocalFolder, string localFolderToFind, string fileName) =>
+    public string GetLocalFile(string projectContainingLocalFolder, string localFolderToFind, string fileName) =>
         GetLocalFolder(projectContainingLocalFolder, _relativePath, localFolderToFind) + fileName;
 
-    public static string GetMemberName(object origin, [CallerMemberName] string memberName = "")
+    public string GetMemberName(object origin, [CallerMemberName] string memberName = "")
     {
         string fullName = origin.GetType().FullName!;
         string result = memberName == "" ? fullName : fullName + "." + memberName;
@@ -46,10 +46,10 @@ public static class FolderFinder
     #endregion
 
     #region Private members
-    readonly static string _solution = nameof(LeadPipe);
+    readonly string _solution = nameof(LeadPipe);
     const string _relativePath = @".\";
 
-    static string GetLocalFolder(string projectContainingLocalFolder, string relativePath, string localFolderToFind)
+    string GetLocalFolder(string projectContainingLocalFolder, string relativePath, string localFolderToFind)
     {
         const char slash = '\\';
         string fullPath = Path.GetFullPath(relativePath);

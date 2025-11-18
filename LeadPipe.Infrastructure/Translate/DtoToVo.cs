@@ -41,4 +41,15 @@ internal class DtoToVo(IDateTimeTranslate dt) : IDtoToVo
         Plumbing result = new(PhoneNumber: number, Date: date, Contents: content, Source: Source.Leaf);
         return result;
     }
+
+    public Plumbing Translate(CalliCsvDto v)
+    {
+        PhoneNumber phone = new(v.Phone);
+        DateTime datetime = DateTime.TryParse(v.Date + " " + v.Time, out DateTime dt)
+            ? dt
+            : DateTime.MaxValue;
+        DateTimeOffset date = datetime;
+
+        return new Plumbing(PhoneNumber: phone, Date: date, Contents: v.PestProblem, Source: Source.Calli);
+    }
 }

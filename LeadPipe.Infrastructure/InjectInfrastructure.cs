@@ -25,6 +25,7 @@ public static class InjectInfrastructure
         services.AddScoped<ICalliUpdateService, CalliUpdateFromFileService>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IPlumbingRepository, PlumbingRepository>();
+        services.AddScoped<ISubsRepository, SubsRepository>();
 
         // Translations 
         services.AddScoped<IDtoToEntity, DtoToEntity>();

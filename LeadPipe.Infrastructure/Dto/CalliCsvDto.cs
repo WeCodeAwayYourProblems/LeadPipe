@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class CalliCsvDto
+public class CalliCsvDto
 {
     [Name("Phone")]
     public long Phone { get; set; }

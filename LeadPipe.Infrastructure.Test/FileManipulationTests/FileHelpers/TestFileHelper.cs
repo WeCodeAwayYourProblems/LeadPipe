@@ -1,12 +1,12 @@
-﻿using LeadPipe.Domain.FunctionalObjects;
+﻿using LeadPipe.Infrastructure.Service;
 
 namespace LeadPipe.Infrastructure.Test.FileManipulationTests.FileHelpers;
 
 internal class TestFileHelper
 {
     #region Private
-    private string JsonFileLocation => FolderFinder.GetLocalFile(nameof(Test), "TestFileLoc", "FileManipulationTests/TestFile.json");
-    private string CsvFileLocation => FolderFinder.GetLocalFile(nameof(Test), "TestFileLoc", "FileManipulationTests/TestFile.csv");
+    private string JsonFileLocation => new FileService().GetLocalFile(nameof(Test), "TestFileLoc", "FileManipulationTests/TestFile.json");
+    private string CsvFileLocation => new FileService().GetLocalFile(nameof(Test), "TestFileLoc", "FileManipulationTests/TestFile.csv");
     #endregion
 
     #region Internal

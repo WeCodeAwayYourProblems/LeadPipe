@@ -3,7 +3,7 @@ using LeadPipe.Infrastructure.Entity;
 
 namespace LeadPipe.Infrastructure.Repository;
 
-internal interface IPlumbingRepository
+public interface IPlumbingRepository
 {
     Task<Result> AddAsync(PlumbingEntity entity);
     Task<Result> AddRangeAsync(List<PlumbingEntity> entities);

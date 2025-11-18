@@ -24,4 +24,5 @@ internal class Settings : IInfrastructureSettings, IDomainSettings
     public string? LeafThreadsEndpoint { get; set; }
     public string? LeafMessagesEndpoint { get; set; }
     public string? PlumbingContext { get; set; }
+    public int LeafConcurrentMax { get; set; }
 }

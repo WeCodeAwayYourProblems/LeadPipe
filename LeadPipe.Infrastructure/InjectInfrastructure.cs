@@ -1,5 +1,6 @@
 ﻿using LeadPipe.Application.Service;
 using LeadPipe.Infrastructure.Database;
+using LeadPipe.Infrastructure.Repository;
 using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Translate;
@@ -23,6 +24,7 @@ public static class InjectInfrastructure
         services.AddScoped<IYellerClientService, YellerClientService>();
         services.AddScoped<ICalliUpdateService, CalliUpdateFromFileService>();
         services.AddScoped<IFileService, FileService>();
+        services.AddScoped<IPlumbingRepository, PlumbingRepository>();
 
         // Translations 
         services.AddScoped<IDtoToEntity, DtoToEntity>();

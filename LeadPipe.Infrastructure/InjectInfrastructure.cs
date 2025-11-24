@@ -44,7 +44,15 @@ public static class InjectInfrastructure
         {
             c.BaseAddress = new Uri(settings.LeafBase!);
             c.DefaultRequestHeaders.Add("Accept", "application/json");
-            c.DefaultRequestHeaders.Add("Authorization", settings.LeafTokenType);
+            c.DefaultRequestHeaders.Add("Authorization", settings.LeafTokenType!);
+        });
+
+        // Add Lab Client
+        services.AddHttpClient(settings.LabName!, c =>
+        {
+            c.BaseAddress = new Uri(settings.LabUri!);
+            c.DefaultRequestHeaders.Add("Accept", settings.LabAccept!);
+            c.DefaultRequestHeaders.Add("Authorization", settings.LabToken!);
         });
 
         // Add Databases

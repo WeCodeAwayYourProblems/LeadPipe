@@ -9,11 +9,6 @@ internal class Settings : IInfrastructureSettings, IDomainSettings
     public string? SqlConnectionString1 { get; set; }
     public string? SqlConnectionString2 { get; set; }
 
-    // Named Http Clients
-    public string? Name1 { get; set; }
-    public string? Name1Token { get; set; }
-    public string? Name1AccountId { get; set; }
-
     // Infrastructure
     public string? LeafName { get; set; }
     public string? LeafTokenType { get; set; }
@@ -25,4 +20,15 @@ internal class Settings : IInfrastructureSettings, IDomainSettings
     public string? LeafMessagesEndpoint { get; set; }
     public string? PlumbingContext { get; set; }
     public int LeafConcurrentMax { get; set; }
+
+    // Lab
+    public string? LabId { get; set; }
+    public string? LabSecret { get; set; }
+    public string? LabName { get; set; }
+    public string? LabUri { get; set; }
+    public string? LabPlumbing { get; set; }
+    public string? LabAuth { get; set; }
+    public string? LabConcurrentMax { get; set; }
+    public string? LabToken { get; set; }
+    public string? LabAccept { get; set; }
 }

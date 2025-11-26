@@ -10,13 +10,13 @@ namespace LeadPipe.Infrastructure.Service;
 internal class PlumbingAssociationService(
     IPlumbingRepository plumbingRepo,
     ISubsRepository subsRepo,
-    ISubsPlumbLinkRepository linkRepo,
+    ISubsPlumbingLinkRepository linkRepo,
     IVoToEntity voToEntity,
     IEntityToVo entityToVo) : IPlumbingAssociationService
 {
     private readonly IPlumbingRepository _plumbingRepo = plumbingRepo;
     private readonly ISubsRepository _subsRepo = subsRepo;
-    private readonly ISubsPlumbLinkRepository _linkRepo = linkRepo;
+    private readonly ISubsPlumbingLinkRepository _linkRepo = linkRepo;
     private readonly IVoToEntity _voToEntity = voToEntity;
     private readonly IEntityToVo _entityToVo = entityToVo;
 

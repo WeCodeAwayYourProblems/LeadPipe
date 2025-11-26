@@ -1,36 +1,35 @@
-﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity;
+﻿using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Repository;
 using CSharpFunctionalExtensions;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
-public class PlumbingRepositoryTests
+public class SubsCallLinkRepositoryTests
 {
 
     [Fact]
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new SubsCallLinkRepository(context);
 
-        var entities = new List<PlumbingEntity>
+        var entities = new List<SubsCallLink>
         {
-            new() { Id = 1, PhoneNumber = 12345 },
-            new() { Id = 2, PhoneNumber = 67890 }
+            new() { Id = 1, SubsEntity = new(), CallEntity = new() },
+            new() { Id = 2, SubsEntity = new(), CallEntity = new() }
         };
 
         var result = await repo.AddRangeAsync(entities);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, context.PlumbingEntities.Count());
+        Assert.Equal(2, context.SubsCallLinks.Count());
     }
 
     [Fact]
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new SubsCallLinkRepository(context);
 
         var result = await repo.AddRangeAsync([]);
 
@@ -39,12 +38,12 @@ public class PlumbingRepositoryTests
     }
 
     [Fact]
-    public async Task AddAsync_ShouldAddPlumbingEntity()
+    public async Task AddAsync_ShouldAddSubsCallLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new SubsCallLinkRepository(context);
 
-        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, Source = Source.Test };
+        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -53,25 +52,25 @@ public class PlumbingRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.PlumbingEntities.Add(new PlumbingEntity { Id = 1, PhoneNumber = 12345 });
+        context.SubsCallLinks.Add(new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() });
         await context.SaveChangesAsync();
 
-        var repo = new PlumbingRepository(context);
+        var repo = new SubsCallLinkRepository(context);
         var result = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(12345, result.Value.PhoneNumber);
+        Assert.Equal(1, result.Value.Id);
     }
 
     [Fact]
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345 };
-        context.PlumbingEntities.Add(plumbing);
+        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() };
+        context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var repo = new PlumbingRepository(context);
+        var repo = new SubsCallLinkRepository(context);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
 
@@ -82,7 +81,7 @@ public class PlumbingRepositoryTests
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
-        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext());
+        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext());
         var result = await repo.GetByIdAsync(99);
 
         Assert.False(result.IsSuccess);
@@ -93,28 +92,28 @@ public class PlumbingRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345 };
-        context.PlumbingEntities.Add(plumbing);
+        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() };
+        context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var repo = new PlumbingRepository(context);
-        var updatedPlumbing = new PlumbingEntity { Id = 1, PhoneNumber = 99999 };
+        var repo = new SubsCallLinkRepository(context);
+        var updatedSubsCallLink = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() };
 
-        var result = await repo.UpdateAsync(updatedPlumbing);
+        var result = await repo.UpdateAsync(updatedSubsCallLink);
         var reloaded = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(99999, reloaded.Value.PhoneNumber);
+        Assert.Equal(1, reloaded.Value.Id);
     }
 
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
-        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext());
-        var updatedPlumbing = new PlumbingEntity { Id = 99, PhoneNumber = 11111 };
+        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext());
+        var updatedSubsCallLink = new SubsCallLink { Id = 99, SubsEntity = new(), CallEntity = new() };
 
-        var result = await repo.UpdateAsync(updatedPlumbing);
+        var result = await repo.UpdateAsync(updatedSubsCallLink);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
@@ -123,7 +122,7 @@ public class PlumbingRepositoryTests
     [Fact]
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
-        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext());
+        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext());
         var result = await repo.DeleteAsync(99);
 
         Assert.True(result.IsSuccess);

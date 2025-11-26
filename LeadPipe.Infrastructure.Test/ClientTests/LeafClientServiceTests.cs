@@ -2,6 +2,7 @@
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Repository;
 using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;

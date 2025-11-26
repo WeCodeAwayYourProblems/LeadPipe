@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Entity;
 
-public class PlumbingEntity
+public class PlumbingEntity : IEntity
 {
     public long Id { get; set; }
     public long PhoneNumber { get; set; }

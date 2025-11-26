@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity;
 
-public class CallEntity
+public class CallEntity : IEntity
 {
     public long Id { get; set; }
     public long PhoneNumber { get; set; }

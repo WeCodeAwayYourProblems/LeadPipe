@@ -30,7 +30,7 @@ public class SubsRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new SubsRepository(context);
 
-        var result = await repo.AddRangeAsync(new List<SubsEntity>());
+        var result = await repo.AddRangeAsync([]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("No subscription entities", result.Error);
@@ -95,7 +95,7 @@ public class SubsRepositoryTests
         var repo = new SubsRepository(context);
         var updatedSubs = new SubsEntity { Id = 1, Number = 99999, Number2 = 67890 };
 
-        var result = await repo.UpdateValuesAsync(updatedSubs);
+        var result = await repo.UpdateAsync(updatedSubs);
         var reloaded = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
@@ -126,7 +126,7 @@ public class SubsRepositoryTests
         var repo = new SubsRepository(RepoTestHelpers.GetInMemoryContext());
         var updatedSubs = new SubsEntity { Id = 99, Number = 11111 };
 
-        var result = await repo.UpdateValuesAsync(updatedSubs);
+        var result = await repo.UpdateAsync(updatedSubs);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);

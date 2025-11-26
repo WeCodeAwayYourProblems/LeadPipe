@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity;
 
-public class PlumbingCallLink
+public class PlumbingCallLink : IEntity
 {
     public long Id { get; set; }
 

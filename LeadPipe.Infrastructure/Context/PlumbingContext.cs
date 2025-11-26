@@ -1,7 +1,7 @@
 ﻿using LeadPipe.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace LeadPipe.Infrastructure.Database;
+namespace LeadPipe.Infrastructure.Context;
 
 internal class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbContext(options)
 {

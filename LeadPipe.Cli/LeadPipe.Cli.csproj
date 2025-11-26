@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LeadPipe.Application\LeadPipe.Application.csproj" />
+    <ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
     <ProjectReference Include="..\LeadPipe.Infrastructure\LeadPipe.Infrastructure.csproj" />
   </ItemGroup>
 

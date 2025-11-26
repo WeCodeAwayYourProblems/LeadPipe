@@ -5,7 +5,6 @@ using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Translate;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -13,7 +12,7 @@ namespace LeadPipe.Infrastructure;
 
 public static class InjectInfrastructure
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings)
     {
         // Format: services.AddScoped<Interface, Class>();
 
@@ -60,7 +59,7 @@ public static class InjectInfrastructure
         // Add Databases
         services.AddDbContext<PlumbingContext>(options =>
         {
-            string? connectionString = configuration.GetConnectionString("PlumbingContext");
+            string? connectionString = settings.PlumbingContext!;
             options.UseSqlite(connectionString);
         });
 

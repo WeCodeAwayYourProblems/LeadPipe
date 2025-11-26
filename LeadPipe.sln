@@ -42,6 +42,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".template.config", ".templa
 		.template.config\template.json = .template.config\template.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadPipe.Infrastructure.MySql", "LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj", "{C4F33022-BA5F-40C8-8286-EBE97BB12462}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F06A47D6-C2F4-4A17-B73C-26912E97765B} = {F06A47D6-C2F4-4A17-B73C-26912E97765B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +85,10 @@ Global
 		{2F28FEA4-7F14-4EDE-A9C1-C416A7CF79A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F28FEA4-7F14-4EDE-A9C1-C416A7CF79A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F28FEA4-7F14-4EDE-A9C1-C416A7CF79A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4F33022-BA5F-40C8-8286-EBE97BB12462}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4F33022-BA5F-40C8-8286-EBE97BB12462}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4F33022-BA5F-40C8-8286-EBE97BB12462}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4F33022-BA5F-40C8-8286-EBE97BB12462}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +102,7 @@ Global
 		{6FB3F381-71F7-4B23-AC71-D47C1D4A2613} = {D81ED4CD-E2EF-45F4-A860-E7DADD9C9BC6}
 		{CAF567E6-E506-4CCF-A207-A19D54855F4D} = {9B2C1815-B7E2-46DA-B8CC-2D8BD536862C}
 		{2F28FEA4-7F14-4EDE-A9C1-C416A7CF79A5} = {D81ED4CD-E2EF-45F4-A860-E7DADD9C9BC6}
+		{C4F33022-BA5F-40C8-8286-EBE97BB12462} = {9B2C1815-B7E2-46DA-B8CC-2D8BD536862C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5297C95E-C3F4-4CF1-BA5C-8ED512BFBFCD}

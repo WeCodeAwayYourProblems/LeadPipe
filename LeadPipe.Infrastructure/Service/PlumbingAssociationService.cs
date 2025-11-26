@@ -20,6 +20,11 @@ internal class PlumbingAssociationService(
     private readonly IVoToEntity _voToEntity = voToEntity;
     private readonly IEntityToVo _entityToVo = entityToVo;
 
+    public Task<Result<List<Call>>> GetCallsAsync()
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Result<List<Plumbing>>> GetPlumbingAsync()
     {
         Result<List<PlumbingEntity>> entitiesResult = await _plumbingRepo.GetAllAsync();

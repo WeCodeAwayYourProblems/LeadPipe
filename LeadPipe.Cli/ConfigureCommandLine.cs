@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using LeadPipe.Application;
 using LeadPipe.Infrastructure;
 using LeadPipe.Translation;
+using LeadPipe.Infrastructure.MySql;
 
 namespace LeadPipe.Cli;
 
@@ -21,6 +22,6 @@ internal static class ConfigureCommandLine
             builder.AddDebug();
             builder.AddConsole();
         });
-        services.AddInfrastructure(settings).AddTranslation().AddApplication();
+        services.AddInfrastructure(settings).AddInfrastructureMySql().AddTranslation().AddApplication();
     }
 }

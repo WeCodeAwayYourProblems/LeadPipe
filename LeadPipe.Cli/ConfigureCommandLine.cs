@@ -15,11 +15,12 @@ internal static class ConfigureCommandLine
         configuration.Bind(settings);
 
         typeof(Settings).GetInterfaces().ToList().ForEach(t => services.AddSingleton(t, settings));
+
         services.AddLogging(builder =>
         {
             builder.AddDebug();
             builder.AddConsole();
         });
-        services.AddInfrastructure(settings, configuration).AddTranslation().AddApplication();
+        services.AddInfrastructure(settings).AddTranslation().AddApplication();
     }
 }

@@ -1,10 +1,10 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 
 namespace LeadPipe.Infrastructure.Translate;
 
 public interface IVoToEntity
 {
-    internal SubsEntity Translate(Sandwich s);
-    internal PlumbingEntity Translate(Plumbing plumbing);
+    SubsEntity Translate(Sandwich s);
+    PlumbingEntity Translate(Plumbing plumbing);
 }

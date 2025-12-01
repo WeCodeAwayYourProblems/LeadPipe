@@ -1,6 +1,3 @@
 ﻿namespace LeadPipe.Domain.ValueObjects;
 
-public class Call
-{
-
-}
+public record Call(DateTimeOffset Date, PhoneNumber Number, TimeSpan Duration, string Note, string Source, bool Billable);

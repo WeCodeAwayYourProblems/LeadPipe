@@ -1,4 +1,4 @@
-﻿using LeadPipe.Infrastructure.Database;
+﻿using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;

@@ -1,6 +1,7 @@
-﻿using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Repository;
+﻿using LeadPipe.Infrastructure.Repository;
 using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Sqlite.Repository;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 

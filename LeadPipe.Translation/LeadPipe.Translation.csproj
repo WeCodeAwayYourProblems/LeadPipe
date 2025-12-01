@@ -7,7 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LeadPipe.Application\LeadPipe.Application.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
+    <ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
+    <ProjectReference Include="..\LeadPipe.Infrastructure\LeadPipe.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,6 @@
-﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Repository;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Sqlite.Repository;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
@@ -16,8 +15,8 @@ public class CallRepositoryTests
 
         var entities = new List<CallEntity>
         {
-            new() { Id = 1, PhoneNumber = 12345 },
-            new() { Id = 2, PhoneNumber = 67890 }
+            new() { Id = 1, PhoneNumber = 12345, Note = string.Empty, Source = string.Empty },
+            new() { Id = 2, PhoneNumber = 67890, Note = string.Empty, Source = string.Empty }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -44,7 +43,7 @@ public class CallRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new CallRepository(context);
 
-        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345};
+        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Source = string.Empty };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -53,7 +52,7 @@ public class CallRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.CallEntities.Add(new CallEntity { Id = 1, PhoneNumber = 12345 });
+        context.CallEntities.Add(new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Source = string.Empty });
         await context.SaveChangesAsync();
 
         var repo = new CallRepository(context);
@@ -67,7 +66,7 @@ public class CallRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345 };
+        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Source = string.Empty };
         context.CallEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -93,12 +92,12 @@ public class CallRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345 };
+        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Source = string.Empty };
         context.CallEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
         var repo = new CallRepository(context);
-        var updatedCall = new CallEntity { Id = 1, PhoneNumber = 99999 };
+        var updatedCall = new CallEntity { Id = 1, PhoneNumber = 99999, Note = string.Empty, Source = string.Empty };
 
         var result = await repo.UpdateAsync(updatedCall);
         var reloaded = await repo.GetByIdAsync(1);
@@ -112,7 +111,7 @@ public class CallRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext());
-        var updatedCall = new CallEntity { Id = 99, PhoneNumber = 11111 };
+        var updatedCall = new CallEntity { Id = 99, PhoneNumber = 11111, Note = string.Empty, Source = string.Empty };
 
         var result = await repo.UpdateAsync(updatedCall);
 

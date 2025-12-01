@@ -12,6 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
 		<PackageReference Include="NSubstitute" Version="5.3.0" />
@@ -27,11 +28,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\LeadPipe.Infrastructure\LeadPipe.Infrastructure.csproj" />
+		<Folder Include="FileManipulationTests\TestFileLoc\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="FileManipulationTests\TestFileLoc\" />
+	  <ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
+	  <ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 
 namespace LeadPipe.Infrastructure.Translate;

@@ -1,9 +1,10 @@
 ﻿using LeadPipe.Domain;
+using LeadPipe.Infrastructure.MySql.Settings;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Cli;
 
-internal class Settings : IInfrastructureSettings, IDomainSettings
+internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettings
 {
     // IDwhSettings
     public string? SqlConnectionString1 { get; set; }
@@ -18,8 +19,9 @@ internal class Settings : IInfrastructureSettings, IDomainSettings
     public string? LeafUuid { get; set; }
     public string? LeafThreadsEndpoint { get; set; }
     public string? LeafMessagesEndpoint { get; set; }
-    public string? PlumbingContext { get; set; }
     public int LeafConcurrentMax { get; set; }
+    public string? PlumbingContext { get; set; }
+    public string? MySqlConnectionString { get; set; }
 
     // Lab
     public string? LabId { get; set; }
@@ -31,4 +33,5 @@ internal class Settings : IInfrastructureSettings, IDomainSettings
     public string? LabConcurrentMax { get; set; }
     public string? LabToken { get; set; }
     public string? LabAccept { get; set; }
+
 }

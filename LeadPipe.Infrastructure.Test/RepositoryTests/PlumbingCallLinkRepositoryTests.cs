@@ -1,6 +1,7 @@
-﻿using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Repository;
+﻿using LeadPipe.Infrastructure.Repository;
 using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Sqlite.Repository;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
@@ -15,8 +16,8 @@ public class PlumbingCallLinkRepositoryTests
 
         var entities = new List<PlumbingCallLink>
         {
-            new() { Id = 1, PlumbingEntity = new(), CallEntity = new() },
-            new() { Id = 2, PlumbingEntity = new(), CallEntity = new() }
+            new() { Id = 1, PlumbingEntity = new(), CallEntity = new(){Note = string.Empty, Source= string.Empty} },
+            new() { Id = 2, PlumbingEntity = new(), CallEntity = new(){Note = string.Empty, Source= string.Empty } }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -43,7 +44,7 @@ public class PlumbingCallLinkRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new PlumbingCallLinkRepository(context);
 
-        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() };
+        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -52,7 +53,7 @@ public class PlumbingCallLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.PlumbingCallLinks.Add(new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() });
+        context.PlumbingCallLinks.Add(new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } });
         await context.SaveChangesAsync();
 
         var repo = new PlumbingCallLinkRepository(context);
@@ -66,7 +67,7 @@ public class PlumbingCallLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() };
+        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
         context.PlumbingCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -92,12 +93,12 @@ public class PlumbingCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() };
+        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
         context.PlumbingCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
         var repo = new PlumbingCallLinkRepository(context);
-        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() };
+        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 1, PlumbingEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedPlumbingCallLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -111,7 +112,7 @@ public class PlumbingCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new PlumbingCallLinkRepository(RepoTestHelpers.GetInMemoryContext());
-        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 99, PlumbingEntity = new(), CallEntity = new() };
+        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 99, PlumbingEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedPlumbingCallLink);
 

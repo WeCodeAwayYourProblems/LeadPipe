@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Translate;
 using LeadPipe.Translation.Primitives;
@@ -11,7 +12,7 @@ internal class EntityToVo(IDateTimeTranslate dtranslate) : IEntityToVo
     public Plumbing Translate(PlumbingEntity entity)
     {
         var number = new PhoneNumber(entity.PhoneNumber);
-        DateTimeOffset date = entity.Date;
+        DateTimeOffset date = new(entity.Date, TimeSpan.FromSeconds(0));
         var contents = entity.Contents;
         var source = entity.Source;
 
@@ -39,6 +40,19 @@ internal class EntityToVo(IDateTimeTranslate dtranslate) : IEntityToVo
             Seller2 = entity.Seller2,
             Seller3 = entity.Seller3
         };
+        return result;
+    }
+
+    public Call Translate(CallEntity c)
+    {
+        DateTimeOffset date = new(c.CallDate, TimeSpan.FromSeconds(0));
+        PhoneNumber number = new(c.PhoneNumber);
+        TimeSpan duration = TimeSpan.FromSeconds(c.Duration);
+        string note = c.Note;
+        string source = c.Source;
+        bool billable = c.Billable;
+
+        var result = new Call(Date: date, Number: number, Duration: duration, Note: note, Source: source, Billable: billable);
         return result;
     }
 }

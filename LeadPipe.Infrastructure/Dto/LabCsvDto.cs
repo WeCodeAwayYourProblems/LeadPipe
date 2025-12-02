@@ -1,4 +1,5 @@
-﻿namespace LeadPipe.Infrastructure.Dto;
+﻿
+namespace LeadPipe.Infrastructure.Dto;
 
 internal class LabCsvDto
 {

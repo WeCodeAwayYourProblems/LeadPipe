@@ -52,4 +52,9 @@ internal class DtoToVo(IDateTimeTranslate dt) : IDtoToVo
 
         return new Plumbing(PhoneNumber: phone, Date: date, Contents: v.PestProblem, Source: Source.Calli);
     }
+
+    public Plumbing Translate(LabDto dto)
+    {
+        throw new NotImplementedException();
+    }
 }

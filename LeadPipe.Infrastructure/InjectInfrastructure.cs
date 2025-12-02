@@ -17,7 +17,7 @@ public static class InjectInfrastructure
         services.AddScoped<IJsonRwService, JsonRwService>();
         services.AddScoped<ILeafClientService, LeafClientService>();
         services.AddScoped<IYellerClientService, YellerClientService>();
-        services.AddScoped<ICalliUpdateService, CalliUpdateFromFileService>();
+        services.AddScoped<IPlumbingUpdateService, CalliUpdateFromFileService>();
         services.AddScoped<IFileService, FileService>();
 
         // Logging

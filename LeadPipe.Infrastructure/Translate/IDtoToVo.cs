@@ -7,4 +7,5 @@ public interface IDtoToVo
 {
     Plumbing Translate(LeafDto v);
     Plumbing Translate(CalliCsvDto v);
+    Plumbing Translate(LabDto dto);
 }

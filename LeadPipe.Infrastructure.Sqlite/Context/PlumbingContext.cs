@@ -40,13 +40,11 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
         spLink.Property(l => l.Id).ValueGeneratedOnAdd();
         spLink.HasIndex(l => l.SubsId);
         spLink.HasIndex(l => l.PlumbingId);
-        spLink.HasIndex(l => new { l.SubsId, l.PlumbingId }).IsUnique();
-        
+        spLink.HasIndex(l => new { l.SubsId, l.PlumbingId }).IsUnique();        
         spLink.HasOne(l => l.SubsEntity)
             .WithMany(s => s.SubsPlumbingLinks)
             .HasForeignKey(l => l.SubsId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
+            .OnDelete(DeleteBehavior.Cascade);        
         spLink.HasOne(l => l.PlumbingEntity)
             .WithMany(p => p.SubsPlumbingLinks)
             .HasForeignKey(l => l.PlumbingId)
@@ -61,17 +59,14 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
         subsCall.HasIndex(sc => sc.SubsId);
         subsCall.HasIndex(sc => sc.CallId);
         subsCall.HasIndex(l => new { l.SubsId, l.CallId }).IsUnique();
-
         subsCall.HasOne(sc => sc.SubsEntity)
             .WithMany(s => s.SubsCallLinks)
             .HasForeignKey(sc => sc.SubsId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
+            .OnDelete(DeleteBehavior.Cascade);        
         subsCall.HasOne(sc => sc.CallEntity)
             .WithMany(c => c.SubsCallLinks)
             .HasForeignKey(sc => sc.CallId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
+            .OnDelete(DeleteBehavior.Cascade);        
         subsCall.Property(sc => sc.MatchingNumber).IsRequired();
 
         // PlumbingCallLink
@@ -80,13 +75,11 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
         plumbCall.Property(pc => pc.Id).ValueGeneratedOnAdd();
         plumbCall.HasIndex(pc => pc.PlumbingId);
         plumbCall.HasIndex(pc => pc.CallId);
-        plumbCall.HasIndex(l => new { l.PlumbingId, l.CallId }).IsUnique();
-        
+        plumbCall.HasIndex(l => new { l.PlumbingId, l.CallId }).IsUnique();        
         plumbCall.HasOne(pc => pc.PlumbingEntity)
             .WithMany(p => p.PlumbingCallLinks)
             .HasForeignKey(pc => pc.PlumbingId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
+            .OnDelete(DeleteBehavior.Cascade);        
         plumbCall.HasOne(pc => pc.CallEntity)
             .WithMany(c => c.PlumbingCallLinks)
             .HasForeignKey(pc => pc.CallId)

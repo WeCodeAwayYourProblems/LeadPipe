@@ -3,6 +3,7 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Repository;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -14,9 +15,16 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
     #region Implementation
     public async Task<Result<T>> AddAsync(T entity)
     {
-        await _set.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
+        try
+        {
+            await _set.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return Result.Success(entity);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<T>($"Failed to save entities: {ex.Message}");
+        }
     }
 
     public async Task<Result<List<T>>> AddRangeAsync(List<T> entities)
@@ -24,10 +32,18 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
         if (entities is null || entities.Count == 0)
             return Result.Failure<List<T>>("No entities provided.");
 
-        await _set.AddRangeAsync(entities);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _set.AddRangeAsync(entities);
+            await _context.SaveChangesAsync();
 
-        return Result.Success(entities);
+            return Result.Success(entities);
+        }
+        catch (Exception ex)
+        {
+            // Catch any exception and wrap it into a Result.Failure
+            return Result.Failure<List<T>>($"Failed to save entities: {ex.Message}");
+        }
     }
 
     public async Task<Result<bool>> DeleteAsync(long id)
@@ -36,10 +52,17 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
         if (entity is null)
             return Result.Success(false);
 
-        _set.Remove(entity);
-        await _context.SaveChangesAsync();
+        try
+        {
+            _set.Remove(entity);
+            await _context.SaveChangesAsync();
 
-        return Result.Success(true);
+            return Result.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<bool>($"Failed to Delete entity: {ex.Message}");
+        }
     }
 
     public async Task<Result<bool>> DeleteAsync(T entity)
@@ -49,8 +72,15 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
 
     public async Task<Result<List<T>>> GetAllAsync()
     {
-        var list = await _set.ToListAsync();
-        return Result.Success(list);
+        try
+        {
+            var list = await _set.ToListAsync();
+            return Result.Success(list);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<T>>($"Failed to get entities: {ex.Message}");
+        }
     }
 
     public async Task<Result<T>> GetByIdAsync(long id)
@@ -68,10 +98,18 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
         if (exists is null)
             return Result.Failure<T>("The desired entity does not exist");
 
-        // Update
-        _context.Entry(exists).CurrentValues.SetValues(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
+        try
+        {
+
+            // Update
+            _context.Entry(exists).CurrentValues.SetValues(entity);
+            await _context.SaveChangesAsync();
+            return Result.Success(entity);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<T>($"Failed to update entity:\n{ex.Message}");
+        }
     }
     #endregion
 }

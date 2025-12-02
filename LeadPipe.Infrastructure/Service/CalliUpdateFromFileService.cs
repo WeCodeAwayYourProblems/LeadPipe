@@ -12,12 +12,12 @@ internal class CalliUpdateFromFileService(
     ICsvRwService csv,
     IDtoToVo dtovo,
     IVoToEntity toEntity,
-    IPlumbingRepository plumb) : ICalliUpdateService
+    IPlumbingRepository plumb) : IPlumbingUpdateService
 {
     private readonly ICsvRwService _csv = csv;
     private readonly IDtoToVo _dtovo = dtovo;
     private readonly IVoToEntity _toEntity = toEntity;
-    private readonly IPlumbingRepository _pr = plumb;
+    private readonly IPlumbingRepository _plumbingRepo = plumb;
     public Result<List<Plumbing>> GetData(FileInfo location)
     {
         Result<List<CalliCsvDto>> raw = _csv.Parse<CalliCsvDto>(location);
@@ -29,8 +29,11 @@ internal class CalliUpdateFromFileService(
     }
     public async Task<Result> SaveDataAsync(List<Plumbing> plumbs)
     {
+        if (plumbs.Count == 0)
+            return Result.Failure("Without any data to pass, none was saved");
+
         List<PlumbingEntity> conversion = [.. plumbs.Select(_toEntity.Translate)];
-        Result result = await _pr.AddRangeAsync(conversion);
+        Result result = await _plumbingRepo.AddRangeAsync(conversion);
         return result;
     }
 }

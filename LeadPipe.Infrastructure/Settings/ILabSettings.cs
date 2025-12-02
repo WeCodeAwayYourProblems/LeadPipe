@@ -9,6 +9,6 @@ public interface ILabSettings
     string? LabPlumbing { get; set; }
     string? LabAuth { get; set; }
     string? LabToken { get; set; }
-    string? LabConcurrentMax { get; set; }
+    int LabConcurrentMax { get; set; }
     string? LabAccept { get; set; }
 }

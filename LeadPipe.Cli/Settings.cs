@@ -10,6 +10,18 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? SqlConnectionString1 { get; set; }
     public string? SqlConnectionString2 { get; set; }
 
+
+    // Lab
+    public string? LabId { get; set; }
+    public string? LabSecret { get; set; }
+    public string? LabName { get; set; }
+    public string? LabUri { get; set; }
+    public string? LabPlumbing { get; set; }
+    public string? LabAuth { get; set; }
+    public string? LabConcurrentMax { get; set; }
+    public string? LabToken { get; set; }
+    public string? LabAccept { get; set; }
+    
     // Infrastructure
     public string? LeafName { get; set; }
     public string? LeafTokenType { get; set; }
@@ -22,16 +34,6 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public int LeafConcurrentMax { get; set; }
     public string? PlumbingContext { get; set; }
     public string? MySqlConnectionString { get; set; }
-
-    // Lab
-    public string? LabId { get; set; }
-    public string? LabSecret { get; set; }
-    public string? LabName { get; set; }
-    public string? LabUri { get; set; }
-    public string? LabPlumbing { get; set; }
-    public string? LabAuth { get; set; }
-    public string? LabConcurrentMax { get; set; }
-    public string? LabToken { get; set; }
-    public string? LabAccept { get; set; }
-
+    public string? Schema1 { get; set; }
+    public string? Schema2 { get; set; }
 }

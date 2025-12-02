@@ -7,20 +7,16 @@ namespace LeadPipe.Infrastructure.MySql;
 
 public static class InjectInfrastructureMySql
 {
-    public static IServiceCollection AddInfrastructureMySql(this IServiceCollection services, IMySqlSettings config)
+    public static IServiceCollection AddInfrastructureMySql(this IServiceCollection services, IMySqlSettings settings)
     {
-        // Format: services.AddScoped<Interface, Class>();
-
-        // Repositories
-
-        // Logging
-
-        // Add databases
-        services.AddDbContext<MySqlContext>(options =>
+        // Register MySqlContext
+        services.AddDbContext<MySqlContext>((serviceProvider, options) =>
+        {
             options.UseMySql(
-                config.MySqlConnectionString!,
-                ServerVersion.AutoDetect(config.MySqlConnectionString!)
-            ));
+                settings.MySqlConnectionString!,
+                ServerVersion.AutoDetect(settings.MySqlConnectionString!)
+            );
+        });
 
         return services;
     }

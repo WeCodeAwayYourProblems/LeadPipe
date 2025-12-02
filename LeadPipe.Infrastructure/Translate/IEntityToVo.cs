@@ -7,4 +7,5 @@ public interface IEntityToVo
 {
     Plumbing Translate(PlumbingEntity entity);
     Sandwich Translate(SubsEntity entity);
+    Call Translate(CallEntity c);
 }

@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 
-namespace LeadPipe.Application.Service;
+namespace LeadPipe.Infrastructure.Service;
 
 public interface ILabService
 {

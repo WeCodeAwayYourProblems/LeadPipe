@@ -1,5 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
@@ -11,7 +10,7 @@ using System.Net.Http.Json;
 
 namespace LeadPipe.Infrastructure.Service;
 
-public class LeafClientService : ILeafClientService
+public class LeafClientService : ILeafService
 {
     public LeafClientService(
         ILeafSettings settings,

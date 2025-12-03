@@ -1,11 +1,6 @@
-﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Dto;
+﻿namespace LeadPipe.Infrastructure.Translate;
 
-namespace LeadPipe.Infrastructure.Translate;
-
-public interface IDtoToVo
+public interface IDtoToVo<TDto, TVo>
 {
-    Plumbing Translate(LeafDto v);
-    Plumbing Translate(CalliCsvDto v);
-    Plumbing Translate(LabDto dto);
+    TDto Translate(TVo data);
 }

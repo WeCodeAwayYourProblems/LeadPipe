@@ -1,9 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 
-namespace LeadPipe.Application.Service;
+namespace LeadPipe.Infrastructure.Service;
 
-public interface ILeafClientService
+public interface ILeafService
 {
     Task<Result<List<Plumbing>>> GetAllAsync(int offset = 0, int errorLimit = 5);
     Task<Result<List<Plumbing>>> RefreshAsync(int errorLimit = 5);

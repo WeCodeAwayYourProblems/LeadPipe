@@ -42,7 +42,7 @@ internal class DtoToVo(IDateTimeTranslate dt) : IDtoToVo
         return result;
     }
 
-    public Plumbing Translate(CalliCsvDto v)
+    public Plumbing Translate(CalliDto v)
     {
         PhoneNumber phone = new(v.Phone);
         DateTime datetime = DateTime.TryParse(v.Date + " " + v.Time, out DateTime dt)

@@ -5,27 +5,26 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Application.Manager;
 
-public interface ILabManager
+public interface ILeafManager
 {
-    Task<Result<List<Plumbing>>> ManageAsync(bool update);
+    Task<Result<List<Plumbing>>> ManageAsync(bool update = true);
 }
-public class LabManager([FromKeyedServices(Source.Lab)] IUpdateService<Plumbing> update) : ILabManager
+
+public class LeafManager([FromKeyedServices(Source.Leaf)] IUpdateService<Plumbing> update) : ILeafManager
 {
     private readonly IUpdateService<Plumbing> _update = update;
     public async Task<Result<List<Plumbing>>> ManageAsync(bool update = true)
     {
-        Result<List<Plumbing>> labresult = update
+        var plumbing = update
             ? await _update.UpdateDataAsync()
             : await _update.GetDataAsync();
 
-        if (labresult.IsFailure)
-            return labresult;
+        if (plumbing.IsFailure)
+            return Result.Failure<List<Plumbing>>(plumbing.Error);
 
-        Result saved = await _update.SaveDataAsync(labresult.Value);
-        Result<List<Plumbing>> result = saved.IsSuccess
-            ? labresult.Value
+        Result saved = await _update.SaveDataAsync(plumbing.Value);
+        return saved.IsSuccess
+            ? plumbing
             : Result.Failure<List<Plumbing>>(saved.Error);
-
-        return result;
     }
 }

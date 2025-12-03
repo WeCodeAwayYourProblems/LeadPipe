@@ -2,16 +2,18 @@
 
 namespace LeadPipe.Infrastructure.Dto;
 
-public class CalliCsvDto
+internal class LibacionDto
 {
-    [Name("Phone")]
-    public long Phone { get; set; }
     [Name("Date")]
     public string? Date { get; set; }
     [Name("Time")]
     public string? Time { get; set; }
+    [Name("Phone Number")]
+    public string? PhoneNumber { get; set; }
     [Name("Time Zone")]
     public string? TimeZone { get; set; }
-    [Name("Pest Problem")]
-    public string? PestProblem { get; set; }
+    [Name("Message")]
+    public string? Message { get; set; }
+    [Name("Commercial?")]
+    public bool Commercial { get; set; }
 }

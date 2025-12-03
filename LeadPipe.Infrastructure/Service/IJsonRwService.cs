@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace LeadPipe.Application.Service;
+namespace LeadPipe.Infrastructure.Service;
 
 public interface IJsonRwService
 {

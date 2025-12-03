@@ -1,11 +1,6 @@
-﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+﻿namespace LeadPipe.Infrastructure.Translate;
 
-namespace LeadPipe.Infrastructure.Translate;
-
-public interface IEntityToVo
+public interface IEntityToVo<TEntity, TVo>
 {
-    Plumbing Translate(PlumbingEntity entity);
-    Sandwich Translate(SubsEntity entity);
-    Call Translate(CallEntity c);
+    TVo Translate(TEntity entity);
 }

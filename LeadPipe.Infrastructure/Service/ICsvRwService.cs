@@ -1,12 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
 using CsvHelper.Configuration;
 
-namespace LeadPipe.Application.Service;
+namespace LeadPipe.Infrastructure.Service;
 
 public interface ICsvRwService
 {
     Result Append<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsed) where TMap : ClassMap<TClass>;
-    Result<List<T>> Parse<T>(FileInfo path);
+    Result<List<T>> ReadFile<T>(FileInfo path);
     Result Write<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsedObject) where TMap : ClassMap<TClass>;
     Result Write<TClass>(IEnumerable<TClass> unparsedObject, FileInfo path);
 }

@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class LeasedCsvDto
+internal class LeasedDto
 {
     [Name("Date Received")]
     public string? Date { get; set; }

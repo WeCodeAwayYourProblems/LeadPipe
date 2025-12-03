@@ -14,8 +14,13 @@ internal class PlumbingAssociationService(
     ISubsPlumbingLinkRepository linkRepo,
     ISubsCallLinkRepository subsCallRepo,
     IPlumbingCallLinkRepository plumbingCallRepo,
-    IVoToEntity voToEntity,
-    IEntityToVo entityToVo) : IPlumbingAssociationService
+    IVoToEntity<Plumbing, PlumbingEntity> plumbToEntity,
+    IVoToEntity<Call, CallEntity> callToEntity,
+    IVoToEntity<Sandwich, SubsEntity> sandToEntity,
+    IEntityToVo<PlumbingEntity, Plumbing> entityToPlumb,
+    IEntityToVo<SubsEntity, Sandwich> entityToSand,
+    IEntityToVo<CallEntity, Call> entityToCall
+    ) : IPlumbingAssociationService
 {
     private readonly IPlumbingRepository _plumbingRepo = plumbingRepo;
     private readonly ISubsRepository _subsRepo = subsRepo;
@@ -25,8 +30,13 @@ internal class PlumbingAssociationService(
     private readonly ISubsCallLinkRepository _subsCallRepo = subsCallRepo;
     private readonly IPlumbingCallLinkRepository _plumbingCallRepo = plumbingCallRepo;
 
-    private readonly IVoToEntity _voToEntity = voToEntity;
-    private readonly IEntityToVo _entityToVo = entityToVo;
+    private readonly IVoToEntity<Plumbing, PlumbingEntity> _plumbToEntity = plumbToEntity;
+    private readonly IVoToEntity<Call, CallEntity> _callToEntity = callToEntity;
+    private readonly IVoToEntity<Sandwich, SubsEntity> _sandToEntity = sandToEntity;
+
+    private readonly IEntityToVo<PlumbingEntity, Plumbing> _entityToPlumb = entityToPlumb;
+    private readonly IEntityToVo<SubsEntity, Sandwich> _entityToSand = entityToSand;
+    private readonly IEntityToVo<CallEntity, Call> _entityToCall = entityToCall;
 
     public async Task<Result<List<Plumbing>>> GetPlumbingAsync()
     {
@@ -34,7 +44,7 @@ internal class PlumbingAssociationService(
         if (entitiesResult.IsFailure)
             return Result.Failure<List<Plumbing>>(entitiesResult.Error);
 
-        List<Plumbing> voList = [.. entitiesResult.Value.Select(_entityToVo.Translate)];
+        List<Plumbing> voList = [.. entitiesResult.Value.Select<PlumbingEntity, Plumbing>(_entityToPlumb.Translate)];
         return Result.Success(voList);
     }
 
@@ -44,7 +54,7 @@ internal class PlumbingAssociationService(
         if (entitiesResult.IsFailure)
             return Result.Failure<List<Sandwich>>(entitiesResult.Error);
 
-        List<Sandwich> voList = [.. entitiesResult.Value.Select(_entityToVo.Translate)];
+        List<Sandwich> voList = [.. entitiesResult.Value.Select(_entityToSand.Translate)];
         return Result.Success(voList);
     }
 
@@ -54,15 +64,15 @@ internal class PlumbingAssociationService(
         if (entitiesResult.IsFailure)
             return Result.Failure<List<Call>>(entitiesResult.Error);
 
-        List<Call> voList = [.. entitiesResult.Value.Select(_entityToVo.Translate)];
+        List<Call> voList = [.. entitiesResult.Value.Select(_entityToCall.Translate)];
         return Result.Success(voList);
     }
 
     public async Task<Result> SaveAllAsync(List<Plumbing> plumb, List<Sandwich> subs, List<Call> calls)
     {
-        List<PlumbingEntity> plumbingEntities = [.. plumb.Select(_voToEntity.Translate)];
-        List<SubsEntity> subsEntities = [.. subs.Select(_voToEntity.Translate)];
-        List<CallEntity> callEntities = [.. calls.Select(_voToEntity.Translate)];
+        List<PlumbingEntity> plumbingEntities = [.. plumb.Select(_plumbToEntity.Translate)];
+        List<SubsEntity> subsEntities = [.. subs.Select(_sandToEntity.Translate)];
+        List<CallEntity> callEntities = [.. calls.Select(_callToEntity.Translate)];
 
         // Batch insert PlumbingEntities and SubsEntities
         await _plumbingRepo.AddRangeAsync(plumbingEntities);
@@ -113,17 +123,19 @@ internal class PlumbingAssociationService(
         Result<List<PlumbingCallLink>> addedPlumbingCallLinks = await _plumbingCallRepo.AddRangeAsync(plumbingCallLink);
 
         // Verify all links exist
-        Result<List<SubsPlumbingLink>> subPlumbLinksResult = await _subsPlumbingRepo.GetAllAsync();
-        Result<List<SubsCallLink>> subCallLinksResult = await _subsCallRepo.GetAllAsync();
-        Result<List<PlumbingCallLink>> plumbCallLinksResult = await _plumbingCallRepo.GetAllAsync();
+        //Result<List<SubsPlumbingLink>> subPlumbLinksResult = await _subsPlumbingRepo.GetAllAsync();
+        //Result<List<SubsCallLink>> subCallLinksResult = await _subsCallRepo.GetAllAsync();
+        //Result<List<PlumbingCallLink>> plumbCallLinksResult = await _plumbingCallRepo.GetAllAsync();
 
-        bool subsPlumbLinksExist = subPlumbLinksResult.IsSuccess && subsPlumbingLinks.All(l => subPlumbLinksResult.Value.Any(dbLink =>
-            dbLink.SubsId == l.SubsId && dbLink.PlumbingId == l.PlumbingId));
-        bool subsCallLinksExist = subCallLinksResult.IsSuccess && subsCallLink.All(l => subCallLinksResult.Value.Any(link =>
-            link.SubsId == l.SubsId && link.CallId == l.CallId));
-        bool plumbCallLinksExist = plumbCallLinksResult.IsSuccess && plumbingCallLink.All(l => plumbCallLinksResult.Value.Any(link =>
-            link.PlumbingId == l.PlumbingId && link.CallId == l.CallId));
+        //bool subsPlumbLinksExist = subPlumbLinksResult.IsSuccess && subsPlumbingLinks.All(l => subPlumbLinksResult.Value.Any(dbLink =>
+        //    dbLink.SubsId == l.SubsId && dbLink.PlumbingId == l.PlumbingId));
+        //bool subsCallLinksExist = subCallLinksResult.IsSuccess && subsCallLink.All(l => subCallLinksResult.Value.Any(link =>
+        //    link.SubsId == l.SubsId && link.CallId == l.CallId));
+        //bool plumbCallLinksExist = plumbCallLinksResult.IsSuccess && plumbingCallLink.All(l => plumbCallLinksResult.Value.Any(link =>
+        //    link.PlumbingId == l.PlumbingId && link.CallId == l.CallId));
 
-        return Result.Combine(subPlumbLinksResult, subCallLinksResult, plumbCallLinksResult, addedSubsPlumbingLinks, addedSubsCallLinks, addedPlumbingCallLinks);
+        return Result.Combine(
+            //subPlumbLinksResult, subCallLinksResult, plumbCallLinksResult,
+            addedSubsPlumbingLinks, addedSubsCallLinks, addedPlumbingCallLinks);
     }
 }

@@ -7,7 +7,7 @@ internal class FileConversionService(ICsvRwService csv, IJsonRwService json) : I
 {
     private readonly ICsvRwService _csv = csv;
     private readonly IJsonRwService _json = json;
-    public Result<List<T>> ExtractCsv<T>(FileInfo csv) => _csv.Parse<T>(csv);
+    public Result<List<T>> ExtractCsv<T>(FileInfo csv) => _csv.ReadFile<T>(csv);
     public Result<List<T>> ExtractJson<T>(FileInfo jsonFile) => _json.ReadFile<T>(jsonFile);
 
     public Result<FileInfo> SaveToCsv<T>(Result<List<T>> entities, FileInfo csvFile)

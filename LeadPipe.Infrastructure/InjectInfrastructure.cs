@@ -1,7 +1,13 @@
 ﻿using LeadPipe.Application.Service;
+
+using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Data.Persistence;
+using LeadPipe.Infrastructure.Data.Source;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace LeadPipe.Infrastructure;
 
@@ -15,16 +21,22 @@ public static class InjectInfrastructure
         services.AddScoped<ICsvRwService, CsvRwService>();
         services.AddScoped<IFileConversionService, FileConversionService>();
         services.AddScoped<IJsonRwService, JsonRwService>();
-        services.AddScoped<ILeafClientService, LeafClientService>();
-        services.AddScoped<IYellerClientService, YellerClientService>();
-        services.AddScoped<IPlumbingUpdateService, CalliUpdateFromFileService>();
+        services.AddScoped<ILeafService, LeafClientService>();
+        services.AddScoped<IYellerService, YellerClientService>();
         services.AddScoped<IFileService, FileService>();
 
-        // Logging
-        services.AddTransient<LeafClientService>();
+        // Data sources
+        RegisterServices(services, typeof(IDataSourceAsync<>));
+
+        // Persistence
+        RegisterServices(services, typeof(IDataPersistence<>));
+
+        // Keyed Services
+        RegisterKeyedServices<SourceKeyAttribute>(services, typeof(IUpdateService<>));
 
         // Add Leaf Client
         services.AddHttpClient();
+
         services.AddHttpClient(settings.LeafName!, c =>
         {
             c.BaseAddress = new Uri(settings.LeafBase!);
@@ -38,9 +50,60 @@ public static class InjectInfrastructure
             c.BaseAddress = new Uri(settings.LabUri!);
             c.DefaultRequestHeaders.Add("Accept", settings.LabAccept!);
             c.DefaultRequestHeaders.Add("Authorization", settings.LabToken!);
-        });        
+        });
 
         return services;
     }
-    
+    private static void RegisterServices(IServiceCollection services, Type iface)
+    {
+        // Get only the assembly that contains your infrastructure registrations
+        var assembly = Assembly.GetAssembly(typeof(InjectInfrastructure));
+        if (assembly is null)
+            return;
+
+        IEnumerable<Type> types = assembly
+            .GetTypes()
+            .Where(t => t is not null)
+            .OfType<Type>();  // ensures non-nullable Type
+
+        foreach (Type type in types)
+        {
+            if (type.IsAbstract || type.IsInterface)
+                continue;
+
+            // Look for an interface matching iface (like IDataSourceAsync<> or IDataPersistence<>)
+            Type? targetInterface = type
+                .GetInterfaces()
+                .FirstOrDefault(i =>
+                    i.IsGenericType &&
+                    i.GetGenericTypeDefinition() == iface
+                );
+
+            if (targetInterface is null)
+                continue;
+
+            // Avoid duplicate registrations
+            if (services.Any(sd => sd.ServiceType == targetInterface))
+                continue;
+
+            services.AddScoped(targetInterface, type);
+        }
+    }
+    private static void RegisterKeyedServices<TAttribute>(IServiceCollection services, Type iface) where TAttribute : Attribute, ISourceKeyAttribute
+    {
+        var assembly = Assembly.GetAssembly(typeof(InjectInfrastructure));
+        if (assembly is null) return;
+        foreach (Type? type in assembly.GetTypes().Where(t => !t.IsAbstract && !t.IsInterface))
+        {
+            var targetInterface = type.GetInterfaces().FirstOrDefault(i => i == iface);
+            if (targetInterface is null)
+                continue;
+            var keyAttr = type.GetCustomAttribute<TAttribute>();
+            if (keyAttr is null)
+                continue;
+            services.AddKeyedScoped(typeof(IUpdateService<Plumbing>), keyAttr.Key, type);
+        }
+    }
+
+
 }

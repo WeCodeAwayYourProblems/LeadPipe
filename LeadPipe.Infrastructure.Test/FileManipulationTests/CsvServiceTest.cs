@@ -46,7 +46,7 @@ public class CsvServiceTest
 
         // Act
         CsvRwService csv = new();
-        var contents = csv.Parse<TestFile>(fileName);
+        var contents = csv.ReadFile<TestFile>(fileName);
 
         // Assert
         Assert.True(contents.IsSuccess);

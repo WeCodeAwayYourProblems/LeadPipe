@@ -1,7 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using CsvHelper;
 using CsvHelper.Configuration;
-using LeadPipe.Application.Service;
 using System.Globalization;
 
 namespace LeadPipe.Infrastructure.Service;
@@ -28,7 +27,7 @@ internal class CsvRwService : ICsvRwService
     #endregion
 
     #region Public
-    public Result<List<T>> Parse<T>(FileInfo path)
+    public Result<List<T>> ReadFile<T>(FileInfo path)
     {
         try
         {
@@ -38,7 +37,7 @@ internal class CsvRwService : ICsvRwService
             return records;
         }
         catch (Exception ex)
-        { return Result.Failure<List<T>>(CsvException(path.FullName, ex, nameof(Parse))); }
+        { return Result.Failure<List<T>>(CsvException(path.FullName, ex, nameof(ReadFile))); }
     }
     public Result Write<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsedObject) where TMap : ClassMap<TClass>
     {

@@ -5,25 +5,26 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Application.Manager;
 
-public interface ILabManager
+public interface IYellerManager
 {
-    Task<Result<List<Plumbing>>> ManageAsync(bool update);
+    Task<Result<List<Plumbing>>> ManageAsync(bool update = true);
 }
-public class LabManager([FromKeyedServices(Source.Lab)] IUpdateService<Plumbing> update) : ILabManager
+
+public class YellerManager([FromKeyedServices(Source.Yeller)] IUpdateService<Plumbing> update) : IYellerManager
 {
     private readonly IUpdateService<Plumbing> _update = update;
     public async Task<Result<List<Plumbing>>> ManageAsync(bool update = true)
     {
-        Result<List<Plumbing>> labresult = update
+        Result<List<Plumbing>> yellerResult = update
             ? await _update.UpdateDataAsync()
             : await _update.GetDataAsync();
 
-        if (labresult.IsFailure)
-            return labresult;
+        if (yellerResult.IsFailure)
+            return yellerResult;
 
-        Result saved = await _update.SaveDataAsync(labresult.Value);
+        Result saved = await _update.SaveDataAsync(yellerResult.Value);
         Result<List<Plumbing>> result = saved.IsSuccess
-            ? labresult.Value
+            ? yellerResult.Value
             : Result.Failure<List<Plumbing>>(saved.Error);
 
         return result;

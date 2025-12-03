@@ -8,11 +8,10 @@ using LeadPipe.Infrastructure.Translate;
 
 namespace LeadPipe.Infrastructure.Service;
 
-[SourceKey(Source.Calli)]
-internal class CalliUpdateFromFileService(
-    IDataSourceAsync<CalliDto> source,
-    IDtoToVo<CalliDto, Plumbing> dtoToVo,
-    IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
+[SourceKey(Source.Lab)]
+internal class LabUpdateService(
+    IDataSourceAsync<LabDto> source, 
+    IDtoToVo<LabDto, Plumbing> dtoToVo, 
+    IVoToEntity<Plumbing, PlumbingEntity> voToEntity, 
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<CalliDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
-{ }
+    ) : UpdateService<LabDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing> { }

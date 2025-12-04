@@ -14,7 +14,7 @@ namespace LeadPipe.Infrastructure.Test.ClientTests;
 public class LeafClientServiceTests
 {
     private readonly ILeafSettings _settings = Substitute.For<ILeafSettings>();
-    private readonly IDtoToVo _dto = Substitute.For<IDtoToVo>();
+    private readonly IDtoToVo<LeafDto, Plumbing> _dto = Substitute.For<IDtoToVo<LeafDto, Plumbing>>();
     private readonly IJsonRwService _json = Substitute.For<IJsonRwService>();
     private readonly IHttpClientFactory _factory = Substitute.For<IHttpClientFactory>();
     private readonly IPlumbingRepository _repo = Substitute.For<IPlumbingRepository>();

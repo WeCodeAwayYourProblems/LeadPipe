@@ -1,5 +1,4 @@
 ﻿using LeadPipe.Application.Service;
-
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Persistence;
 using LeadPipe.Infrastructure.Data.Source;
@@ -7,6 +6,7 @@ using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace LeadPipe.Infrastructure;
@@ -28,6 +28,38 @@ public static class InjectInfrastructure
         // Data sources
         RegisterServices(services, typeof(IDataSourceAsync<>));
 
+        services.AddScoped<IDataSourceAsync<CalliDto>>(sp =>
+            new CalliFileDataSource(
+                new FileInfo(settings.CalliLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<CalliFileDataSource>>()
+            ));
+
+        services.AddScoped<IDataSourceAsync<LeasedDto>>(sp =>
+            new LeasedFileDataSource(
+                new FileInfo(settings.LeasedLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<LeasedFileDataSource>>()
+            ));
+
+        services.AddScoped<IDataSourceAsync<LibacionDto>>(sp =>
+            new LibacionFileDataSource(
+                new FileInfo(settings.LibacionLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<LibacionFileDataSource>>()
+            ));
+
+        services.AddScoped<IDataSourceAsync<PanDto>>(sp =>
+            new PanFileDataSource(
+                new FileInfo(settings.PanLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<PanFileDataSource>>()
+            ));
+
         // Persistence
         RegisterServices(services, typeof(IDataPersistence<>));
 
@@ -35,8 +67,6 @@ public static class InjectInfrastructure
         RegisterKeyedServices<SourceKeyAttribute>(services, typeof(IUpdateService<>));
 
         // Add Leaf Client
-        services.AddHttpClient();
-
         services.AddHttpClient(settings.LeafName!, c =>
         {
             c.BaseAddress = new Uri(settings.LeafBase!);
@@ -54,6 +84,7 @@ public static class InjectInfrastructure
 
         return services;
     }
+
     private static void RegisterServices(IServiceCollection services, Type iface)
     {
         // Get only the assembly that contains your infrastructure registrations
@@ -69,6 +100,10 @@ public static class InjectInfrastructure
         foreach (Type type in types)
         {
             if (type.IsAbstract || type.IsInterface)
+                continue;
+
+            // Skip data sources that require FileInfo (they are manually registered)
+            if (type.GetConstructors().Any(c => c.GetParameters().Any(p => p.ParameterType == typeof(FileInfo))))
                 continue;
 
             // Look for an interface matching iface (like IDataSourceAsync<> or IDataPersistence<>)
@@ -92,10 +127,17 @@ public static class InjectInfrastructure
     private static void RegisterKeyedServices<TAttribute>(IServiceCollection services, Type iface) where TAttribute : Attribute, ISourceKeyAttribute
     {
         var assembly = Assembly.GetAssembly(typeof(InjectInfrastructure));
-        if (assembly is null) return;
+        if (assembly is null)
+            return;
         foreach (Type? type in assembly.GetTypes().Where(t => !t.IsAbstract && !t.IsInterface))
         {
-            var targetInterface = type.GetInterfaces().FirstOrDefault(i => i == iface);
+            var targetInterface = type.GetInterfaces()
+                .FirstOrDefault(i =>
+                    i.IsGenericType &&
+                    i.GetGenericTypeDefinition() == iface &&
+                    i.GenericTypeArguments.Length == 1 &&
+                    i.GenericTypeArguments[0] == typeof(Plumbing)
+                );
             if (targetInterface is null)
                 continue;
             var keyAttr = type.GetCustomAttribute<TAttribute>();
@@ -104,6 +146,5 @@ public static class InjectInfrastructure
             services.AddKeyedScoped(typeof(IUpdateService<Plumbing>), keyAttr.Key, type);
         }
     }
-
 
 }

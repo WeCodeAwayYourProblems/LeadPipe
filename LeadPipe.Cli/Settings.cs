@@ -21,7 +21,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public int LabConcurrentMax { get; set; }
     public string? LabToken { get; set; }
     public string? LabAccept { get; set; }
-    
+
     // Infrastructure
     public string? LeafName { get; set; }
     public string? LeafTokenType { get; set; }
@@ -36,4 +36,8 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? MySqlConnectionString { get; set; }
     public string? Schema1 { get; set; }
     public string? Schema2 { get; set; }
+    public string? CalliLocation { get; set; }
+    public string? LeasedLocation { get; set; }
+    public string? LibacionLocation { get; set; }
+    public string? PanLocation { get; set; }
 }

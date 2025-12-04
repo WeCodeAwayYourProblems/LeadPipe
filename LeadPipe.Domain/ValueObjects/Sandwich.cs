@@ -13,6 +13,7 @@ public class Sandwich
     public bool Active { get; set; }
     public bool SubActive { get; set; }
     public bool Complete { get; set; }
+    public string? Type { get; set; }
     public double Value { get; set; }
     public string? Seller { get; set; }
     public string? Seller2 { get; set; }

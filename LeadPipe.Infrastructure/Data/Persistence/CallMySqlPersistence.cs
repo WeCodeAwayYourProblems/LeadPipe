@@ -9,6 +9,7 @@ internal class CallMySqlPersistence(ICallMySqlRepository repo) : IDataPersistenc
     private readonly ICallMySqlRepository _repo = repo; 
     public async Task<Result> SaveAsync(List<CallMySqlEntity> t)
     {
-        Result<List<CallMySqlEntity>> added = await _repo.AddRangeAsync(t); return added;
+        Result<List<CallMySqlEntity>> added = await _repo.AddRangeAsync(t); 
+        return added;
     }
 }

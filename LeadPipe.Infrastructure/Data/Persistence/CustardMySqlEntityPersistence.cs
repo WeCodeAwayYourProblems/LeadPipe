@@ -4,11 +4,11 @@ using LeadPipe.Infrastructure.Repository;
 
 namespace LeadPipe.Infrastructure.Data.Persistence;
 
-internal class CustardMySqlEntityPersistence(ICustomerMySqlRepository repo) : IDataPersistence<CustomerMySqlEntity>
+internal class CustardMySqlEntityPersistence(ICustardMySqlRepository repo) : IDataPersistence<CustardMySqlEntity>
 {
-    private readonly ICustomerMySqlRepository _repo = repo; 
-    public async Task<Result> SaveAsync(List<CustomerMySqlEntity> t)
+    private readonly ICustardMySqlRepository _repo = repo; 
+    public async Task<Result> SaveAsync(List<CustardMySqlEntity> t)
     {
-        Result<List<CustomerMySqlEntity>> added = await _repo.AddRangeAsync(t); return added;
+        Result<List<CustardMySqlEntity>> added = await _repo.AddRangeAsync(t); return added;
     }
 }

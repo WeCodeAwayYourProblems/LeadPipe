@@ -1,5 +1,4 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.MySql;
-
 public class SubMySqlEntity
 {
 #pragma warning disable IDE1006 // Naming Styles
@@ -14,7 +13,5 @@ public class SubMySqlEntity
     public DateTime dateCancelled { get; set; }
     public int soldBy2 { get; set; }
     public int soldBy3 { get; set; }
-
-    public CustomerMySqlEntity? Customer { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
 }

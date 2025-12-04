@@ -1,55 +1,74 @@
 ﻿using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.MySql.Context;
 
-public class MySqlReadonlyContext(DbContextOptions<MySqlReadonlyContext> options)
-    : DbContext(options)
+public class MySqlContext(DbContextOptions<MySqlContext> options, IMySqlSettings settings) : DbContext(options)
 {
-    public DbSet<CustomerMySqlEntity> Customers { get; set; }
-    public DbSet<SubMySqlEntity> Subscriptions { get; set; }
+    private readonly IMySqlSettings _settings = settings;
+
+    // Tables
     public DbSet<CallMySqlEntity> Calls { get; set; }
+    public DbSet<CustardMySqlEntity> Customers { get; set; }
+    public DbSet<SubMySqlEntity> Subscriptions { get; set; }
+    public DbSet<SummaryMySqlEntity> Summaries { get; set; }
+    public DbSet<CustomerCallMySqlEntity> CustomerCalls { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Customer
-        var cust = modelBuilder.Entity<CustomerMySqlEntity>();
-        cust.ToTable("customers");
-        cust.HasKey(c => c.customerID);
+        // TABLE NAMES
+        modelBuilder.Entity<CallMySqlEntity>()
+            .ToTable("calls", schema: _settings.Schema2);
+        modelBuilder.Entity<SummaryMySqlEntity>()
+            .ToTable("summary", schema: _settings.Schema2);
+        modelBuilder.Entity<CustardMySqlEntity>()
+            .ToTable("customer", schema: _settings.Schema1);
+        modelBuilder.Entity<SubMySqlEntity>()
+            .ToTable("subscription", schema: _settings.Schema1);
 
-        cust.Property(c => c.phone1).HasMaxLength(50);
-        cust.Property(c => c.phone2).HasMaxLength(50);
+        // PRIMARY KEYS
+        modelBuilder.Entity<CallMySqlEntity>()
+            .HasKey(x => x.call_id);
+        modelBuilder.Entity<CustardMySqlEntity>()
+            .HasKey(x => x.customerID);
+        modelBuilder.Entity<SubMySqlEntity>()
+            .HasKey(x => x.subscriptionID);
+        modelBuilder.Entity<SummaryMySqlEntity>()
+            .HasKey(x => x.call_id);
+        modelBuilder.Entity<CustomerCallMySqlEntity>()
+            .HasKey(x => x.Id);
 
-        cust.HasMany(c => c.Subscriptions)
-            .WithOne(s => s.Customer)
-            .HasForeignKey(s => s.customerID);
+        // RELATIONSHIPS
+        // 1) Customer (1) to Subscriptions (M)
+        modelBuilder.Entity<SubMySqlEntity>()
+            .HasOne<CustardMySqlEntity>()
+            .WithMany()
+            .HasForeignKey(x => x.customerID)
+            .OnDelete(DeleteBehavior.NoAction);
 
-        // Subscription
-        var sub = modelBuilder.Entity<SubMySqlEntity>();
-        sub.ToTable("subscriptions");
-        sub.HasKey(s => s.subscriptionID);
+        // 2) Call (1) to Summary (1)
+        modelBuilder.Entity<CallMySqlEntity>()
+            .HasOne<SummaryMySqlEntity>()
+            .WithOne()
+            .HasForeignKey<SummaryMySqlEntity>(x => x.call_id);
 
-        sub.HasIndex(s => s.customerID);
+        // 3) Customer (M) to Call (M) — via CustomerCallMySqlEntity
+        modelBuilder.Entity<CustomerCallMySqlEntity>()
+            .HasOne(x => x.Customer)
+            .WithMany()
+            .HasForeignKey(x => x.CustomerId)
+            .OnDelete(DeleteBehavior.NoAction);
+        modelBuilder.Entity<CustomerCallMySqlEntity>()
+            .HasOne(x => x.Call)
+            .WithMany()
+            .HasForeignKey(x => x.CallId)
+            .OnDelete(DeleteBehavior.NoAction);
 
-        // Calls
-        var call = modelBuilder.Entity<CallMySqlEntity>();
-        call.ToTable("calls");
-        call.HasKey(c => c.call_id);
-
-        call.HasIndex(c => c.contact_number_clean);
-        call.HasIndex(c => c.called_at_utc);
+        // Optional indexes for performance
+        modelBuilder.Entity<CustomerCallMySqlEntity>()
+            .HasIndex(x => new { x.CustomerId, x.CallId });
+        modelBuilder.Entity<CustomerCallMySqlEntity>()
+            .HasIndex(x => x.MatchingPhone);
     }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Prevent accidental writes
-        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-    }
-
-    public override int SaveChanges() =>
-        throw new InvalidOperationException("Write operations are not allowed on read-only MySQL context.");
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
-        throw new InvalidOperationException("Write operations are not allowed on read-only MySQL context.");
-
 }

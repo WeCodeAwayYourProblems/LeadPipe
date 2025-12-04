@@ -4,71 +4,89 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.MySql.Context;
 
-public class MySqlContext(DbContextOptions<MySqlContext> options, IMySqlSettings settings) : DbContext(options)
+public class MySqlContext : DbContext
 {
-    private readonly IMySqlSettings _settings = settings;
+    private readonly IMySqlSettings _settings;
 
-    // Tables
+    public MySqlContext(DbContextOptions<MySqlContext> options, IMySqlSettings settings)
+        : base(options)
+    {
+        _settings = settings;
+        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+    }
+
     public DbSet<CallMySqlEntity> Calls { get; set; }
-    public DbSet<CustardMySqlEntity> Customers { get; set; }
+    public DbSet<CustomerMySqlEntity> Customers { get; set; }
     public DbSet<SubMySqlEntity> Subscriptions { get; set; }
     public DbSet<SummaryMySqlEntity> Summaries { get; set; }
-    public DbSet<CustomerCallMySqlEntity> CustomerCalls { get; set; }
+    public DbSet<TranscriptionMySqlEntity> Transcriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // TABLE NAMES
-        modelBuilder.Entity<CallMySqlEntity>()
-            .ToTable("calls", schema: _settings.Schema2);
-        modelBuilder.Entity<SummaryMySqlEntity>()
-            .ToTable("summary", schema: _settings.Schema2);
-        modelBuilder.Entity<CustardMySqlEntity>()
-            .ToTable("customer", schema: _settings.Schema1);
-        modelBuilder.Entity<SubMySqlEntity>()
-            .ToTable("subscription", schema: _settings.Schema1);
+        // CALL ENTITY
+        modelBuilder.Entity<CallMySqlEntity>(entity =>
+        {
+            entity.ToTable("calls", schema: _settings.Schema2);
+            entity.HasKey(x => x.call_id);
 
-        // PRIMARY KEYS
-        modelBuilder.Entity<CallMySqlEntity>()
-            .HasKey(x => x.call_id);
-        modelBuilder.Entity<CustardMySqlEntity>()
-            .HasKey(x => x.customerID);
-        modelBuilder.Entity<SubMySqlEntity>()
-            .HasKey(x => x.subscriptionID);
-        modelBuilder.Entity<SummaryMySqlEntity>()
-            .HasKey(x => x.call_id);
-        modelBuilder.Entity<CustomerCallMySqlEntity>()
-            .HasKey(x => x.Id);
+            // One-to-one with Summary
+            entity.HasOne<SummaryMySqlEntity>()
+                  .WithOne()
+                  .HasForeignKey<SummaryMySqlEntity>(s => s.call_id)
+                  .OnDelete(DeleteBehavior.NoAction);
 
-        // RELATIONSHIPS
-        // 1) Customer (1) to Subscriptions (M)
-        modelBuilder.Entity<SubMySqlEntity>()
-            .HasOne<CustardMySqlEntity>()
-            .WithMany()
-            .HasForeignKey(x => x.customerID)
-            .OnDelete(DeleteBehavior.NoAction);
+            // One-to-one with Transcription
+            entity.HasOne<TranscriptionMySqlEntity>()
+                  .WithOne()
+                  .HasForeignKey<TranscriptionMySqlEntity>(s => s.call_id)
+                  .OnDelete(DeleteBehavior.NoAction);
+        });
 
-        // 2) Call (1) to Summary (1)
-        modelBuilder.Entity<CallMySqlEntity>()
-            .HasOne<SummaryMySqlEntity>()
-            .WithOne()
-            .HasForeignKey<SummaryMySqlEntity>(x => x.call_id);
+        // SUMMARY ENTITY
+        modelBuilder.Entity<SummaryMySqlEntity>(entity =>
+        {
+            entity.ToTable("summary", schema: _settings.Schema2);
+            entity.HasKey(x => x.call_id);
+        });
 
-        // 3) Customer (M) to Call (M) — via CustomerCallMySqlEntity
-        modelBuilder.Entity<CustomerCallMySqlEntity>()
-            .HasOne(x => x.Customer)
-            .WithMany()
-            .HasForeignKey(x => x.CustomerId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<CustomerCallMySqlEntity>()
-            .HasOne(x => x.Call)
-            .WithMany()
-            .HasForeignKey(x => x.CallId)
-            .OnDelete(DeleteBehavior.NoAction);
+        // TRANSCRIPTION ENTITY
+        modelBuilder.Entity<TranscriptionMySqlEntity>(entity =>
+        {
+            entity.ToTable("transcriptions", schema: _settings.Schema2);
+            entity.HasKey(x => x.call_id);
+        });
 
-        // Optional indexes for performance
-        modelBuilder.Entity<CustomerCallMySqlEntity>()
-            .HasIndex(x => new { x.CustomerId, x.CallId });
-        modelBuilder.Entity<CustomerCallMySqlEntity>()
-            .HasIndex(x => x.MatchingPhone);
+        // CUSTOMER ENTITY
+        modelBuilder.Entity<CustomerMySqlEntity>(entity =>
+        {
+            entity.ToTable("customer", schema: _settings.Schema1);
+            entity.HasKey(x => x.customerID);
+
+            // One-to-many with Subscriptions
+            entity.HasMany<SubMySqlEntity>()
+                  .WithOne()
+                  .HasForeignKey(s => s.customerID)
+                  .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // SUBSCRIPTION ENTITY
+        modelBuilder.Entity<SubMySqlEntity>(entity =>
+        {
+            entity.ToTable("subscription", schema: _settings.Schema1);
+            entity.HasKey(x => x.subscriptionID);
+        });
     }
+
+    // BLOCK ALL WRITE OPERATIONS
+    public override int SaveChanges() =>
+        throw new InvalidOperationException("SaveChanges is disabled. MySQL database is read-only.");
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess) =>
+        throw new InvalidOperationException("SaveChanges is disabled. MySQL database is read-only.");
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("SaveChangesAsync is disabled. MySQL database is read-only.");
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("SaveChangesAsync is disabled. MySQL database is read-only.");
 }

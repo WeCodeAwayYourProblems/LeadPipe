@@ -1,5 +1,5 @@
 ﻿namespace LeadPipe.Infrastructure.Dto;
 
-internal class YellerDto
+public class YellerDto
 {
 }

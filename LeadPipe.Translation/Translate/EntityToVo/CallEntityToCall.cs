@@ -8,7 +8,8 @@ internal class CallEntityToCall : IEntityToVo<CallEntity, Call>
 {
     public Call Translate(CallEntity c)
     {
-        DateTimeOffset date = new(c.CallDate, TimeSpan.FromSeconds(0));
+        var utc = DateTime.SpecifyKind(c.CallDate, DateTimeKind.Utc);
+        DateTimeOffset date = new(utc, TimeSpan.Zero);
         PhoneNumber number = new(c.PhoneNumber);
         TimeSpan duration = TimeSpan.FromSeconds(c.Duration);
         string note = c.Note;

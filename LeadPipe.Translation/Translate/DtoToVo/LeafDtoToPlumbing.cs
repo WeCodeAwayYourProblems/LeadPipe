@@ -19,8 +19,8 @@ internal class LeafDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeafDto, Plum
             : new(PhoneNumber.Default);
 
         // Date
-        DateTime d = v.creation;
-        DateTimeOffset date = _dt.Convert(d, TimeSpan.FromHours(0));
+        DateTime d = DateTime.SpecifyKind(v.creation, DateTimeKind.Utc);
+        DateTimeOffset date = new(d, TimeSpan.Zero);
 
         // Contents 
         string content = string.Empty;

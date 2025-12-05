@@ -11,7 +11,7 @@ internal class PlumbingToPlumbingEntity : IVoToEntity<Plumbing, PlumbingEntity>
         var result = new PlumbingEntity()
         {
             PhoneNumber = plumbing.PhoneNumber.Number,
-            Date = new(plumbing.Date.Ticks),
+            Date = plumbing.Date.UtcDateTime,
             UnixDate = plumbing.Date.ToUnixTimeSeconds(),
             Contents = plumbing.Contents,
             Source = plumbing.Source,

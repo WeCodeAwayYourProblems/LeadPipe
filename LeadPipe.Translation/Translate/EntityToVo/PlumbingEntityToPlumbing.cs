@@ -9,7 +9,8 @@ internal class PlumbingEntityToPlumbing : IEntityToVo<PlumbingEntity, Plumbing>
     public Plumbing Translate(PlumbingEntity entity)
     {
         var number = new PhoneNumber(entity.PhoneNumber);
-        DateTimeOffset date = new(entity.Date, TimeSpan.FromSeconds(0));
+        DateTime d = DateTime.SpecifyKind(entity.Date, DateTimeKind.Utc);
+        DateTimeOffset date = new(d, TimeSpan.FromSeconds(0));
         var contents = entity.Contents;
         var source = entity.Source;
 

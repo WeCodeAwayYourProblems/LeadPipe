@@ -9,7 +9,7 @@ internal class PlumbingToLeafDto : IVoToDto<Plumbing, LeafDto>
     public LeafDto Translate(Plumbing p)
     {
         string cellphone = $"{p.PhoneNumber.Number}";
-        DateTime creation = new(p.Date.Ticks);
+        DateTime creation = p.Date.UtcDateTime;
         string? message = p.Contents;
         LeafDto result = new()
         {

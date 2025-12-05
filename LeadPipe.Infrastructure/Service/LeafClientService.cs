@@ -86,14 +86,14 @@ public class LeafClientService : ILeafService
         if (plumbingEntities.IsFailure)
         {
             _logger.LogWarning("Repository call failed: {Error}. Performing full refresh.", plumbingEntities.Error);
-            return await GetAllAsync(errorLimit);
+            return await GetAllAsync(errorLimit: errorLimit);
         }
 
         List<PlumbingEntity> leafPlumbing = [.. plumbingEntities.Value.Where(v => v.Source == Source.Leaf)];
         if (leafPlumbing.Count == 0)
         {
             _logger.LogWarning("Database returned no items for {Source}. Performing full refresh.", Source.Leaf);
-            return await GetAllAsync(errorLimit);
+            return await GetAllAsync(errorLimit: errorLimit);
         }
 
         int offset = leafPlumbing.Count - 1; // Api uses index-style offsets

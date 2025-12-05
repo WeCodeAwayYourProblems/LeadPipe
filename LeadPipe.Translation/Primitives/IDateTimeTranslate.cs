@@ -6,11 +6,3 @@ public interface IDateTimeTranslate
     DateTimeOffset Convert(DateTime localTime, ETimeZone zone);
     bool Convert(DateTime localTime, ETimeZone zone, out DateTimeOffset result);
 }
-public enum ETimeZone
-{
-    Pacific,
-    Mountain,
-    Central,
-    Eastern,
-    Utc
-}

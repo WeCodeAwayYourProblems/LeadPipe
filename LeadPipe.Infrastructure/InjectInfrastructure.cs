@@ -2,7 +2,8 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Source;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces;
+using LeadPipe.Infrastructure.Interfaces.Core;
+using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;

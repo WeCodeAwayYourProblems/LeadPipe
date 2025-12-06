@@ -2,7 +2,7 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Source;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces;
+using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

@@ -1,5 +1,6 @@
 ﻿using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces;
+using LeadPipe.Infrastructure.Interfaces.Core;
+using LeadPipe.Infrastructure.Interfaces.Service;
 using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Data.Source;

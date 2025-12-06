@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using CsvHelper;
 using CsvHelper.Configuration;
-using LeadPipe.Infrastructure.Interfaces;
+using LeadPipe.Infrastructure.Interfaces.Service;
 using System.Globalization;
 
 namespace LeadPipe.Infrastructure.Service;

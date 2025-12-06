@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace LeadPipe.Infrastructure.Interfaces;
+namespace LeadPipe.Infrastructure.Interfaces.Core;
 
 public interface ILoad<T>
 {

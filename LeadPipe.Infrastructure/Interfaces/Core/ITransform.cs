@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace LeadPipe.Infrastructure.Interfaces;
+namespace LeadPipe.Infrastructure.Interfaces.Core;
 
 internal interface ITransform<TIn, TOut> : ILoad<TIn>
 {

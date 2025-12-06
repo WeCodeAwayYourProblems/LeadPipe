@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 
-namespace LeadPipe.Infrastructure.Interfaces;
+namespace LeadPipe.Infrastructure.Interfaces.Service;
 
 public interface ILeafService
 {

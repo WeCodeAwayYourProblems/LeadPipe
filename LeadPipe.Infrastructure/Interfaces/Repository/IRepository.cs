@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 
-namespace LeadPipe.Infrastructure.Repository;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 public interface IRepository<T> where T : class, IEntity
 {

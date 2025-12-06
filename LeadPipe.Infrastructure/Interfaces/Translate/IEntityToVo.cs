@@ -1,4 +1,4 @@
-﻿namespace LeadPipe.Infrastructure.Translate;
+﻿namespace LeadPipe.Infrastructure.Interfaces.Translate;
 
 public interface IEntityToVo<TEntity, TVo>
 {

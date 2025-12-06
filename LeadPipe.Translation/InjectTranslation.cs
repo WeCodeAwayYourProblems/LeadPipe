@@ -1,8 +1,8 @@
 ﻿using LeadPipe.Infrastructure;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.MySql;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Sqlite;
-using LeadPipe.Infrastructure.Translate;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate;
 using Microsoft.Extensions.DependencyInjection;

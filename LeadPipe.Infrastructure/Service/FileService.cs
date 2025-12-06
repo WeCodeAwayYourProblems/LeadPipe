@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using LeadPipe.Infrastructure.Interfaces;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace LeadPipe.Infrastructure.Service;

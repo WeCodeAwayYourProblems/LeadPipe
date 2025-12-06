@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.MySql;
 
-namespace LeadPipe.Infrastructure.Repository;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 public interface ICallMySqlRepository
 {

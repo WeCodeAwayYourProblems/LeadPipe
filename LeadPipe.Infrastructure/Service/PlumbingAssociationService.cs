@@ -2,8 +2,8 @@
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Repository;
-using LeadPipe.Infrastructure.Translate;
+using LeadPipe.Infrastructure.Interfaces.Repository;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Service;
 
@@ -77,6 +77,7 @@ internal class PlumbingAssociationService(
         // Batch insert PlumbingEntities and SubsEntities
         await _plumbingRepo.AddRangeAsync(plumbingEntities);
         await _subsRepo.AddRangeAsync(subsEntities);
+        await _callRepo.AddRangeAsync(callEntities);
 
         // Generate links using LINQ
         Dictionary<long, PlumbingEntity> plumbingDict = plumbingEntities.ToDictionary(p => p.PhoneNumber);
@@ -104,7 +105,7 @@ internal class PlumbingAssociationService(
                 CallEntity = pcallDict[p.PhoneNumber]
             }).ToList();
 
-        Dictionary<long, CallEntity> callDict = callEntities.ToDictionary(c => c.PhoneNumber, c => c);
+        Dictionary<long, CallEntity> callDict = callEntities.ToDictionary(c => c.PhoneNumber);
         List<CallSubsLink> subsCallLink = subsEntities
             .SelectMany(s => new[] { s.Number, s.Number2 }
                 .Where(num => callDict.ContainsKey(num))

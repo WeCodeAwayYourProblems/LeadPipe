@@ -1,10 +1,9 @@
 ﻿using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Data.Persistence;
-using LeadPipe.Infrastructure.Data.Source;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Translate;
+using LeadPipe.Infrastructure.Interfaces;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Service;
 

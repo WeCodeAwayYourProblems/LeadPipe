@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Infrastructure.Interfaces;
 
 public interface IYellerService
 {

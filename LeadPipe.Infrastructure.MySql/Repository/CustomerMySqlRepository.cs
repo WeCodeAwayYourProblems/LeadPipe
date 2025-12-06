@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Interfaces.Repository;
 using LeadPipe.Infrastructure.MySql.Context;
-using LeadPipe.Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;

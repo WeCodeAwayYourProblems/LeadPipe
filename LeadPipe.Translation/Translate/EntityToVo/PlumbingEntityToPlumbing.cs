@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Translate;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 

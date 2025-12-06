@@ -1,7 +1,7 @@
 ﻿using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Repository;
+using LeadPipe.Infrastructure.Interfaces.Repository;
 using LeadPipe.Infrastructure.Sqlite.Context;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class PlumbingCallLinkRepository(PlumbingContext context) : PlumbingContextRepository<PlumbingCallLink>(context), IPlumbingCallLinkRepository { }
+public sealed class PlumbingCallLinkRepository(PlumbingContext context) : PlumbingContextRepository<PlumbingCallLink>(context), IPlumbingCallLinkRepository { }

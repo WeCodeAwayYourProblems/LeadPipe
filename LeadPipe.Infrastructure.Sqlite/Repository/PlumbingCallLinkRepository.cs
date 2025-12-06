@@ -4,4 +4,4 @@ using LeadPipe.Infrastructure.Sqlite.Context;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class PlumbingCallLinkRepository(PlumbingContext context) : PlumbingContextRepository<PlumbingCallLink>(context), IPlumbingCallLinkRepository { }
+public sealed class PlumbingCallLinkRepository(PlumbingContext context) : PlumbingContextRepository<PlumbingCallLink>(context), IPlumbingCallLinkRepository { }

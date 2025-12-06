@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace LeadPipe.Infrastructure.Data.Persistence;
+namespace LeadPipe.Infrastructure.Interfaces;
 
 public interface IDataPersistence<T>
 {

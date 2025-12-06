@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Interfaces;
 using LeadPipe.Infrastructure.Repository;
 
 namespace LeadPipe.Infrastructure.Data.Persistence;

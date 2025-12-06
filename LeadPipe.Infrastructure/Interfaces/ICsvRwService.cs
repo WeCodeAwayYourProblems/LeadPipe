@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using CsvHelper.Configuration;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Infrastructure.Interfaces;
 
 public interface ICsvRwService
 {

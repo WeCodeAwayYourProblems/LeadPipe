@@ -1,8 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
-using LeadPipe.Infrastructure.Data.Persistence;
-using LeadPipe.Infrastructure.Data.Source;
-using LeadPipe.Infrastructure.Translate;
+using LeadPipe.Infrastructure.Interfaces;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Service;
 

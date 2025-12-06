@@ -2,9 +2,10 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Repository;
 using LeadPipe.Infrastructure.Settings;
-using LeadPipe.Infrastructure.Translate;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 

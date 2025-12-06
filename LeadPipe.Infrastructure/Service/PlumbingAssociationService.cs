@@ -2,7 +2,7 @@
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Interfaces.Repository;
+using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Service;

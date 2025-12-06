@@ -2,7 +2,7 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Persistence;
 using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Interfaces.Repository;
+using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.DataTests;

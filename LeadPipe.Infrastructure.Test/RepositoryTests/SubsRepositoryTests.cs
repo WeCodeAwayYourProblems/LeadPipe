@@ -32,8 +32,8 @@ public class SubsRepositoryTests
 
         var result = await repo.AddRangeAsync([]);
 
-        Assert.False(result.IsSuccess);
-        Assert.Contains("No subscription entities", result.Error);
+        Assert.True(result.IsFailure);
+        Assert.Contains("No entities", result.Error);
     }
 
     [Fact]
@@ -44,8 +44,8 @@ public class SubsRepositoryTests
 
         var result = await repo.AddRangeAsync(null);
 
-        Assert.False(result.IsSuccess);
-        Assert.Contains("No subscription entities", result.Error);
+        Assert.True(result.IsFailure);
+        Assert.Contains("No entities", result.Error);
     }
 
     [Fact]

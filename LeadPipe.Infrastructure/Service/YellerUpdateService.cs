@@ -10,9 +10,8 @@ namespace LeadPipe.Infrastructure.Service;
 [SourceKey(Source.Yeller)]
 internal sealed class YellerUpdateService(
     IDataSourceAsync<YellerDto> source,
-    ILoadData<YellerDto> load,
     IDtoToVo<YellerDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<YellerDto, Plumbing, PlumbingEntity>(source, load, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+    ) : UpdateService<YellerDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
 { }

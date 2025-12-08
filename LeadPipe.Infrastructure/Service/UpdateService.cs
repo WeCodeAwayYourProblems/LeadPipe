@@ -7,20 +7,18 @@ namespace LeadPipe.Infrastructure.Service;
 
 public abstract class UpdateService<TDto, TVo, TEntity>(
     IDataSourceAsync<TDto> source,
-    ILoadData<TDto> load,
     IDtoToVo<TDto, TVo> dtoToVo,
     IVoToEntity<TVo, TEntity> voToEntity,
     IDataPersistence<TEntity> persistence
     ) : IUpdateService<TVo>
 {
     private readonly IDataSourceAsync<TDto> _source = source;
-    private readonly ILoadData<TDto> _load = load;
     private readonly IDtoToVo<TDto, TVo> _dtoToVo = dtoToVo;
     private readonly IVoToEntity<TVo, TEntity> _voToEntity = voToEntity;
     private readonly IDataPersistence<TEntity> _persistence = persistence;
     public async Task<Result<List<TVo>>> GetDataAsync()
     {
-        Result<List<TDto>> raw = await _load.LoadAsync();
+        Result<List<TDto>> raw = await _source.LoadAsync();
         if (raw.IsFailure)
             return Result.Failure<List<TVo>>(raw.Error);
         List<TVo> result = [.. raw.Value.Select(_dtoToVo.Translate)];

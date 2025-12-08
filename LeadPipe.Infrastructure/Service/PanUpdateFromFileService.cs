@@ -10,9 +10,8 @@ namespace LeadPipe.Infrastructure.Service;
 [SourceKey(Source.Pan)]
 internal sealed class PanUpdateFromFileService(
     IDataSourceAsync<PanDto> source,
-    ILoadData<PanDto> load,
     IDtoToVo<PanDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<PanDto, Plumbing, PlumbingEntity>(source, load, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+    ) : UpdateService<PanDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
 { }

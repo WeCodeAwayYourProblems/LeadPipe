@@ -10,9 +10,8 @@ namespace LeadPipe.Infrastructure.Service;
 [SourceKey(Source.Leased)]
 internal sealed class LeasedUpdateFromFileService(
     IDataSourceAsync<LeasedDto> source,
-    ILoadData<LeasedDto> load,
     IDtoToVo<LeasedDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<LeasedDto, Plumbing, PlumbingEntity>(source, load, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+    ) : UpdateService<LeasedDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
 { }

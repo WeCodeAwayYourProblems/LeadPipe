@@ -5,8 +5,8 @@ namespace LeadPipe.Infrastructure.Test.FileManipulationTests.FileHelpers;
 internal class TestFileHelper
 {
     #region Private
-    private string JsonFileLocation => new FileService().GetLocalFile(nameof(Test), "TestFileLoc", "FileManipulationTests/TestFile.json");
-    private string CsvFileLocation => new FileService().GetLocalFile(nameof(Test), "TestFileLoc", "FileManipulationTests/TestFile.csv");
+    private string JsonFileLocation() => new FileService().GetLocalFile(nameof(Infrastructure.Test), "TestFileLoc", "FileManipulationTests/TestFile.json");
+    private string CsvFileLocation() => new FileService().GetLocalFile(nameof(Infrastructure.Test), "TestFileLoc", "FileManipulationTests/TestFile.csv");
     #endregion
 
     #region Internal
@@ -29,8 +29,8 @@ internal class TestFileHelper
         var file = new TestFileHelper();
         return type switch
         {
-            TestFileType.Csv => file.CsvFileLocation,
-            TestFileType.Json => file.JsonFileLocation,
+            TestFileType.Csv => file.CsvFileLocation(),
+            TestFileType.Json => file.JsonFileLocation(),
             _ => throw new(nameof(type)),
         };
     }

@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Service;
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Test.FileManipulationTests.FileHelpers;
 
 namespace LeadPipe.Infrastructure.Test.FileManipulationTests;
@@ -17,15 +18,18 @@ public class CsvServiceTest
         // Assemble
         // Create the File name
         FileInfo fileName = new(TestFileHelper.AccessTestFile(TestFileType.Csv));
+        if (!fileName.Exists)
+            File.WriteAllText(fileName.FullName, string.Empty);
 
         // Create the actual object to be saved to file
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
         CsvRwService csv = new();
-        csv.Write<TestFile, TestFile>(fileName, [content]);
+        Result result = csv.Write<TestFile, TestFile>(fileName, [content]);
 
         // Assert
+        Assert.True(result.IsSuccess);
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
         Assert.NotEqual(dtDefault, content.DateTime); // The date time does not equal the default -- otherwise, there was a parsing error
 

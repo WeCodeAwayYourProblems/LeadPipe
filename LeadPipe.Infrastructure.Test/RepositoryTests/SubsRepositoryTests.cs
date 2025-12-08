@@ -42,7 +42,9 @@ public class SubsRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new SubsRepository(context);
 
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         var result = await repo.AddRangeAsync(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         Assert.True(result.IsFailure);
         Assert.Contains("No entities", result.Error);

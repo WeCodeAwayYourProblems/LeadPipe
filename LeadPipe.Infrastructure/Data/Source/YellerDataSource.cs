@@ -7,9 +7,9 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Source;
 
-public class YellerDataSource(IYellerService yeller, IVoToDto<Plumbing, YellerDto> voToDto) : IDataSourceAsync<YellerDto>
+public class YellerDataSource(IYellerGetterService yeller, IVoToDto<Plumbing, YellerDto> voToDto) : IDataSourceAsync<YellerDto>
 {
-    private readonly IYellerService _yeller = yeller;
+    private readonly IYellerGetterService _yeller = yeller;
     private readonly IVoToDto<Plumbing, YellerDto> _voToDto = voToDto;
 
     public async Task<Result<List<YellerDto>>> LoadAsync()

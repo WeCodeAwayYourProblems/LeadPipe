@@ -4,14 +4,14 @@ using LeadPipe.Infrastructure.Interfaces.Service;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal class YellerClientService : IYellerService
+internal class YellerClientService : IYellerGetterService
 {
-    public Task<Result<List<Plumbing>>> GetAllAsync()
+    public async Task<Result<List<Plumbing>>> GetAllAsync()
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<List<Plumbing>>> RefreshAsync()
+    public async Task<Result<List<Plumbing>>> RefreshAsync()
     {
         throw new NotImplementedException();
     }

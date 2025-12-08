@@ -23,7 +23,7 @@ public static class InjectInfrastructure
         services.AddScoped<IFileRWService, FileConversionService>();
         services.AddScoped<IJsonRwService, JsonRwService>();
         services.AddScoped<ILeafService, LeafClientService>();
-        services.AddScoped<IYellerService, YellerClientService>();
+        services.AddScoped<IYellerGetterService, YellerClientService>();
         services.AddScoped<IFileService, FileService>();
 
         // Data sources

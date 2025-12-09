@@ -83,6 +83,14 @@ public static class InjectInfrastructure
             c.DefaultRequestHeaders.Add("Authorization", settings.LabToken!);
         });
 
+        // Add Yeller Client
+        services.AddHttpClient(settings.YellerName!, c =>
+        {
+            c.BaseAddress = new Uri(settings.YellerBase!);
+            c.DefaultRequestHeaders.Add("Accept", "application/json");
+            c.DefaultRequestHeaders.Add("Authorization", settings.YellerToken!);
+        });
+
         return services;
     }
 

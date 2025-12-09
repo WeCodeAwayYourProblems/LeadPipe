@@ -4,12 +4,11 @@ using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Cli;
 
-internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettings
+internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettings, IYellerSettings
 {
     // IDwhSettings
     public string? SqlConnectionString1 { get; set; }
     public string? SqlConnectionString2 { get; set; }
-
 
     // Lab
     public string? LabId { get; set; }
@@ -40,4 +39,9 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? LeasedLocation { get; set; }
     public string? LibacionLocation { get; set; }
     public string? PanLocation { get; set; }
+    public string? YellerName { get; set; }
+    public string? YellerSecret { get; set; }
+    public string? YellerToken { get; set; }
+    public string? YellerBase { get; set; }
+    public string? YellerId { get; set; }
 }

@@ -6,5 +6,3 @@ namespace LeadPipe.Application.Manager;
 
 public interface IReportLeasedManager: IReportManager<Plumbing> { }
 public sealed class ReportLeasedManager([FromKeyedServices(Source.Leased)] IReportService<Plumbing> report) : ReportManager<Plumbing>(report), IReportLeasedManager { }
-
-

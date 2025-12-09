@@ -64,4 +64,3 @@ public class CustomerMySqlRepository(MySqlContext context) : ICustomerMySqlRepos
         return Result.Success(entity);
     }
 }
-

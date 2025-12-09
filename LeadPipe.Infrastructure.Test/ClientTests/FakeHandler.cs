@@ -20,4 +20,3 @@ internal class FakeHandler(object? responseObj, HttpStatusCode status) : HttpMes
         return Task.FromResult(msg);
     }
 }
-

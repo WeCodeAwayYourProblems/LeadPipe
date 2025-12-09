@@ -1,6 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
-using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Interfaces.Core;
 
 namespace LeadPipe.Infrastructure.Service;
@@ -27,4 +26,3 @@ internal abstract class ReportService<TVo, TReport>(
         return await _report.ReportData(d.Value);
     }
 }
-

@@ -116,4 +116,3 @@ public class LeafClientServiceTests
         Assert.Equal(2, results.Value.Count);
     }
 }
-

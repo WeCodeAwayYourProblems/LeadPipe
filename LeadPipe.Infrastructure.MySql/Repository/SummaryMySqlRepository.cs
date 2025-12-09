@@ -64,4 +64,3 @@ public class SummaryMySqlRepository(MySqlContext context) : ISummaryMySqlReposit
         return Result.Success(entity);
     }
 }
-

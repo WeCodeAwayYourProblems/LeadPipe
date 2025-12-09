@@ -66,4 +66,3 @@ public class CallMySqlRepository(MySqlContext context) : ICallMySqlRepository
         return Result.Success(entity);
     }
 }
-

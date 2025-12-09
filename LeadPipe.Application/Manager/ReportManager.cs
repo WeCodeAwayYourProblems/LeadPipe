@@ -22,5 +22,3 @@ public abstract class ReportManager<TVo>(IReportService<TVo> report) : IReportMa
             : Result.Failure<List<TVo>>(sent.Error);
     }
 }
-
-

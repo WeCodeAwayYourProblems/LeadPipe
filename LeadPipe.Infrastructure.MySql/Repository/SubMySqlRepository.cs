@@ -64,4 +64,3 @@ public class SubMySqlRepository(MySqlContext context) : ISubMySqlRepository
         return Result.Success(entity);
     }
 }
-

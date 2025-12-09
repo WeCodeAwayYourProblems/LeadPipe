@@ -7,4 +7,7 @@ public interface IYellerSettings
     string? YellerSecret { get; set; }
     string? YellerToken { get; set; }
     string? YellerBase { get; set; }
+    string? YellerPrelimEndpoint { get; set; }
+    int YellerConcurrentMax { get; set; }
+    string? YellerFinalEndpoint { get; set; }
 }

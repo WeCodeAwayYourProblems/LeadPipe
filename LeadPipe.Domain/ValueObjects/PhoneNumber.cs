@@ -7,8 +7,16 @@ public partial class PhoneNumber
     #region Public
     public override string ToString()
     {
-        return $"Phone Number: {Number}";
+        // Convert the number to a string, but don't lose leading zeros
+        string digits = Number.ToString().PadLeft(10, '0');
+
+        // Take only the last 10 digits (if Number was longer)
+        digits = digits.Length > 10 ? digits[^10..] : digits;
+
+        // Manually insert formatting characters
+        return $"({digits[0..3]}) {digits[3..6]}-{digits[6..10]}";
     }
+
 
     private bool? _isDefault;
     public bool IsDefault
@@ -16,7 +24,7 @@ public partial class PhoneNumber
         get { return _isDefault ??= Number == Default || Number == 1111111111 || Number > 9999999999; }
     }
 
-    public static readonly long Default = 0;
+    public const long Default = 0;
 
     public long Number { get; }
 
@@ -40,6 +48,7 @@ public partial class PhoneNumber
         try
         {
             result = new(number);
+            if (result.Number == Default) return false;
             return true;
         }
         catch { }
@@ -49,7 +58,7 @@ public partial class PhoneNumber
     #endregion
 
     #region Private
-    long ValidateStringInput(string? number)
+    static long ValidateStringInput(string? number)
     {
         if (string.IsNullOrWhiteSpace(number))
             return Default;
@@ -62,7 +71,7 @@ public partial class PhoneNumber
         return result;
     }
 
-    long ValidateNumericalInput(long number)
+    static long ValidateNumericalInput(long number)
     {
         return StrToLong(number.ToString());
     }

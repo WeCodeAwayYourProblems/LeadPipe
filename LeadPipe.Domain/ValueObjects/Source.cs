@@ -10,5 +10,6 @@ public enum Source
     Pan,
     Yeller,
     Meating,
-    Test
+    Test,
+    Test2
 }

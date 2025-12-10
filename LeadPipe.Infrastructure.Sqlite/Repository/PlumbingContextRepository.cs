@@ -26,7 +26,7 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
         }
     }
 
-    public async Task<Result<List<T>>> AddRangeAsync(List<T> entities)
+    public virtual async Task<Result<List<T>>> AddRangeAsync(List<T> entities)
     {
         if (entities is null || entities.Count == 0)
             return Result.Failure<List<T>>("No entities provided.");

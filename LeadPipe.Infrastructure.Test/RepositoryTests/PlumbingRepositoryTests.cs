@@ -128,4 +128,74 @@ public class PlumbingRepositoryTests
 
         Assert.True(result.IsSuccess);
     }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldNotAddDuplicates_WhenEntitiesExist()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new PlumbingRepository(context);
+
+        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test };
+        await repo.AddAsync(entity);
+
+        // Attempt to add the same entity again
+        var duplicates = new List<PlumbingEntity>
+        {
+            new() { PhoneNumber = 12345, Source = Source.Test }
+        };
+
+        var result = await repo.AddRangeAsync(duplicates);
+
+        Assert.True(result.IsSuccess);
+        // No new rows should be added
+        Assert.Equal(1, context.PlumbingEntities.Count());
+        Assert.Empty(result.Value); // Added list should be empty because nothing new was inserted
+    }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldAddOnlyNewEntities_WhenMixedWithExisting()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new PlumbingRepository(context);
+
+        // Existing entity in database
+        var existing = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test };
+        await repo.AddAsync(existing);
+
+        // New batch contains one existing + one new
+        var batch = new List<PlumbingEntity>
+        {
+            new() { PhoneNumber = 12345, Source = Source.Test }, // duplicate
+            new() { PhoneNumber = 67890, Source = Source.Test }  // new
+        };
+
+        var result = await repo.AddRangeAsync(batch);
+
+        Assert.True(result.IsSuccess);
+        // Total rows in DB = 2
+        Assert.Equal(2, context.PlumbingEntities.Count());
+        // Only the new entity is returned as added
+        Assert.Single(result.Value);
+        Assert.Equal(67890, result.Value[0].PhoneNumber);
+    }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldNotAddDuplicates_WhenEntitiesHaveSamePhoneNumberButDifferentSource()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new PlumbingRepository(context);
+
+        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test };
+        await repo.AddAsync(entity);
+
+        // Same phone number but different source -> should be added
+        var newEntity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test2 };
+
+        var result = await repo.AddRangeAsync([newEntity]);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, context.PlumbingEntities.Count());
+        Assert.Single(result.Value);
+        Assert.Equal(Source.Test2, result.Value[0].Source);
+    }
 }

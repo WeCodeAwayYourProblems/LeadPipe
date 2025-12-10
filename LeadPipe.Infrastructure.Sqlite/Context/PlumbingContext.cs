@@ -15,7 +15,7 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // sync State Entity
+        // Sync State Entity
         var sync = modelBuilder.Entity<SyncStateEntity>();
         sync.HasKey(x => x.Id);
         sync.HasIndex(x => x.Id)
@@ -33,6 +33,7 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
         plumb.HasKey(p => p.Id);
         plumb.Property(p => p.Id).ValueGeneratedOnAdd();
         plumb.HasIndex(p => p.PhoneNumber);
+        plumb.HasIndex(p => new { p.PhoneNumber, p.Source }).IsUnique();
         plumb.Property(p => p.Source).HasConversion<string>();
 
         // CallEntity

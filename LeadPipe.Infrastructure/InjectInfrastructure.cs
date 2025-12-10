@@ -1,13 +1,9 @@
 ﻿using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Data.Source;
-using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Service;
+using LeadPipe.Infrastructure.Data;
 using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace LeadPipe.Infrastructure;
@@ -17,57 +13,6 @@ public static class InjectInfrastructure
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings)
     {
         // Format: services.AddScoped<Interface, Class>();
-
-        // Loggers
-        
-        // Services
-        services.AddScoped<ICsvRwService, CsvRwService>();
-        services.AddScoped<IFileRWService, FileConversionService>();
-        services.AddScoped<IJsonRwService, JsonRwService>();
-        services.AddScoped<ILeafService, LeafClientService>();
-        services.AddScoped<IYellerService, YellerClientService>();
-        services.AddScoped<IFileService, FileService>();
-
-        // Data sources
-        RegisterServices(services, typeof(IDataSourceAsync<>));
-
-        services.AddScoped<IDataSourceAsync<CalliDto>>(sp =>
-            new CalliFileDataSource(
-                new FileInfo(settings.CalliLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<CalliFileDataSource>>()
-            ));
-
-        services.AddScoped<IDataSourceAsync<LeasedDto>>(sp =>
-            new LeasedFileDataSource(
-                new FileInfo(settings.LeasedLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<LeasedFileDataSource>>()
-            ));
-
-        services.AddScoped<IDataSourceAsync<LibacionDto>>(sp =>
-            new LibacionFileDataSource(
-                new FileInfo(settings.LibacionLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<LibacionFileDataSource>>()
-            ));
-
-        services.AddScoped<IDataSourceAsync<PanDto>>(sp =>
-            new PanFileDataSource(
-                new FileInfo(settings.PanLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<PanFileDataSource>>()
-            ));
-
-        // Persistence
-        RegisterServices(services, typeof(IDataPersistence<>));
-
-        // Keyed Services
-        RegisterKeyedServices<SourceKeyAttribute>(services, typeof(IUpdateService<>));
 
         // Add Leaf Client
         services.AddHttpClient(settings.LeafName!, c =>
@@ -93,7 +38,7 @@ public static class InjectInfrastructure
             c.DefaultRequestHeaders.Add("Authorization", settings.YellerToken!);
         });
 
-        return services;
+        return services.InjectData(settings).InjectServices(settings);
     }
 
     private static void RegisterServices(IServiceCollection services, Type iface)

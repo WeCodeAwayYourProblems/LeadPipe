@@ -18,6 +18,8 @@ public static class InjectInfrastructure
     {
         // Format: services.AddScoped<Interface, Class>();
 
+        // Loggers
+        
         // Services
         services.AddScoped<ICsvRwService, CsvRwService>();
         services.AddScoped<IFileRWService, FileConversionService>();

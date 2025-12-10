@@ -1,6 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
@@ -17,6 +19,7 @@ internal class YellerClientService : IYellerService
     private readonly HttpClient _client;
     private readonly IDtoToVo<YellerDto, Plumbing> _dtoToVo;
     private readonly ILogger _logger;
+    private readonly ISyncStateRepository _sync;
     private readonly SemaphoreSlim _throttle;
     private const int errorLimit = 5;
 
@@ -24,7 +27,9 @@ internal class YellerClientService : IYellerService
         IHttpClientFactory factory,
         IYellerSettings settings,
         IDtoToVo<YellerDto, Plumbing> dtoToVo,
-        ILogger<YellerClientService> logger)
+        ILogger<YellerClientService> logger,
+        ISyncStateRepository sync
+        )
     {
         _factory = factory;
         _settings = settings;
@@ -32,17 +37,21 @@ internal class YellerClientService : IYellerService
         _dtoToVo = dtoToVo;
         _logger = logger;
         _throttle = new SemaphoreSlim(_settings.YellerConcurrentMax);
+        _sync = sync;
     }
     #endregion
 
-    public async Task<Result<List<Plumbing>>> GetAllAsync()
+    public async Task<Result<List<Plumbing>>> GetAllAsync(string id = "")
     {
         const int limit = 20;
-        var endpoint = $"{_settings.YellerPrelimEndpoint}?limit={limit}";
+        var endpoint = id == ""
+            ? $"{_settings.YellerPrelimEndpoint}?limit={limit}"
+            : $"{_settings.YellerPrelimEndpoint}?limit={limit}&{_settings.YellerPrelimId}={id}";
         var raw = new List<string>();
 
         int errors = 0;
         string process = "Id retrieval";
+        string finalId = "";
 
         while (true)
         {
@@ -70,7 +79,7 @@ internal class YellerClientService : IYellerService
 
                 YellerHelperDto? value = await response.Content.ReadFromJsonAsync<YellerHelperDto>();
 
-                if (value?.lead_ids == null)
+                if (value?.lead_ids == null || value.lead_ids.Length == 0)
                 {
                     errors++;
                     _logger.LogWarning(
@@ -82,6 +91,8 @@ internal class YellerClientService : IYellerService
 
                 raw.AddRange(value.lead_ids);
 
+                finalId = value.lead_ids[^1];
+                endpoint = $"{_settings.YellerPrelimEndpoint}?limit={limit}&{_settings.YellerPrelimId}={finalId}";
                 if (!value.has_more)
                     break;
 
@@ -103,6 +114,15 @@ internal class YellerClientService : IYellerService
                 errors, process);
 
             return Result.Failure<List<Plumbing>>("Failed to retrieve data from API.");
+        }
+
+        SyncStateEntity state = new() { LastProcessedId = finalId, LastSyncUtc = DateTime.UtcNow, UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds() };
+        Result<SyncStateEntity> synced = await _sync.SaveAsync(state);
+        if (synced.IsFailure)
+        {
+            _logger.LogError(
+                "Failed to sync. The next call to this api will have data that overlaps with existing persisted data. Error {Error}",
+                synced.Error);
         }
 
         Result<List<YellerDto>> dtoResult = await GetDto(raw);
@@ -129,7 +149,6 @@ internal class YellerClientService : IYellerService
                 _logger.LogWarning(
                     "Reached error limit {ErrorLimit}. Retrieved: {Retrieved}. Process: {Process}",
                     errorLimit, master.Count, process);
-
                 break;
             }
 

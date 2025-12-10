@@ -1,5 +1,4 @@
-﻿
-namespace LeadPipe.Infrastructure.Dto;
+﻿namespace LeadPipe.Infrastructure.Dto;
 
 public class LabDto
 {

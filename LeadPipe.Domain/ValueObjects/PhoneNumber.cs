@@ -51,9 +51,11 @@ public partial class PhoneNumber
             if (result.Number == Default) return false;
             return true;
         }
-        catch { }
-        result = new(Default);
-        return false;
+        catch
+        {
+            result = new(Default);
+            return false;
+        }
     }
     #endregion
 

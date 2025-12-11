@@ -175,4 +175,59 @@ public class PhoneNumberTests
 
         Assert.NotEqual(p1, p2);
     }
+
+    // ---------------------------------------------------------------
+    //  TryParse edge cases based on StrToLong + NonDigitChar logic
+    // ---------------------------------------------------------------
+    public class TryParseEdgeCases
+    {
+        [Theory]
+        // valid 10-digit number embedded in text
+        [InlineData("Call me at 555-333-2222", 5553332222)]
+        [InlineData("My number is (555) 333 2222.", 5553332222)]
+        [InlineData("...5553332222...", 5553332222)]
+
+        // valid phone number buried in junk digits
+        [InlineData("9998887776665553332222", 5553332222)]
+        [InlineData("1234567890123455553332222", 5553332222)]
+        [InlineData("0000000000000002234567890", 2234567890)]
+
+        // valid number but with unacceptable leading digit (0 or 1)
+        [InlineData("0000000000000001234567890", PhoneNumber.Default)]
+        [InlineData("My fake is 0123456789", PhoneNumber.Default)]
+        [InlineData("Pretend: 1000000000", PhoneNumber.Default)]
+
+        // Does NOT contain 10 consecutive digits
+        [InlineData("1 2 3 4 5 6 7 8 9", PhoneNumber.Default)]
+        [InlineData("abc def ghi 000999", PhoneNumber.Default)]
+
+        // enormous digit blob; only last 10 digits matter
+        [InlineData("1234567890123456789012345678902234567890", 2234567890)]
+        [InlineData("9999999999999999999999999999999999999999", 9999999999)]
+
+        // mix of digits + extensions
+        [InlineData("5553332222ex55", 5553332222)]
+        [InlineData("5553332222 ex 101", 5553332222)]
+
+        // missing phone number
+        [InlineData("no digits here", PhoneNumber.Default)]
+        [InlineData("   ", PhoneNumber.Default)]
+        [InlineData(null, PhoneNumber.Default)]
+        public void TryParse_EdgeCases_WorksAsExpected(string input, long expected)
+        {
+            bool ok = PhoneNumber.TryParse(input, out var result);
+
+            if (expected == PhoneNumber.Default)
+            {
+                Assert.False(ok);
+                Assert.Equal(PhoneNumber.Default, result.Number);
+            }
+            else
+            {
+                Assert.True(ok);
+                Assert.Equal(expected, result.Number);
+            }
+        }
+    }
+
 }

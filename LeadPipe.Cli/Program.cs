@@ -39,14 +39,17 @@ internal class Program
         return obj switch
         {
             IVerb o => o.Run(service),
+            IVerbAsync v => v.Run(service).GetAwaiter().GetResult(),
             _ => throw new Exception(),
         };
     }
 
     private static Type[] LoadVerbs()
     {
-        return Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => t.GetInterfaces().Contains(typeof(IVerb)))
+        return Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract)
+            .Where(t => typeof(IVerb).IsAssignableFrom(t) || typeof(IVerbAsync).IsAssignableFrom(t))
             .Where(t => t.IsClass)
             .ToArray();
     }

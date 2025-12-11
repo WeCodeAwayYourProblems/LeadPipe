@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace LeadPipe.Cli.Verbs;
 
 [Verb(Update, HelpText = "This updates specific data.")]
-internal class UpdateVerb : IVerb
+internal class UpdateVerb : IVerbAsync
 {
     private const string Update = "update";
 
@@ -43,23 +43,52 @@ internal class UpdateVerb : IVerb
             Source.Libacion => Make<IUpdateLibacionManager>(),
             Source.Pan => Make<IUpdatePanManager>(),
             Source.Yeller => Make<IUpdateYellerManager>(),
-            Source.All=>Result.Combine<List<Plumbing>>(
-                 Make<IUpdateCalliManager>(),
-Make<IUpdateLabManager>(),
-Make<IUpdateLeafManager>(),
-Make<IUpdateLeasedManager>(),
-Make<IUpdateLibacionManager>(),
-Make<IUpdatePanManager>(),
-Make<IUpdateYellerManager>()
 
-                ),
+            Source.All => async () =>
+            {
+                // create an array of funcs then invoke them to get tasks
+                Func<Task<Result<List<Plumbing>>>>[] funcs = [
+                Make<IUpdateCalliManager>(),
+                Make<IUpdateLabManager>(),
+                Make<IUpdateLeafManager>(),
+                Make<IUpdateLeasedManager>(),
+                Make<IUpdateLibacionManager>(),
+                Make<IUpdatePanManager>(),
+                Make<IUpdateYellerManager>()
+                ];
+
+                // start them all and capture individual errors, if any occur
+                IEnumerable<Task<Result<List<Plumbing>>>> tasks = funcs.Select(async f =>
+                {
+                    try { return await f(); }
+                    catch (Exception ex) { return Result.Failure<List<Plumbing>>(ex.Message); }
+                });
+
+                List<Result<List<Plumbing>>> results = [.. await Task.WhenAll(tasks)];
+
+                // Combine Results
+                Result v = Result.Combine(results);
+                if (v.IsFailure)
+                    return Result.Failure<List<Plumbing>>(v.Error);
+
+                // Flatten results
+                List<Plumbing> combination = [];
+                foreach (var r in results)
+                    combination.AddRange(r.Value);
+                return Result.Success(combination);
+            }
+            ,
 
             _ => async () => Result.Failure<List<Plumbing>>("Wrong input")
         };
 
-        Result<List<Plumbing>> value = await action();
-
-
+        Result<List<Plumbing>> result = await action();
+        if (result.IsSuccess)
+            Environment.ExitCode = 0;
+        else
+            Environment.ExitCode = 1;
+        return Environment.ExitCode;
     }
+
     #endregion
 }

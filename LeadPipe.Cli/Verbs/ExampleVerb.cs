@@ -39,5 +39,21 @@ internal class ExampleVerb : IVerb
             ? $"The user either chose to provide nothing or the provided path does not exist, so an empty string was used. Here is the literal input: {location}"
             : $"Here is the literal path:\n\t{Path.GetFullPath(location)}\n\tAnd here is the literal input: {location}";
     }
+    private static bool TryCreate(string location, out string error)
+    {
+        bool result = false;
+        error = string.Empty;
+        try
+        {
+            if (!Path.Exists(location))
+                File.Create(location);
+            result = true;
+        }
+        catch (Exception ex)
+        {
+            error = ex.ToString();
+        }
+        return result;
+    }
     #endregion
 }

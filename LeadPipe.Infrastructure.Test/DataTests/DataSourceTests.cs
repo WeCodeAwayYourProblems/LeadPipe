@@ -26,7 +26,7 @@ public class DataSourceTests
         var jsonMock = Substitute.For<IJsonRwService>();
         var loggerMock = Substitute.For<ILogger<CalliFileDataSource>>();
 
-        var dtoList = new List<CalliDto> { new CalliDto() };
+        List<CalliDto> dtoList = [new()];
         if (extension == ".csv")
             csvMock.ReadFile<CalliDto>(Arg.Any<FileInfo>()).Returns(Result.Success(dtoList));
         else

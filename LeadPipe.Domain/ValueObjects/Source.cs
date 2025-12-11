@@ -9,7 +9,7 @@ public enum Source
     Libacion,
     Pan,
     Yeller,
-    Meating,
     Test,
-    Test2
+    Test2,
+    All
 }

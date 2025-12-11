@@ -44,4 +44,8 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? YellerToken { get; set; }
     public string? YellerBase { get; set; }
     public string? YellerId { get; set; }
+    public string? YellerPrelimEndpoint { get; set; }
+    public int YellerConcurrentMax { get; set; }
+    public string? YellerFinalEndpoint { get; set; }
+    public string? YellerPrelimId { get; set; }
 }

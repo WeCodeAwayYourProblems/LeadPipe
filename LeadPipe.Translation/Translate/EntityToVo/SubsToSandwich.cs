@@ -23,7 +23,7 @@ internal class SubsToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SubsE
             Active = entity.Active,
             SubActive = entity.SubActive,
             Complete = entity.Complete,
-            Value = entity.Value,
+            Value = (decimal)entity.Value,
             Seller = entity.Seller,
             Seller2 = entity.Seller2,
             Seller3 = entity.Seller3

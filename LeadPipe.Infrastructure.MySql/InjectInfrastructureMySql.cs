@@ -1,4 +1,6 @@
-﻿using LeadPipe.Infrastructure.MySql.Context;
+﻿using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
+using LeadPipe.Infrastructure.MySql.Context;
+using LeadPipe.Infrastructure.MySql.Repository;
 using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +19,12 @@ public static class InjectInfrastructureMySql
                 ServerVersion.AutoDetect(settings.MySqlConnectionString!)
             );
         });
+
+        // Register repositories
+        services.AddScoped<ICallMySqlRepository, CallMySqlRepository>();
+        services.AddScoped<ICustomerMySqlRepository, CustomerMySqlRepository>();
+        services.AddScoped<ISubMySqlRepository, SubMySqlRepository>();
+        services.AddScoped<ISummaryMySqlRepository, SummaryMySqlRepository>();
 
         return services;
     }

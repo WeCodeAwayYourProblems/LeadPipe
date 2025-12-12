@@ -20,7 +20,13 @@ public static class InjectInfrastructureSqlite
         });
 
         // Add Repositories
-        RegisterRepositories(services);
+        services.AddScoped<ICallRepository, CallRepository>();
+        services.AddScoped<IPlumbingCallLinkRepository, PlumbingCallLinkRepository>();
+        services.AddScoped<IPlumbingRepository, PlumbingRepository>();
+        services.AddScoped<ISubsCallLinkRepository, SubsCallLinkRepository>();
+        services.AddScoped<ISubsPlumbingLinkRepository, SubsPlumbingLinkRepository>();
+        services.AddScoped<ISubsRepository, SubsRepository>();
+        services.AddScoped<ISyncStateRepository, SyncStateRepository>();
 
         return services;
     }

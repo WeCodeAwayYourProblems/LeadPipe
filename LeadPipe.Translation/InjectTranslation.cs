@@ -1,6 +1,13 @@
-﻿using LeadPipe.Infrastructure.Interfaces.Translate;
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Translation.Primitives;
+using LeadPipe.Translation.Translate.DtoToVo;
+using LeadPipe.Translation.Translate.EntityToVo;
+using LeadPipe.Translation.Translate.VoToDto;
+using LeadPipe.Translation.Translate.VoToEntity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -16,43 +23,27 @@ public static class InjectTranslation
         services.AddScoped<IDateTimeTranslate, DateTimeTranslate>();
 
         // Translations 
-        RegisterServices(services, typeof(IDtoToVo<,>));
-        RegisterServices(services, typeof(IEntityToVo<,>));
-        RegisterServices(services, typeof(IVoToDto<,>));
-        RegisterServices(services, typeof(IVoToEntity<,>));
+        // IDtoToVo
+        services.AddScoped<IDtoToVo<CalliDto, Plumbing>, CalliDtoToPlumbing>();
+        services.AddScoped<IDtoToVo<LabDto, Plumbing>, LabDtoToPlumbing>();
+        services.AddScoped<IDtoToVo<LeafDto, Plumbing>, LeafDtoToPlumbing>();
+        services.AddScoped<IDtoToVo<YellerDto, Plumbing>, YellerDtoToPlumbing>();
+        services.AddScoped<IDtoToVo<LeasedDto, Plumbing>, LeasedDtoToPlumbing>();
+        services.AddScoped<IDtoToVo<PanDto, Plumbing>, PanDtoToPlumbing>();
 
-        // Complex translations
-        RegisterServices(services, typeof(IEntityToVo<,,>));
-        RegisterServices(services, typeof(IVoToEntity<,,>));
+        // IEntityToVo
+        services.AddScoped<IEntityToVo<CallEntity, Call>, CallEntityToCall>();
+        services.AddScoped<IEntityToVo<PlumbingEntity, Plumbing>, PlumbingEntityToPlumbing>();
+        services.AddScoped<IEntityToVo<SubsEntity, Sandwich>, SubsToSandwich>();
+        // IVoToDto
+        services.AddScoped<IVoToDto<Plumbing, LabDto>, PlumbingToLabDto>();
+        services.AddScoped<IVoToDto<Plumbing, LeafDto>, PlumbingToLeafDto>();
+        services.AddScoped<IVoToDto<Plumbing, YellerDto>, PlumbingToYellerDto>();
+        // IVoToEntity
+        services.AddScoped<IVoToEntity<Call, CallEntity>, CallToCallEntity>();
+        services.AddScoped<IVoToEntity<Plumbing, PlumbingEntity>, PlumbingToPlumbingEntity>();
+        services.AddScoped<IVoToEntity<Sandwich, SubsEntity>, SandToSub>();
 
         return services;
-    }
-    private static void RegisterServices(IServiceCollection services, Type iface)
-    {
-        var assembly = Assembly.GetAssembly(typeof(InjectTranslation));
-        if (assembly is null)
-            return;
-
-        foreach (var type in assembly.GetTypes())
-        {
-            if (type.IsAbstract || type.IsInterface)
-                continue;
-
-            // Look for any implemented interface matching the open generic definition
-            var targetInterface = type
-                .GetInterfaces()
-                .FirstOrDefault(i =>
-                    i.IsGenericType &&
-                    i.GetGenericTypeDefinition() == iface);
-
-            if (targetInterface is null)
-                continue;
-
-            // Avoid duplicate registrations
-            if (services.Any(sd => sd.ServiceType == targetInterface))
-                continue;
-
-            services.AddScoped(targetInterface, type);
-        }
     }
 }

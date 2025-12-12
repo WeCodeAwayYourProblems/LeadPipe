@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class PanDto
+public class PanDto
 {
     [Name("Name")]
     public string? Name { get; set; }

@@ -4,11 +4,23 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
 public class PlumbingRepository(PlumbingContext context) : PlumbingContextRepository<PlumbingEntity>(context), IPlumbingRepository
 {
+    public async Task<Result<List<PlumbingEntity>>> GetAllAsync(Source source)
+    {
+        try
+        {
+            List<PlumbingEntity> plumbing = await _set
+                .Where(p => p.Source == source)
+                .ToListAsync();
+            return Result.Success(plumbing);
+        }
+        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>(ex.Message); }
+    }
     public override async Task<Result<List<PlumbingEntity>>> AddRangeAsync(List<PlumbingEntity> entities)
     {
         if (entities == null || entities.Count == 0)

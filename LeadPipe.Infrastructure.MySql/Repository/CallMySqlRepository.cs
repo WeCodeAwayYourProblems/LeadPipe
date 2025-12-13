@@ -3,13 +3,28 @@ using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 using LeadPipe.Infrastructure.MySql.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
+
 
 public class CallMySqlRepository(MySqlContext context) : ICallMySqlRepository
 {
     private readonly MySqlContext _context = context;
     private readonly DbSet<CallMySqlEntity> _set = context.Set<CallMySqlEntity>();
+
+    public async Task<Result<List<CallMySqlEntity>>> FindAsync(Expression<Func<CallMySqlEntity, bool>> predicate)
+    {
+        try
+        {
+            var list = await _set.Where(predicate).ToListAsync();
+            return Result.Success(list);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<CallMySqlEntity>>(ex.Message);
+        }
+    }
 
     public async Task<Result<CallMySqlEntity>> AddAsync(CallMySqlEntity entity)
     {

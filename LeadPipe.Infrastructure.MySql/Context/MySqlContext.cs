@@ -14,13 +14,13 @@ public class MySqlContext : DbContext
         _settings = settings;
         ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
     }
-#pragma warning disable IDE8618
+#pragma warning disable IDE0079
     public DbSet<CallMySqlEntity> Calls { get; set; }
     public DbSet<CustomerMySqlEntity> Customers { get; set; }
     public DbSet<SubMySqlEntity> Subscriptions { get; set; }
     public DbSet<SummaryMySqlEntity> Summaries { get; set; }
     public DbSet<TranscriptionMySqlEntity> Transcriptions { get; set; }
-#pragma warning restore IDE8618
+#pragma warning restore IDE0079
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

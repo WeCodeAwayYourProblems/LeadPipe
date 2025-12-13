@@ -5,7 +5,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Context;
 
 public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbContext(options)
 {
-#pragma warning disable IDE8618
+#pragma warning disable IDE0079
     public DbSet<SyncStateEntity> SyncState { get; set; }
     public DbSet<SubsEntity> SubsEntities { get; set; }
     public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
@@ -13,7 +13,7 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
     public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
     public DbSet<CallSubsLink> SubsCallLinks { get; set; }
     public DbSet<PlumbingCallLink> PlumbingCallLinks { get; set; }
-#pragma warning restore IDE8618
+#pragma warning restore IDE0079
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

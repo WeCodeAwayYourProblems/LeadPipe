@@ -3,6 +3,7 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -11,7 +12,19 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
     protected readonly PlumbingContext _context = context;
     protected readonly DbSet<T> _set = context.Set<T>();
 
-    #region Implementation
+    public async Task<Result<List<T>>> FindAsync(Expression<Func<T, bool>> predicate)
+    {
+        try
+        {
+            var list = await _set.Where(predicate).ToListAsync();
+            return Result.Success(list);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<T>>(ex.Message);
+        }
+    }
+
     public async Task<Result<T>> AddAsync(T entity)
     {
         try
@@ -110,5 +123,5 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
             return Result.Failure<T>($"Failed to update entity:\n{ex.Message}");
         }
     }
-    #endregion
+
 }

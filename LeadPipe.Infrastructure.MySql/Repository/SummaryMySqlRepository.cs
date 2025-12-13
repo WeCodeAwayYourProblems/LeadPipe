@@ -3,6 +3,7 @@ using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 using LeadPipe.Infrastructure.MySql.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
 
@@ -11,6 +12,18 @@ public class SummaryMySqlRepository(MySqlContext context) : ISummaryMySqlReposit
     private readonly MySqlContext _context = context;
     private readonly DbSet<SummaryMySqlEntity> _set = context.Set<SummaryMySqlEntity>();
 
+    public async Task<Result<List<SummaryMySqlEntity>>> FindAsync(Expression<Func<SummaryMySqlEntity, bool>> predicate)
+    {
+        try
+        {
+            var list = await _set.Where(predicate).ToListAsync();
+            return Result.Success(list);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<SummaryMySqlEntity>>(ex.Message);
+        }
+    }
     public async Task<Result<SummaryMySqlEntity>> AddAsync(SummaryMySqlEntity entity)
     {
         await _set.AddAsync(entity);

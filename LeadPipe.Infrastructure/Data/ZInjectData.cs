@@ -1,5 +1,7 @@
-﻿using LeadPipe.Infrastructure.Data.Persistence;
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Data.Persistence;
 using LeadPipe.Infrastructure.Data.Source;
+using LeadPipe.Infrastructure.Data.Transform;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Entity.Sqlite;
@@ -25,11 +27,17 @@ internal static class ZInjectData
         services.AddScoped<IDataPersistence<CallSubsLink>, SubsCallLinkPersistence>();
         services.AddScoped<IDataPersistence<SubsPlumbingLink>, SubsPlumbingLinkPersistence>();
         services.AddScoped<IDataPersistence<SummaryMySqlEntity>, SummaryMySqlEntityPersistence>();
-        
+
         // Data Sources
         services.AddScoped<IDataSourceAsync<LabDto>, LabDataSource>();
         services.AddScoped<IDataSourceAsync<LeafDto>, LeafDataSource>();
         services.AddScoped<IDataSourceAsync<YellerDto>, YellerDataSource>();
+
+        // Keyed Sources
+        services.AddKeyedScoped<ILoadData<Plumbing>, YellerLoadData>(Domain.ValueObjects.Source.Yeller);
+
+        // Transformers
+        services.AddScoped<ITransform<Plumbing, YellerReport>, YellerTransform>();
 
         // Data sources with file locations
         services.AddScoped<IDataSourceAsync<CalliDto>>(sp =>

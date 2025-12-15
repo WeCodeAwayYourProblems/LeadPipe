@@ -1,10 +1,17 @@
 ﻿using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Data;
+using LeadPipe.Infrastructure.Data.Persistence;
+using LeadPipe.Infrastructure.Data.Source;
+using LeadPipe.Infrastructure.Data.Transform;
+using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Core;
+using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure;
 
@@ -13,6 +20,102 @@ public static class InjectInfrastructure
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings)
     {
         // Format: services.AddScoped<Interface, Class>();
+
+        // *****************************************
+        // ADD DATA
+        // *****************************************
+
+        // Data Persistence
+        services.AddScoped<IDataPersistence<CallEntity>, CallEntityPersistence>();
+        services.AddScoped<IDataPersistence<CallMySqlEntity>, CallMySqlPersistence>();
+        services.AddScoped<IDataPersistence<CustomerMySqlEntity>, CustomerMySqlEntityPersistence>();
+        services.AddScoped<IDataPersistence<PlumbingCallLink>, PlumbingCallLinkPersistence>();
+        services.AddScoped<IDataPersistence<PlumbingEntity>, PlumbingPersistence>();
+        services.AddScoped<IDataPersistence<SubMySqlEntity>, SubMySqlEntityPersistence>();
+        services.AddScoped<IDataPersistence<CallSubsLink>, SubsCallLinkPersistence>();
+        services.AddScoped<IDataPersistence<SubsPlumbingLink>, SubsPlumbingLinkPersistence>();
+        services.AddScoped<IDataPersistence<SummaryMySqlEntity>, SummaryMySqlEntityPersistence>();
+
+        // Data Sources
+        services.AddScoped<IDataSourceAsync<LabDto>, LabDataSource>();
+        services.AddScoped<IDataSourceAsync<LeafDto>, LeafDataSource>();
+        services.AddScoped<IDataSourceAsync<YellerDto>, YellerDataSource>();
+
+        // Keyed Sources
+        services.AddKeyedScoped<ILoadData<Plumbing>, YellerLoadData>(Source.Yeller);
+
+        // Transformers
+        services.AddScoped<ITransform<Plumbing, YellerReport>, YellerTransform>();
+
+        // Data sources with file locations
+        services.AddScoped<IDataSourceAsync<CalliDto>>(sp =>
+            new CalliFileDataSource(
+                new FileInfo(settings.CalliLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<CalliFileDataSource>>()
+            ));
+
+        services.AddScoped<IDataSourceAsync<LeasedDto>>(sp =>
+            new LeasedFileDataSource(
+                new FileInfo(settings.LeasedLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<LeasedFileDataSource>>()
+            ));
+
+        services.AddScoped<IDataSourceAsync<LibacionDto>>(sp =>
+            new LibacionFileDataSource(
+                new FileInfo(settings.LibacionLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<LibacionFileDataSource>>()
+            ));
+
+        services.AddScoped<IDataSourceAsync<PanDto>>(sp =>
+            new PanFileDataSource(
+                new FileInfo(settings.PanLocation!),
+                sp.GetRequiredService<ICsvRwService>(),
+                sp.GetRequiredService<IJsonRwService>(),
+                sp.GetRequiredService<ILogger<PanFileDataSource>>()
+            ));
+
+        // *****************************************
+        // ADD SERVICES
+        // *****************************************
+
+        // Loggers 
+        services.AddTransient<LabService>();
+        services.AddTransient<LeafClientService>();
+        services.AddTransient<YellerClientService>();
+
+        // Keyed Services
+        // Keyed update services
+        services.AddKeyedScoped<IUpdateService<Plumbing>, CalliUpdateFromFileService>(Source.Calli);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, LabUpdateService>(Source.Lab);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, LibacionUpdateService>(Source.Libacion);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, LeafUpdateService>(Source.Leaf);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, LeasedUpdateFromFileService>(Source.Leased);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, PanUpdateFromFileService>(Source.Pan);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
+
+        // Keyed Report services
+        services.AddKeyedScoped<IReport<YellerReport>, YellerClientReporter>(Source.Yeller);
+
+        // Scoped services
+        services.AddScoped<ICsvRwService, CsvRwService>();
+        services.AddScoped<IFileRWService, FileConversionService>();
+        services.AddScoped<IFileService, FileService>();
+        services.AddScoped<IJsonRwService, JsonRwService>();
+        services.AddScoped<ILabService, LabService>();
+        services.AddScoped<ILeafService, LeafClientService>();
+        services.AddScoped<IPlumbingAssociationService, PlumbingAssociationService>();
+        services.AddScoped<IYellerService, YellerClientService>();
+        services.AddScoped<IYellerReportService, YellerReportService>();
+
+        // *****************************************
+        // Add CLIENTS
+        // *****************************************
 
         // Add Leaf Client
         services.AddHttpClient(settings.LeafName!, c =>
@@ -38,69 +141,6 @@ public static class InjectInfrastructure
             c.DefaultRequestHeaders.Add("Authorization", settings.YellerToken!);
         });
 
-        return services.InjectData(settings).InjectServices(settings);
+        return services;
     }
-
-    private static void RegisterServices(IServiceCollection services, Type iface)
-    {
-        // Get only the assembly that contains your infrastructure registrations
-        var assembly = Assembly.GetAssembly(typeof(InjectInfrastructure));
-        if (assembly is null)
-            return;
-
-        IEnumerable<Type> types = assembly
-            .GetTypes()
-            .Where(t => t is not null)
-            .OfType<Type>();  // ensures non-nullable Type
-
-        foreach (Type type in types)
-        {
-            if (type.IsAbstract || type.IsInterface)
-                continue;
-
-            // Skip data sources that require FileInfo (they are manually registered)
-            if (type.GetConstructors().Any(c => c.GetParameters().Any(p => p.ParameterType == typeof(FileInfo))))
-                continue;
-
-            // Look for an interface matching iface (like IDataSourceAsync<> or IDataPersistence<>)
-            Type? targetInterface = type
-                .GetInterfaces()
-                .FirstOrDefault(i =>
-                    i.IsGenericType &&
-                    i.GetGenericTypeDefinition() == iface
-                );
-
-            if (targetInterface is null)
-                continue;
-
-            // Avoid duplicate registrations
-            if (services.Any(sd => sd.ServiceType == targetInterface))
-                continue;
-
-            services.AddScoped(targetInterface, type);
-        }
-    }
-    private static void RegisterKeyedServices<TAttribute>(IServiceCollection services, Type iface) where TAttribute : Attribute, ISourceKeyAttribute
-    {
-        var assembly = Assembly.GetAssembly(typeof(InjectInfrastructure));
-        if (assembly is null)
-            return;
-        foreach (Type? type in assembly.GetTypes().Where(t => !t.IsAbstract && !t.IsInterface))
-        {
-            var targetInterface = type.GetInterfaces()
-                .FirstOrDefault(i =>
-                    i.IsGenericType &&
-                    i.GetGenericTypeDefinition() == iface &&
-                    i.GenericTypeArguments.Length == 1 &&
-                    i.GenericTypeArguments[0] == typeof(Plumbing)
-                );
-            if (targetInterface is null)
-                continue;
-            var keyAttr = type.GetCustomAttribute<TAttribute>();
-            if (keyAttr is null)
-                continue;
-            services.AddKeyedScoped(typeof(IUpdateService<Plumbing>), keyAttr.Key, type);
-        }
-    }
-
 }

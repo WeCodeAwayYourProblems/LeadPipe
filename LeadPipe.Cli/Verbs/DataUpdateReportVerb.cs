@@ -47,8 +47,8 @@ internal class DataUpdateReportVerb : IVerbAsync
     {
         Result<List<Plumbing>> result = Type switch
         {
-            DataCliType.Update => await UpdateResult(service),
-            DataCliType.Report => await ReportResult(service),
+            DataCliType.Update => await Update(service),
+            DataCliType.Report => await Report(service),
             _ or null => await Combine(service)
         };
 
@@ -63,7 +63,7 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     #region Private
 
-    private async Task<Result<List<Plumbing>>> UpdateResult(IServiceProvider service)
+    private async Task<Result<List<Plumbing>>> Update(IServiceProvider service)
     {
         Func<Task<Result<List<Plumbing>>>> Make<T>() where T : IUpdateManager =>
             async () => await service.GetRequiredService<T>().ManageAsync();
@@ -116,7 +116,7 @@ internal class DataUpdateReportVerb : IVerbAsync
         Result<List<Plumbing>> result = await action();
         return result;
     }
-    private async Task<Result<List<Plumbing>>> ReportResult(IServiceProvider service)
+    private async Task<Result<List<Plumbing>>> Report(IServiceProvider service)
     {
         Func<Task<Result<List<Plumbing>>>> Make<T>() where T : IReportManager<Plumbing> =>
             async () => await service.GetRequiredService<T>().ManageAsync();
@@ -171,9 +171,9 @@ internal class DataUpdateReportVerb : IVerbAsync
     }
     private async Task<Result<List<Plumbing>>> Combine(IServiceProvider service)
     {
-        Result<List<Plumbing>> update = await UpdateResult(service);
-        Result<List<Plumbing>> report = await ReportResult(service);
-        Result result = Result.Combine(update, report);
+        Result<List<Plumbing>> update = await Update(service);
+        Result<List<Plumbing>> report = await Report(service);
+        Result result = Result.Combine(" | ", update, report);
         return result.IsSuccess
             ? Result.Success<List<Plumbing>>([.. update.Value, .. report.Value])
             : Result.Failure<List<Plumbing>>(result.Error);

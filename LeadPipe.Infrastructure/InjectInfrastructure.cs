@@ -24,8 +24,8 @@ public static class InjectInfrastructure
     {
         // Format: services.AddScoped<Interface, Class>();
 
-        #region ADD DATA
         // *****************************************
+        #region ADD DATA
 
         // Data Persistence
         services.AddScoped<IDataPersistence<CallEntity>, CallEntityPersistence>();
@@ -38,10 +38,6 @@ public static class InjectInfrastructure
         services.AddScoped<IDataPersistence<SubsPlumbingLink>, SubsPlumbingLinkPersistence>();
         services.AddScoped<IDataPersistence<SummaryMySqlEntity>, SummaryMySqlEntityPersistence>();
 
-        // Data Sources
-        services.AddScoped<IDataSourceAsync<LabDto>, LabDataSource>();
-        services.AddScoped<IDataSourceAsync<LeafDto>, LeafDataSource>();
-        services.AddScoped<IDataSourceAsync<YellerDto>, YellerDataSource>();
 
         // Keyed Sources
         services.AddKeyedScoped<ILoadData<Plumbing>, LoadCalli>(Source.Calli);
@@ -65,42 +61,18 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<ILoadData<Plumbing>, LoadPan>(Source.Pan);
         services.AddKeyedScoped<ILoadData<Plumbing>, LoadYeller>(Source.Yeller);
 
-        // Data sources with file locations
-        services.AddScoped<IDataSourceAsync<CalliDto>>(sp =>
-            new CalliFileDataSource(
-                new FileInfo(settings.CalliLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<CalliFileDataSource>>()
-            ));
-
-        services.AddScoped<IDataSourceAsync<LeasedDto>>(sp =>
-            new LeasedFileDataSource(
-                new FileInfo(settings.LeasedLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<LeasedFileDataSource>>()
-            ));
-
-        services.AddScoped<IDataSourceAsync<LibacionDto>>(sp =>
-            new LibacionFileDataSource(
-                new FileInfo(settings.LibacionLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<LibacionFileDataSource>>()
-            ));
-
-        services.AddScoped<IDataSourceAsync<PanDto>>(sp =>
-            new PanFileDataSource(
-                new FileInfo(settings.PanLocation!),
-                sp.GetRequiredService<ICsvRwService>(),
-                sp.GetRequiredService<IJsonRwService>(),
-                sp.GetRequiredService<ILogger<PanFileDataSource>>()
-            ));
+        // Data Sources
+        services.AddScoped<IDataSourceAsync<LabDto>, LabDataSource>();
+        services.AddScoped<IDataSourceAsync<LeafDto>, LeafDataSource>();
+        services.AddScoped<IDataSourceAsync<YellerDto>, YellerDataSource>();
+        services.AddScoped<IDataSourceAsync<CalliDto>, CalliFileDataSource>();
+        services.AddScoped<IDataSourceAsync<LeasedDto>, LeasedFileDataSource>();
+        services.AddScoped<IDataSourceAsync<LibacionDto>, LibacionFileDataSource>();
+        services.AddScoped<IDataSourceAsync<PanDto>, PanFileDataSource>();
         #endregion
 
-        #region ADD SERVICES
         // *****************************************
+        #region ADD SERVICES
 
         // Loggers 
         services.AddTransient<LabService>();
@@ -137,8 +109,8 @@ public static class InjectInfrastructure
 
         #endregion
 
-        #region ADD CLIENTS
         // *****************************************
+        #region ADD CLIENTS
 
         // Add Leaf Client
         services.AddHttpClient(settings.LeafName!, c =>

@@ -1,10 +1,19 @@
 ﻿namespace LeadPipe.Infrastructure.Settings;
 
-public interface IInfrastructureSettings : IDwhSettings, ILeafSettings, ILabSettings, IYellerSettings, ICalliSettings
+public interface IInfrastructureSettings : IDwhSettings,
+    ILabSettings,
+    ILeafSettings,
+    IYellerSettings
 {
-    string? CalliLocation { get; set; }
-    string? LeasedLocation { get; set; }
-    string? LibacionLocation { get; set; }
-    string? PanLocation { get; set; }
+    string? CalliReportLoc { get; set; }
+    string? CalliSourceLoc { get; set; }
 
+    string? LibacionSourceLoc { get; set; }
+    string? LibacionReportLoc { get; set; }
+
+    string? LeasedSourceLoc { get; set; }
+    string? LeasedReportLoc { get; set; }
+
+    string? PanReportLoc { get; set; }
+    string? PanSourceLoc { get; set; }
 }

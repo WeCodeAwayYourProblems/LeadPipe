@@ -4,6 +4,7 @@ using LeadPipe.Infrastructure.Data.Source;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -25,6 +26,8 @@ public class DataSourceTests
         var csvMock = Substitute.For<ICsvRwService>();
         var jsonMock = Substitute.For<IJsonRwService>();
         var loggerMock = Substitute.For<ILogger<CalliFileDataSource>>();
+        var settingsMock = Substitute.For<IInfrastructureSettings>();
+        settingsMock.CalliSourceLoc.Returns(tempFilePath);
 
         List<CalliDto> dtoList = [new()];
         if (extension == ".csv")
@@ -32,7 +35,7 @@ public class DataSourceTests
         else
             jsonMock.ReadFile<CalliDto>(Arg.Any<FileInfo>()).Returns(Result.Success(dtoList));
 
-        var ds = new CalliFileDataSource(tempFile, csvMock, jsonMock, loggerMock);
+        var ds = new CalliFileDataSource(settingsMock, csvMock, jsonMock, loggerMock);
 
         // Act
         var result = await ds.LoadAsync();

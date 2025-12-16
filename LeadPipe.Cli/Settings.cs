@@ -35,10 +35,8 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? MySqlConnectionString { get; set; }
     public string? Schema1 { get; set; }
     public string? Schema2 { get; set; }
-    public string? CalliLocation { get; set; }
-    public string? LeasedLocation { get; set; }
-    public string? LibacionLocation { get; set; }
-    public string? PanLocation { get; set; }
+    
+    // Yeller 
     public string? YellerName { get; set; }
     public string? YellerSecret { get; set; }
     public string? YellerToken { get; set; }
@@ -48,5 +46,17 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public int YellerConcurrentMax { get; set; }
     public string? YellerFinalEndpoint { get; set; }
     public string? YellerPrelimId { get; set; }
+
+    // Data
+    public string? CalliSourceLoc { get; set; }
     public string? CalliReportLoc { get; set; }
+    
+    public string? LeasedSourceLoc { get; set; }
+    public string? LeasedReportLoc { get; set; }
+    
+    public string? LibacionSourceLoc { get; set; }
+    public string? LibacionReportLoc { get; set; }
+    
+    public string? PanReportLoc { get; set; }
+    public string? PanSourceLoc { get; set; }
 }

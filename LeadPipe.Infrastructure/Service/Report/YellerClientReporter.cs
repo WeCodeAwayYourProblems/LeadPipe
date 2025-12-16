@@ -25,7 +25,7 @@ public sealed class YellerClientReporter(
 [SourceKey(Source.Calli)]
 public sealed class CalliReporter(
     ICsvRwService csv,
-    ICalliSettings settings
+    IInfrastructureSettings settings
     ) : CsvReporter<ReportFilePlumbing>(csv, new FileInfo(settings.CalliReportLoc!))
 { }
 

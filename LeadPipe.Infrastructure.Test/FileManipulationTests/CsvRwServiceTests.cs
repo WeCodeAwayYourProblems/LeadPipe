@@ -1,4 +1,7 @@
+using CSharpFunctionalExtensions;
+using CsvHelper.Configuration;
 using LeadPipe.Infrastructure.Service;
+using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace LeadPipe.Infrastructure.Test.FileManipulationTests;
 
@@ -29,6 +32,15 @@ public sealed class CsvRwServiceTests : IDisposable
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
+    }
+    public class DefaultClassMap : ClassMap<TestRecord>
+    {
+        public DefaultClassMap()
+        {
+            int index = 0;
+            Map(m => m.Id).Index(index++);
+            Map(m=>m.Name).Index(index++);
+        }
     }
 
     [Fact]
@@ -92,7 +104,7 @@ public sealed class CsvRwServiceTests : IDisposable
         var file = GetTempFile("nonexistent.csv");
         var result = _service.ReadFile<TestRecord>(file);
         Assert.False(result.IsSuccess);
-        Assert.Contains("Failed to perform the following action", result.ErrorMessage);
+        Assert.Contains("Failed to perform the following action", result.Error);
     }
 
     [Fact]
@@ -101,7 +113,7 @@ public sealed class CsvRwServiceTests : IDisposable
         var file = GetTempFile("nonexistent.csv");
         var result = await _service.ReadFileAsync<TestRecord>(file);
         Assert.False(result.IsSuccess);
-        Assert.Contains("Failed to perform the following action", result.ErrorMessage);
+        Assert.Contains("Failed to perform the following action", result.Error);
     }
 
     [Fact]
@@ -127,9 +139,9 @@ public sealed class CsvRwServiceTests : IDisposable
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
-        var result = await _service.WriteAsync(records, file, cts.Token);
+        Result result = await _service.WriteAsync(records, file, cts.Token);
         // WriteAsync internally does not throw for cancellation but flush might
-        Assert.False(result.IsSuccess || result.Value != null);
+        Assert.True(result.IsFailure);
     }
 
     [Fact]
@@ -145,6 +157,4 @@ public sealed class CsvRwServiceTests : IDisposable
         Assert.Empty(readResult.Value);
     }
 
-    // Default ClassMap for Append test
-    private sealed class DefaultClassMap<T> : ClassMap<T> { }
 }

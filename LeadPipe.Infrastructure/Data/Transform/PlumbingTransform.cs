@@ -22,6 +22,7 @@ public sealed class PlumbingTransform(
 
         string message = link.PlumbingEntity.Contents is string c ? c : string.Empty;
         string source = link.PlumbingEntity.Source.ToString();
+        string metadata = link.PlumbingEntity.MetaData;
 
         long customerId = link.SubsEntity.CustomerId;
         long subId = link.SubsEntity.Id;
@@ -55,6 +56,7 @@ public sealed class PlumbingTransform(
             FormattedDate = formattedDate,
             Message = message,
             Source = source,
+            MetaData = metadata,
             CustomerId = customerId,
             SubId = subId,
             SubActive = subActive,

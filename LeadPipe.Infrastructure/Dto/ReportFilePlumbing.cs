@@ -14,6 +14,7 @@ public class ReportFilePlumbingMap : ClassMap<ReportFilePlumbing>
         Map(m => m.FormattedDate).Index(index++).Name(ReportFilePlumbing.FormattedDateName);
         Map(m => m.Message).Index(index++).Name(ReportFilePlumbing.MessageName);
         Map(m => m.Source).Index(index++).Name(ReportFilePlumbing.SourceName);
+        Map(m => m.MetaData).Index(index++).Name(ReportFilePlumbing.MetaDataName);
         Map(m => m.MsgBeforeCust).Index(index++).Name(ReportFilePlumbing.MsgBeforeCustName);
         Map(m => m.IsSale).Index(index++).Name(ReportFilePlumbing.IsSaleName);
         Map(m => m.CustomerId).Index(index++).Name(ReportFilePlumbing.CustomerIdName);
@@ -52,6 +53,10 @@ public class ReportFilePlumbing
     /// </summary>
     public required string Source { get; set; }
     public const string SourceName = "Source";
+
+    [Name(MetaDataName)]
+    public required string MetaData { get; set; }
+    public const string MetaDataName = "Meta Data";
 
     [Name(MsgBeforeCustName)]
     public bool MsgBeforeCust { get; set; }

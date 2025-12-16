@@ -12,6 +12,7 @@ public abstract class Persistence<IRepo, TEntity>(IRepo repo) : IDataPersistence
     private readonly IRepo _repo = repo;
     public async Task<Result> SaveAsync(List<TEntity> t)
     {
-        Result<List<TEntity>> added = await _repo.AddRangeAsync(t); return added;
+        Result<List<TEntity>> added = await _repo.AddRangeAsync(t); 
+        return added;
     }
 }

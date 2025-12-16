@@ -40,6 +40,45 @@ internal class CsvRwService : ICsvRwService
         catch (Exception ex)
         { return Result.Failure<List<T>>(CsvException(path.FullName, ex, nameof(ReadFile))); }
     }
+    public async Task<Result<List<T>>> ReadFileAsync<T>(FileInfo path, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await using var stream = new FileStream(
+                path.FullName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 4096,
+                useAsync: true);
+
+            using var reader = new StreamReader(stream);
+            using var csv = new CsvReader(reader, _config);
+
+            var records = new List<T>();
+
+            foreach (var record in csv.GetRecords<T>())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                records.Add(record);
+            }
+
+            return Result.Success(records);
+        }
+        catch (OperationCanceledException)
+        {
+            throw; // let cancellation propagate naturally
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<T>>(
+                CsvException(path.FullName, ex, nameof(ReadFileAsync)));
+        }
+    }
+
+
     public Result Write<TClass, TMap>(FileInfo path, IEnumerable<TClass> unparsedObject) where TMap : ClassMap<TClass>
     {
         try

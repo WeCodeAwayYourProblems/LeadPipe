@@ -44,6 +44,12 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<YellerDto>, YellerDataSource>();
 
         // Keyed Sources
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadCalli>(Source.Calli);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLab>(Source.Lab);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLeaf>(Source.Leaf);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLeased>(Source.Leased);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLibacion>(Source.Libacion);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadPan>(Source.Pan);
         services.AddKeyedScoped<ILoadData<Plumbing>, LoadYeller>(Source.Yeller);
 
         // Transformers

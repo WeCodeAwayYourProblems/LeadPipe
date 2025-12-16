@@ -98,10 +98,10 @@ internal class DataUpdateReportVerb : IVerbAsync
                     catch (Exception ex) { return Result.Failure<List<Plumbing>>(ex.Message); }
                 });
 
-                List<Result<List<Plumbing>>> results = [.. await Task.WhenAll(tasks)];
+                Result<List<Plumbing>>[] results = [.. await Task.WhenAll(tasks)];
 
                 // Combine Results
-                Result v = Result.Combine(results);
+                Result v = Result.Combine(" | ", results);
                 if (v.IsFailure)
                     return Result.Failure<List<Plumbing>>(v.Error);
 

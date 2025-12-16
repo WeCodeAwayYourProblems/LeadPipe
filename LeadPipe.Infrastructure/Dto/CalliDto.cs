@@ -12,6 +12,6 @@ public class CalliDto
     public string? Time { get; set; }
     [Name("Time Zone")]
     public string? TimeZone { get; set; }
-    [Name("Pest Problem")]
+    [Name("Pest Problem/Message Content")]
     public string? PestProblem { get; set; }
 }

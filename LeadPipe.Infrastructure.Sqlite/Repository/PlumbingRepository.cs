@@ -28,13 +28,20 @@ public class PlumbingRepository(PlumbingContext context) : PlumbingContextReposi
 
         try
         {
-            var combos = entities.Select(e => new { e.PhoneNumber, e.Source });
+            var combos = entities.Select(e => new { e.PhoneNumber, e.Source }).ToList();
 
             // Pull only rows that match any combo
-            var existing = await _set
-                .Where(p => combos.Contains(new { p.PhoneNumber, p.Source }))
-                .Select(p => new { p.PhoneNumber, p.Source })
-                .ToListAsync();
+            var existing = await (
+                from p in _set
+                join c in combos
+                    on new { p.PhoneNumber, p.Source }
+                    equals new { c.PhoneNumber, c.Source }
+                select new { p.PhoneNumber, p.Source }
+                ).ToListAsync();
+            //var existing = await _set
+            //.Where(p => combos.Contains(new { p.PhoneNumber, p.Source }))
+            //.Select(p => new { p.PhoneNumber, p.Source })
+            //.ToListAsync();
 
             // Use a HashSet for faster duplicate filtering
             var existingSet = new HashSet<(long PhoneNumber, Source Source)>(

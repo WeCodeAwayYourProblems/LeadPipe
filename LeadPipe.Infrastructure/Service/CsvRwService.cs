@@ -84,5 +84,40 @@ internal class CsvRwService : ICsvRwService
         catch (Exception ex)
         { return Result.Failure(CsvException(path.FullName, ex, nameof(Append))); }
     }
+
+    public async Task<Result> WriteAsync<TClass>(
+    IEnumerable<TClass> unparsedObject,
+    FileInfo path,
+    CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var stream = new FileStream(
+                path.FullName,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 4096,
+                useAsync: true);
+
+            await using var writer = new StreamWriter(stream);
+            using var csv = new CsvWriter(writer, _config);
+
+            // CsvHelper is synchronous here
+            csv.WriteRecords(unparsedObject);
+
+            // Ensure buffered data is flushed asynchronously
+            await writer.FlushAsync();
+            await stream.FlushAsync(cancellationToken);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            var exception = CsvException(path.FullName, ex, nameof(WriteAsync));
+            return Result.Failure(exception);
+        }
+    }
+
     #endregion
 }

@@ -59,10 +59,7 @@ public class PlumbingRepository(
 
             return Result.Success(toInsert);
         }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<PlumbingEntity>>($"Failed to save Plumbing entities: {ex.Message}");
-        }
+        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>($"Failed to save Plumbing entities: {ex.Message}"); }
     }
 
 }

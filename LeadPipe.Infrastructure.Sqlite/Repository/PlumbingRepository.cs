@@ -4,12 +4,16 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class PlumbingRepository(PlumbingContext context) : PlumbingContextRepository<PlumbingEntity>(context), IPlumbingRepository
+public class PlumbingRepository(
+    PlumbingContext context, 
+    ILogger<PlumbingRepository> logger
+    ) : PlumbingContextRepository<PlumbingEntity>(context), IPlumbingRepository
 {
+    private readonly ILogger<PlumbingRepository> _logger = logger;
     public async Task<Result<List<PlumbingEntity>>> GetAllAsync(Source source)
     {
         try
@@ -28,17 +32,16 @@ public class PlumbingRepository(PlumbingContext context) : PlumbingContextReposi
 
         try
         {
-            var combos = entities.Select(e => new { e.PhoneNumber, e.Source }).ToList();
+            // Extract numbers
+            HashSet<long> phoneNumbers = [.. entities.Select(e => e.PhoneNumber)];
 
-            // Pull only rows that match any combo
+            // Query
             var existing = await _set
-                .Where(p => combos.Any(c =>
-                    c.PhoneNumber == p.PhoneNumber &&
-                    c.Source == p.Source))
+                .Where(p => phoneNumbers.Contains(p.PhoneNumber))
                 .Select(p => new { p.PhoneNumber, p.Source })
                 .ToListAsync();
 
-            // Use a HashSet for faster duplicate filtering
+            // Now finish the composite match in memory
             HashSet<(long PhoneNumber, Source Source)> existingSet = [.. existing.Select(x => (x.PhoneNumber, x.Source))];
 
             List<PlumbingEntity> toInsert = [.. entities.Where(e => !existingSet.Contains((e.PhoneNumber, e.Source)))];
@@ -48,6 +51,11 @@ public class PlumbingRepository(PlumbingContext context) : PlumbingContextReposi
 
             await _set.AddRangeAsync(toInsert);
             await _context.SaveChangesAsync();
+
+            _logger.LogDebug(
+                "Plumbing bulk insert: {Inserted}/{Total}",
+                toInsert.Count,
+                entities.Count);
 
             return Result.Success(toInsert);
         }

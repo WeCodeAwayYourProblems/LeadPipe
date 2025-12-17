@@ -4,6 +4,7 @@ using LeadPipe.Infrastructure.Sqlite.Context;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace LeadPipe.Infrastructure.Sqlite;
@@ -18,6 +19,9 @@ public static class InjectInfrastructureSqlite
             string? connectionString = settings.PlumbingContext!;
             options.UseSqlite(connectionString);
         });
+
+        // Logger
+        services.AddTransient<PlumbingRepository>();
 
         // Add Repositories
         services.AddScoped<ICallRepository, CallRepository>();

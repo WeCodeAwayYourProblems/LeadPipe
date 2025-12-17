@@ -38,19 +38,11 @@ public class PlumbingRepository(PlumbingContext context) : PlumbingContextReposi
                     equals new { c.PhoneNumber, c.Source }
                 select new { p.PhoneNumber, p.Source }
                 ).ToListAsync();
-            //var existing = await _set
-            //.Where(p => combos.Contains(new { p.PhoneNumber, p.Source }))
-            //.Select(p => new { p.PhoneNumber, p.Source })
-            //.ToListAsync();
 
             // Use a HashSet for faster duplicate filtering
-            var existingSet = new HashSet<(long PhoneNumber, Source Source)>(
-                existing.Select(x => (x.PhoneNumber, x.Source))
-            );
+            HashSet<(long PhoneNumber, Source Source)> existingSet = [.. existing.Select(x => (x.PhoneNumber, x.Source))];
 
-            var toInsert = entities
-                .Where(e => !existingSet.Contains((e.PhoneNumber, e.Source)))
-                .ToList();
+            List<PlumbingEntity> toInsert = [.. entities.Where(e => !existingSet.Contains((e.PhoneNumber, e.Source)))];
 
             if (toInsert.Count == 0)
                 return Result.Success(new List<PlumbingEntity>());

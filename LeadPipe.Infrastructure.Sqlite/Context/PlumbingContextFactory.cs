@@ -5,6 +5,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace LeadPipe.Infrastructure.Sqlite.Context;
 
+/// <summary>
+/// This is here specifically for adding ef migrations
+/// </summary>
 public sealed class PlumbingContextFactory : IDesignTimeDbContextFactory<PlumbingContext>
 {
     public PlumbingContext CreateDbContext(string[] args)

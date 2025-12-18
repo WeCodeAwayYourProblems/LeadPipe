@@ -12,10 +12,13 @@ public static class InjectInfrastructureMySql
     public static IServiceCollection AddInfrastructureMySql(this IServiceCollection services, IMySqlSettings settings)
     {
         // Register MySqlContext
+        if (string.IsNullOrWhiteSpace(settings.MySqlConnectionString))
+            throw new InvalidOperationException("MySqlConnectionString is missing.");
+
         services.AddDbContext<MySqlContext>((serviceProvider, options) =>
         {
             options.UseMySql(
-                settings.MySqlConnectionString!,
+                settings.MySqlConnectionString,
                 ServerVersion.AutoDetect(settings.MySqlConnectionString!)
             );
         });

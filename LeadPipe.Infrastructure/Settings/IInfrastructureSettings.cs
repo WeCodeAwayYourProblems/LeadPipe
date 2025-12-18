@@ -9,6 +9,9 @@ public interface IInfrastructureSettings :
     string? CalliReportLoc { get; set; }
     string? CalliSourceLoc { get; set; }
 
+    string? LabReportLoc { get; set; }
+    string? LabSourceLoc { get; set; }
+
     string? LibacionSourceLoc { get; set; }
     string? LibacionReportLoc { get; set; }
 

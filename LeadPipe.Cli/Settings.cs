@@ -51,6 +51,9 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? CalliSourceLoc { get; set; }
     public string? CalliReportLoc { get; set; }
     
+    public string? LabReportLoc { get ; set ; }
+    public string? LabSourceLoc { get ; set ; }
+
     public string? LeasedSourceLoc { get; set; }
     public string? LeasedReportLoc { get; set; }
     

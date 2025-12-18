@@ -7,14 +7,22 @@ using LeadPipe.Infrastructure.Settings;
 namespace LeadPipe.Infrastructure.Service.Report;
 
 [SourceKey(Source.Yeller)]
-public sealed class YellerClientReporter(
-    IHttpClientFactory factory,
-    IYellerSettings settings
-    ) : IReport<ReportYeller>
+public sealed class YellerClientReporter : IReport<ReportYeller>
 {
-    private readonly IHttpClientFactory _factory = factory;
-    private readonly IYellerSettings _settings = settings;
-    private HttpClient Client => _factory.CreateClient(_settings.YellerName!);
+    private readonly IHttpClientFactory _factory;
+    private readonly IYellerSettings _settings;
+    private readonly HttpClient _client;
+
+    public YellerClientReporter(
+        IHttpClientFactory factory,
+        IYellerSettings settings
+    )
+    {
+        _factory = factory;
+        _settings = settings;
+        _client = _factory.CreateClient(_settings.YellerName!);
+    }
+
     public Task<Result> ReportData(List<ReportYeller> d)
     {
         throw new NotImplementedException();

@@ -14,7 +14,7 @@ public abstract class LoadData<TVo, TEntity>(
 {
     private readonly IRepository<TEntity> _repo = repo;
     private readonly IEntityToVo<TEntity, TVo> _eToVo = eToVo;
-    Domain.ValueObjects.Source _source = source;
+    private readonly Domain.ValueObjects.Source _source = source;
     public async Task<Result<List<TVo>>> LoadAsync()
     {
         try

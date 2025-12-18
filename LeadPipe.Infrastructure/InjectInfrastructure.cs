@@ -14,7 +14,6 @@ using LeadPipe.Infrastructure.Service.Report;
 using LeadPipe.Infrastructure.Service.Update;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure;
 
@@ -91,11 +90,16 @@ public static class InjectInfrastructure
 
         // Keyed Report services
         services.AddKeyedScoped<IReportService<Plumbing>, CalliReportService>(Source.Calli);
+        services.AddKeyedScoped<IReportService<Plumbing>, LabReportService>(Source.Lab);
+        services.AddKeyedScoped<IReportService<Plumbing>, LeafReportService>(Source.Leaf);
+        services.AddKeyedScoped<IReportService<Plumbing>, LeasedReportService>(Source.Leased);
+        services.AddKeyedScoped<IReportService<Plumbing>, LibacionReportService>(Source.Libacion);
+        services.AddKeyedScoped<IReportService<Plumbing>, PanReportService>(Source.Pan);
         services.AddKeyedScoped<IReportService<Plumbing>, YellerReportService>(Source.Yeller);
 
         // Non-keyed report services
-        services.AddKeyedScoped<IReport<ReportYeller>, YellerClientReporter>(Source.Yeller);
         services.AddKeyedScoped<IReport<ReportPlumbing>, CalliReporter>(Source.Calli);
+        services.AddKeyedScoped<IReport<ReportYeller>, YellerClientReporter>(Source.Yeller);
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();

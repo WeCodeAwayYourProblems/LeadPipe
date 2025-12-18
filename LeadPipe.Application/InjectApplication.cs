@@ -10,16 +10,25 @@ public static class InjectApplication
     {
         // Format: services.AddScoped<Interface, Class>();  
 
-        // Add update managers
-        RegisterManagers(services);
+        // Add Update managers
+        Register(services, typeof(IUpdateManager));
 
-        // Add managers singly
+        // Add Report managers
+        services.AddScoped<IReportCalliManager, ReportCalliManager>();
+        services.AddScoped<IReportLabManager, ReportLabManager>();
+        services.AddScoped<IReportLeafManager, ReportLeafManager>();
+        services.AddScoped<IReportLeasedManager, ReportLeasedManager>();
+        services.AddScoped<IReportLibacionManager, ReportLibacionManager>();
+        services.AddScoped<IReportPanManager, ReportPanManager>();
+        services.AddScoped<IReportYellerManager, ReportYellerManager>();
+
+        // Add managers
         services.AddScoped<IFileRWManager, FileRWManager>();
         services.AddScoped<IPlumbingAssociationManager, PlumbingAssociationManager>();
 
         return services;
     }
-    private static void RegisterManagers(IServiceCollection services)
+    private static void Register(IServiceCollection services, Type type)
     {
         Assembly? assembly = Assembly.GetAssembly(typeof(InjectApplication));
         if (assembly is null)
@@ -30,7 +39,7 @@ public static class InjectApplication
             .Where(t =>
                 t.IsClass &&
                 !t.IsAbstract &&
-                typeof(IUpdateManager).IsAssignableFrom(t)
+                type.IsAssignableFrom(t)
             );
 
         foreach (Type? managerType in managers)
@@ -39,8 +48,8 @@ public static class InjectApplication
             Type? serviceInterface = managerType
                 .GetInterfaces()
                 .FirstOrDefault(i =>
-                    i != typeof(IUpdateManager) &&
-                    typeof(IUpdateManager).IsAssignableFrom(i));
+                    i != type &&
+                    type.IsAssignableFrom(i));
 
             if (serviceInterface is null)
                 continue;
@@ -48,5 +57,28 @@ public static class InjectApplication
             services.AddScoped(serviceInterface, managerType);
         }
     }
+    private static void RegisterGeneric(IServiceCollection services, Type type)
+    {
+        Assembly? assembly = Assembly.GetAssembly(typeof(InjectApplication));
+        if (assembly is null)
+            return;
 
+        IEnumerable<Type> managers = assembly
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract);
+
+        foreach (Type managerType in managers)
+        {
+            Type? serviceInterface = managerType
+                .GetInterfaces()
+                .FirstOrDefault(i =>
+                    i.IsGenericType &&
+                    i.GetGenericTypeDefinition() == type
+                );
+            if (serviceInterface is null)
+                continue;
+
+            services.AddScoped(serviceInterface, managerType);
+        }
+    }
 }

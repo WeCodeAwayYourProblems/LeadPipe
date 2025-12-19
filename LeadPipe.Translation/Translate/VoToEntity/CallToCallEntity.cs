@@ -15,6 +15,7 @@ internal class CallToCallEntity : IVoToEntity<Call, CallEntity>
             UnixCallDate = c.Date.ToUnixTimeSeconds(),
             Note = c.Note,
             Source = c.Source,
+            Location = c.Location,
             Duration = (int)c.Duration.TotalSeconds,
             Billable = c.Billable
         };

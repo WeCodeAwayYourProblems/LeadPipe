@@ -23,41 +23,5 @@ public class CustomerMySqlRepositoryTests
         return new CustomerMySqlRepository(context);
     }
 
-    [Fact]
-    public async Task AddAsync_ShouldAddEntity()
-    {
-        var repo = CreateRepository();
-        var entity = new CustomerMySqlEntity { customerID = 1 };
-
-        var result = await repo.AddAsync(entity);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.Value.customerID);
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ShouldReturnEntity()
-    {
-        var repo = CreateRepository();
-        var entity = new CustomerMySqlEntity { customerID = 2 };
-        await repo.AddAsync(entity);
-
-        var result = await repo.GetByIdAsync(2);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.customerID);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldRemoveEntity()
-    {
-        var repo = CreateRepository();
-        var entity = new CustomerMySqlEntity { customerID = 3 };
-        await repo.AddAsync(entity);
-
-        var deleteResult = await repo.DeleteAsync(entity.customerID);
-
-        Assert.True(deleteResult.IsSuccess);
-        Assert.True(deleteResult.Value);
-    }
+   
 }

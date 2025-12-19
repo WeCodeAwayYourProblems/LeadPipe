@@ -15,8 +15,8 @@ public class SubsCallLinkRepositoryTests
 
         var entities = new List<CallSubsLink>
         {
-            new() { Id = 1, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Source=string.Empty } },
-            new() { Id = 2, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Source=string.Empty } }
+            new() { Id = 1, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Location = string.Empty, Source=string.Empty } },
+            new() { Id = 2, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Location = string.Empty, Source=string.Empty } }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -43,7 +43,7 @@ public class SubsCallLinkRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new SubsCallLinkRepository(context);
 
-        var plumbing = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
+        var plumbing = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -52,7 +52,7 @@ public class SubsCallLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SubsCallLinks.Add(new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } });
+        context.SubsCallLinks.Add(new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } });
         await context.SaveChangesAsync();
 
         var repo = new SubsCallLinkRepository(context);
@@ -66,7 +66,7 @@ public class SubsCallLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
+        var plumbing = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -92,12 +92,12 @@ public class SubsCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
+        var plumbing = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
         var repo = new SubsCallLinkRepository(context);
-        var updatedSubsCallLink = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
+        var updatedSubsCallLink = new CallSubsLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsCallLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -111,7 +111,7 @@ public class SubsCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext());
-        var updatedSubsCallLink = new CallSubsLink { Id = 99, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Source = string.Empty } };
+        var updatedSubsCallLink = new CallSubsLink { Id = 99, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsCallLink);
 

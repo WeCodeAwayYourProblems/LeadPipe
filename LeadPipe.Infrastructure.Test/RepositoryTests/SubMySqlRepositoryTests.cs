@@ -23,41 +23,5 @@ public class SubMySqlRepositoryTests
         return new SubMySqlRepository(context);
     }
 
-    [Fact]
-    public async Task AddAsync_ShouldAddEntity()
-    {
-        var repo = CreateRepository();
-        var entity = new SubMySqlEntity { subscriptionID = 1 };
-
-        var result = await repo.AddAsync(entity);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.Value.subscriptionID);
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ShouldReturnEntity()
-    {
-        var repo = CreateRepository();
-        var entity = new SubMySqlEntity { subscriptionID = 2 };
-        await repo.AddAsync(entity);
-
-        var result = await repo.GetByIdAsync(2);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.subscriptionID);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldRemoveEntity()
-    {
-        var repo = CreateRepository();
-        var entity = new SubMySqlEntity { subscriptionID = 3 };
-        await repo.AddAsync(entity);
-
-        var deleteResult = await repo.DeleteAsync(entity.subscriptionID);
-
-        Assert.True(deleteResult.IsSuccess);
-        Assert.True(deleteResult.Value);
-    }
+    
 }

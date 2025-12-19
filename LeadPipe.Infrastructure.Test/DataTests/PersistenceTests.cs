@@ -51,7 +51,7 @@ public class PersistenceTests
     public async Task CallEntityPersistence_SaveAsync_ReturnsSuccess()
     {
         var repo = Substitute.For<ICallRepository>();
-        var entity = new CallEntity() { Note = string.Empty, Source = $"{Source.Test}" };
+        var entity = new CallEntity() { Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}" };
         repo.AddRangeAsync(Arg.Any<List<CallEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<CallEntity> { entity })));
 
@@ -72,7 +72,7 @@ public class PersistenceTests
 
         var persistence = new CallEntityPersistence(repo);
 
-        var result = await persistence.SaveAsync(new List<CallEntity> { new CallEntity() { Note = string.Empty, Source = $"{Source.Test}" } });
+        var result = await persistence.SaveAsync(new List<CallEntity> { new CallEntity() { Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}" } });
 
         Assert.True(result.IsFailure);
         Assert.Equal("error", result.Error);

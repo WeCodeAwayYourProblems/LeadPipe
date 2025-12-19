@@ -35,7 +35,6 @@ public static class InjectInfrastructure
         services.AddScoped<IDataPersistence<SubMySqlEntity>, SubMySqlEntityPersistence>();
         services.AddScoped<IDataPersistence<CallSubsLink>, SubsCallLinkPersistence>();
         services.AddScoped<IDataPersistence<SubsPlumbingLink>, SubsPlumbingLinkPersistence>();
-        services.AddScoped<IDataPersistence<SummaryMySqlEntity>, SummaryMySqlEntityPersistence>();
 
 
         // Keyed Sources

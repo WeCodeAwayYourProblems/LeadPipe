@@ -8,6 +8,7 @@ public class CallEntity : IEntity
     public long UnixCallDate { get; set; }
     public required string Note { get; set; }
     public required string Source { get; set; }
+    public required string Location { get; set; }
     public long Duration { get; set; }
     public bool Billable { get; set; }
 

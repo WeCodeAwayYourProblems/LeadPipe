@@ -14,9 +14,10 @@ internal class CallEntityToCall : IEntityToVo<CallEntity, Call>
         TimeSpan duration = TimeSpan.FromSeconds(c.Duration);
         string note = c.Note;
         string source = c.Source;
+        string location = c.Location;
         bool billable = c.Billable;
 
-        var result = new Call(Date: date, Number: number, Duration: duration, Note: note, Source: source, Billable: billable);
+        Call result = new(Date: date, Number: number, Duration: duration, Note: note, Source: source, Location: location, Billable: billable);
         return result;
     }
 }

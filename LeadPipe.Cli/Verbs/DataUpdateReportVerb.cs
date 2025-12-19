@@ -65,7 +65,7 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     private async Task<Result<List<Plumbing>>> Update(IServiceProvider service)
     {
-        Func<Task<Result<List<Plumbing>>>> Make<T>() where T : IUpdateManager =>
+        Func<Task<Result<List<Plumbing>>>> Make<T>() where T : IUpdateManager<Plumbing> =>
             async () => await service.GetRequiredService<T>().ManageAsync();
 
         Func<Task<Result<List<Plumbing>>>> action = Source switch

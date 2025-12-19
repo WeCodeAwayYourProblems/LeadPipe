@@ -11,7 +11,15 @@ public static class InjectApplication
         // Format: services.AddScoped<Interface, Class>();  
 
         // Add Update managers
-        Register(services, typeof(IUpdateManager));
+        services.AddScoped<IUpdateCalliManager, UpdateCalliManager>();
+        services.AddScoped<IUpdateLabManager, UpdateLabManager>();
+        services.AddScoped<IUpdateLeafManager, UpdateLeafManager>();
+        services.AddScoped<IUpdateLeasedManager, UpdateLeasedManager>();
+        services.AddScoped<IUpdateLibacionManager, UpdateLibacionManager>();
+        services.AddScoped<IUpdatePanManager, UpdatePanManager>();
+        services.AddScoped<IUpdateYellerManager, UpdateYellerManager>();
+        services.AddScoped<IUpdateCallsManager, UpdateCallsManager>();
+        services.AddScoped<IUpdateSandwichManager, UpdateSandwichManager>();
 
         // Add Report managers
         services.AddScoped<IReportCalliManager, ReportCalliManager>();

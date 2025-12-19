@@ -101,6 +101,7 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReport<ReportPlumbing>, CalliReporter>(Source.Calli);
         services.AddKeyedScoped<IReport<ReportPlumbing>, LabReporter>(Source.Lab);
         services.AddKeyedScoped<IReport<ReportPlumbing>, LeasedReporter>(Source.Leased);
+        services.AddKeyedScoped<IReport<ReportPlumbing>, LeafReporter>(Source.Leaf);
         services.AddKeyedScoped<IReport<ReportPlumbing>, LibacionReporter>(Source.Libacion);
         services.AddKeyedScoped<IReport<ReportPlumbing>, PanReporter>(Source.Pan);
         services.AddKeyedScoped<IReport<ReportPlumbing>, YellerReporter>(Source.Yeller);        

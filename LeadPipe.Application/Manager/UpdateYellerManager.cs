@@ -4,5 +4,5 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Application.Manager;
 
-public interface IUpdateYellerManager : IUpdateManager { }
-public sealed class UpdateYellerManager([FromKeyedServices(Source.Yeller)] IUpdateService<Plumbing> update) : UpdateManager(update), IUpdateYellerManager { }
+public interface IUpdateYellerManager : IUpdateManager<Plumbing> { }
+public sealed class UpdateYellerManager([FromKeyedServices(Source.Yeller)] IUpdateService<Plumbing> update) : UpdateManager<Plumbing>(update), IUpdateYellerManager { }

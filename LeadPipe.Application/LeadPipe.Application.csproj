@@ -4,10 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>f61f648e-c555-4854-ab9a-40533affb5d6</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
 	  <PackageReference Include="CsvHelper" Version="*" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="*" />
 	  <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
   </ItemGroup>

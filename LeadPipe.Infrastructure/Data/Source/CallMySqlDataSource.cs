@@ -17,8 +17,8 @@ public sealed class CallMySqlDataSource(
         return found;
     }
 
-    public Task<Result<List<CallMySqlEntity>>> RefreshAsync()
+    public async Task<Result<List<CallMySqlEntity>>> RefreshAsync()
     {
-        throw new NotImplementedException();
+        return await LoadAsync();
     }
 }

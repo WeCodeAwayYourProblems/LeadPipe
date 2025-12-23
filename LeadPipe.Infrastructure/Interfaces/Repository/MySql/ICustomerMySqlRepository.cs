@@ -6,6 +6,6 @@ namespace LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 
 public interface ICustomerMySqlRepository
 {
-    Task<Result<List<CustomerMySqlEntity>>> FindAsync(Expression<Func<CustomerMySqlEntity, bool>> predicate, bool includeSubscriptions);
-    Task<Result<CustomerMySqlEntity>> GetByIdAsync(int id, bool includeSubscriptions);
+    Task<Result<List<CustomerMySqlEntity>>> FindAsync(Expression<Func<CustomerMySqlEntity, bool>> predicate, bool includeSubscriptions = true);
+    Task<Result<CustomerMySqlEntity>> GetByIdAsync(int id, bool includeSubscriptions = true);
 }

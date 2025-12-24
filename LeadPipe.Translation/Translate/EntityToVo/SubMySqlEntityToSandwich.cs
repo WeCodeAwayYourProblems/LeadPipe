@@ -42,13 +42,13 @@ internal sealed class SubMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntityT
         bool subActive = entity.active == 1;
         bool complete = entity.initialStatus == 1;
         decimal value = entity.contractValue;
-        
+
         const string np = "Not Provided";
         string type = entity.serviceType is string t ? t : np;
-        string seller = entity.soldBy is string s1 ? s1 : np;
-        string seller2 = entity.soldBy2 is string s2 ? s2 : np;
-        string seller3 = entity.soldBy3 is string s3 ? s3 : np;
-        
+        int seller = entity.soldBy is int soldby ? soldby : 0;
+        int seller2 = entity.soldBy2 is int soldBy2 ? soldBy2 : 0;
+        int seller3 = entity.soldBy3 is int soldBy3 ? soldBy3 : 0;
+
         Sandwich result = new(
             SubscriptionId: subscriptionId,
             CustomerId: customerId,

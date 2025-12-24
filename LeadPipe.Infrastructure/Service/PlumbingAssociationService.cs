@@ -79,10 +79,10 @@ internal class PlumbingAssociationService(
         List<SubsEntity> subsEntities = [.. subs.Select(_sandToEntity.Translate)];
         List<CallEntity> callEntities = [.. calls.Select(_callToEntity.Translate)];
 
-        // Batch insert Plumbing, Subs, and Calls
-        await _plumbingRepo.AddRangeAsync(plumbingEntities);
-        await _subsRepo.AddRangeAsync(subsEntities);
-        await _callRepo.AddRangeAsync(callEntities);
+        // Batch upsert Plumbing, Subs, and Calls
+        await _plumbingRepo.UpsertRangeAsync(plumbingEntities);
+        await _subsRepo.UpsertRangeAsync(subsEntities);
+        await _callRepo.UpsertRangeAsync(callEntities);
 
         // Create dictionaries for quick lookup by PhoneNumber
         Dictionary<long, PlumbingEntity> plumbingDict = plumbingEntities.ToDictionary(p => p.PhoneNumber);
@@ -150,9 +150,9 @@ internal class PlumbingAssociationService(
             })];
 
         // Save links to DB
-        Result<List<SubsPlumbingLink>> addedSubsPlumbingLinks = await _subsPlumbingRepo.AddRangeAsync(subsPlumbingLinks);
-        Result<List<CallSubsLink>> addedSubsCallLinks = await _subsCallRepo.AddRangeAsync(subsCallLinks);
-        Result<List<PlumbingCallLink>> addedPlumbingCallLinks = await _plumbingCallRepo.AddRangeAsync(plumbingCallLinks);
+        Result<List<SubsPlumbingLink>> addedSubsPlumbingLinks = await _subsPlumbingRepo.UpsertRangeAsync(subsPlumbingLinks);
+        Result<List<CallSubsLink>> addedSubsCallLinks = await _subsCallRepo.UpsertRangeAsync(subsCallLinks);
+        Result<List<PlumbingCallLink>> addedPlumbingCallLinks = await _plumbingCallRepo.UpsertRangeAsync(plumbingCallLinks);
 
         // Combine all results
         return Result.Combine(addedSubsPlumbingLinks, addedSubsCallLinks, addedPlumbingCallLinks);

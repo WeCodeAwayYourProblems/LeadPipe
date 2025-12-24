@@ -1,4 +1,5 @@
 ﻿using LeadPipe.Application.Manager;
+using LeadPipe.Application.UpdateReportPipeline;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 

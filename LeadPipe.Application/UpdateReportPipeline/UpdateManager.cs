@@ -1,13 +1,13 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
 
-namespace LeadPipe.Application.Manager;
+namespace LeadPipe.Application.UpdateReportPipeline;
 
-public interface IUpdateManager<TVo>
+internal interface IUpdateManager<TVo>
 {
     Task<Result<List<TVo>>> ManageAsync(bool update = true);
 }
-public abstract class UpdateManager<TVo>(IUpdateService<TVo> update)
+internal abstract class UpdateManager<TVo>(IUpdateService<TVo> update)
 {
     private readonly IUpdateService<TVo> _update = update;
     public async Task<Result<List<TVo>>> ManageAsync(bool update = true)

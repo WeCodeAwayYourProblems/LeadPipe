@@ -2,14 +2,14 @@
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 
-namespace LeadPipe.Application.Manager;
+namespace LeadPipe.Application.UpdateReportPipeline;
 
-public interface IPlumbingAssociationManager
+internal interface IPlumbingAssociationManager
 {
     Task<Result> ManageAsync();
 }
 
-public class PlumbingAssociationManager(IPlumbingAssociationService plumbs) : IPlumbingAssociationManager
+internal class PlumbingAssociationManager(IPlumbingAssociationService plumbs) : IPlumbingAssociationManager
 {
     private readonly IPlumbingAssociationService _plumbs = plumbs;
     public async Task<Result> ManageAsync()

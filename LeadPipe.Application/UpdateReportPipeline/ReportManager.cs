@@ -1,13 +1,13 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
 
-namespace LeadPipe.Application.Manager;
+namespace LeadPipe.Application.UpdateReportPipeline;
 
-public interface IReportManager<TVo>
+internal interface IReportManager<TVo>
 {
     Task<Result<List<TVo>>> ManageAsync();
 }
-public abstract class ReportManager<TVo>(IReportService<TVo> report) : IReportManager<TVo>
+internal abstract class ReportManager<TVo>(IReportService<TVo> report) : IReportManager<TVo>
 {
     private readonly IReportService<TVo> _report = report;
 

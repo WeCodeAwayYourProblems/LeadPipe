@@ -15,21 +15,18 @@ public class TranscriptionMySqlRepository(MySqlContext context) : ITranscription
     {
         try
         {
-            var list = await _set.AsNoTracking().Where(predicate).ToListAsync();
+            List<TranscriptionMySqlEntity> list = await _set.AsNoTracking().Where(predicate).ToListAsync();
             return Result.Success(list);
         }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<TranscriptionMySqlEntity>>(ex.Message);
-        }
+        catch (Exception ex) { return Result.Failure<List<TranscriptionMySqlEntity>>(ex.Message); }
     }
 
     public async Task<Result<TranscriptionMySqlEntity>> GetByIdAsync(long callId)
     {
-        var found = await _set.AsNoTracking().SingleOrDefaultAsync(t => t.call_id == callId);
+        TranscriptionMySqlEntity? found = await _set.AsNoTracking().SingleOrDefaultAsync(t => t.call_id == callId);
 
         return found is null
-            ? Result.Failure<TranscriptionMySqlEntity>("Not found")
+            ? Result.Failure<TranscriptionMySqlEntity>($"{nameof(TranscriptionMySqlEntity)} with id {callId} was not found")
             : Result.Success(found);
     }
 }

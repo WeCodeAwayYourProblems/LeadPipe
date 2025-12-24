@@ -22,7 +22,7 @@ public class CallMySqlRepository(MySqlContext context) : ICallMySqlRepository
                 query = query
                     .Include(c => c.summaries)
                     .Include(c => c.transcriptions);
-                
+
                 // If this query ever takes a long time, this will be helpful
                 //query = _set
                 //    .AsNoTracking()
@@ -31,13 +31,10 @@ public class CallMySqlRepository(MySqlContext context) : ICallMySqlRepository
                 //    .Include(c => c.transcriptions);
             }
 
-            var list = await query.Where(predicate).ToListAsync();
+            List<CallMySqlEntity> list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<CallMySqlEntity>>(ex.Message);
-        }
+        catch (Exception ex) { return Result.Failure<List<CallMySqlEntity>>(ex.Message); }
     }
 
     public async Task<Result<CallMySqlEntity>> GetByIdAsync(long id, bool includeDetails = true)
@@ -51,10 +48,10 @@ public class CallMySqlRepository(MySqlContext context) : ICallMySqlRepository
                 .Include(c => c.transcriptions);
         }
 
-        var found = await query.SingleOrDefaultAsync(c => c.call_id == id);
+        CallMySqlEntity? found = await query.SingleOrDefaultAsync(c => c.call_id == id);
 
         return found is null
-            ? Result.Failure<CallMySqlEntity>($"Entity with id {id} was not found")
+            ? Result.Failure<CallMySqlEntity>($"{nameof(CallMySqlEntity)} with id {id} was not found")
             : Result.Success(found);
     }
 }

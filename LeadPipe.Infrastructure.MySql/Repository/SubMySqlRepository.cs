@@ -18,17 +18,12 @@ public class SubMySqlRepository(MySqlContext context) : ISubMySqlRepository
             IQueryable<SubMySqlEntity> query = _set.AsNoTracking();
 
             if (includeCustomer)
-            {
                 query = query.Include(s => s.customer);
-            }
 
-            var list = await query.Where(predicate).ToListAsync();
+            List<SubMySqlEntity> list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<SubMySqlEntity>>(ex.Message);
-        }
+        catch (Exception ex) { return Result.Failure<List<SubMySqlEntity>>(ex.Message); }
     }
 
     public async Task<Result<SubMySqlEntity>> GetByIdAsync(int id, bool includeCustomer = true)
@@ -36,14 +31,12 @@ public class SubMySqlRepository(MySqlContext context) : ISubMySqlRepository
         IQueryable<SubMySqlEntity> query = _set.AsNoTracking();
 
         if (includeCustomer)
-        {
             query = query.Include(s => s.customer);
-        }
 
-        var found = await query.SingleOrDefaultAsync(s => s.subscriptionID == id);
+        SubMySqlEntity? found = await query.SingleOrDefaultAsync(s => s.subscriptionID == id);
 
         return found is null
-            ? Result.Failure<SubMySqlEntity>($"Entity with id {id} was not found")
+            ? Result.Failure<SubMySqlEntity>($"{nameof(SubMySqlEntity)} with id {id} was not found")
             : Result.Success(found);
     }
 }

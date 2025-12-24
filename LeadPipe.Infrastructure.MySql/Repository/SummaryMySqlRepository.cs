@@ -15,27 +15,24 @@ public class SummaryMySqlRepository(MySqlContext context) : ISummaryMySqlReposit
     {
         try
         {
-            var list = await _set
+            List<SummaryMySqlEntity> list = await _set
                 .AsNoTracking()
                 .Where(predicate)
                 .ToListAsync();
 
             return Result.Success(list);
         }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<SummaryMySqlEntity>>(ex.Message);
-        }
+        catch (Exception ex) { return Result.Failure<List<SummaryMySqlEntity>>(ex.Message); }
     }
 
     public async Task<Result<SummaryMySqlEntity>> GetByIdAsync(long callId)
     {
-        var found = await _set
+        SummaryMySqlEntity? found = await _set
             .AsNoTracking()
             .SingleOrDefaultAsync(s => s.call_id == callId);
 
         return found is null
-            ? Result.Failure<SummaryMySqlEntity>($"Entity with id {callId} was not found")
+            ? Result.Failure<SummaryMySqlEntity>($"{nameof(SummaryMySqlEntity)} with id {callId} was not found")
             : Result.Success(found);
     }
 }

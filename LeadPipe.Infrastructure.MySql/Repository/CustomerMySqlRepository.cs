@@ -18,17 +18,12 @@ public class CustomerMySqlRepository(MySqlContext context) : ICustomerMySqlRepos
             IQueryable<CustomerMySqlEntity> query = _set.AsNoTracking();
 
             if (includeSubscriptions)
-            {
                 query = query.Include(c => c.subscriptions);
-            }
 
-            var list = await query.Where(predicate).ToListAsync();
+            List<CustomerMySqlEntity> list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<CustomerMySqlEntity>>(ex.Message);
-        }
+        catch (Exception ex) { return Result.Failure<List<CustomerMySqlEntity>>(ex.Message); }
     }
 
     public async Task<Result<CustomerMySqlEntity>> GetByIdAsync(int id, bool includeSubscriptions = true)
@@ -36,11 +31,9 @@ public class CustomerMySqlRepository(MySqlContext context) : ICustomerMySqlRepos
         IQueryable<CustomerMySqlEntity> query = _set.AsNoTracking();
 
         if (includeSubscriptions)
-        {
             query = query.Include(c => c.subscriptions);
-        }
 
-        var found = await query.SingleOrDefaultAsync(c => c.customerID == id);
+        CustomerMySqlEntity? found = await query.SingleOrDefaultAsync(c => c.customerID == id);
 
         return found is null
             ? Result.Failure<CustomerMySqlEntity>($"Entity with id {id} was not found")

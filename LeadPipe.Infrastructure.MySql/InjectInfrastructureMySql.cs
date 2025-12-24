@@ -4,6 +4,7 @@ using LeadPipe.Infrastructure.MySql.Repository;
 using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.MySql;
 
@@ -20,7 +21,9 @@ public static class InjectInfrastructureMySql
             options.UseMySql(
                 settings.MySqlConnectionString,
                 ServerVersion.AutoDetect(settings.MySqlConnectionString)
-            );
+            )
+            .LogTo(Console.WriteLine,LogLevel.Information)
+            .EnableSensitiveDataLogging();
         });
 
         // Register repositories

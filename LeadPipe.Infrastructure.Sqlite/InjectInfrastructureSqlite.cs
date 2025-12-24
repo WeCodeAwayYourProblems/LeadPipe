@@ -27,7 +27,9 @@ public static class InjectInfrastructureSqlite
 
             Directory.CreateDirectory(Path.GetDirectoryName(dataSource)!);
 
-            options.UseSqlite(cs);
+            options.UseSqlite(cs)
+                .LogTo(Console.WriteLine, LogLevel.Information)
+                .EnableSensitiveDataLogging();
         });
 
         services.AddTransient<PlumbingRepository>();

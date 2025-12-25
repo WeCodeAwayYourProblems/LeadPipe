@@ -44,7 +44,7 @@ public class MySqlContext : DbContext
         // SUMMARY ENTITY
         modelBuilder.Entity<SummaryMySqlEntity>(entity =>
         {
-            entity.ToTable("summary", schema: _settings.Schema2);
+            entity.ToTable("call_summary", schema: _settings.Schema2);
             entity.HasKey(x => x.call_id);
         });
 

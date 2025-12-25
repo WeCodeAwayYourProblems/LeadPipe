@@ -3,6 +3,7 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
@@ -148,31 +149,10 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
         }
     }
 
-    public async Task<Result<List<T>>> UpsertRangeAsync(List<T> entities)
+    public virtual async Task<Result<List<T>>> UpsertRangeAsync(List<T> entities)
     {
-        if (entities.Count == 0)
-            return Result.Success(entities);
-
-        long[] ids = [.. entities.Select(e => e.Id)];
-
-        Dictionary<long, T> existingEntities = await _set
-            .Where(e => ids.Contains(e.Id))
-            .ToDictionaryAsync(e => e.Id);
-
-        try
-        {
-            _context.ChangeTracker.AutoDetectChangesEnabled = false;
-
-            foreach (T entity in entities)
-                if (existingEntities.TryGetValue(entity.Id, out var existing))
-                    _context.Entry(existing).CurrentValues.SetValues(entity);
-                else
-                    await _set.AddAsync(entity);
-            await _context.SaveChangesAsync();
-            return Result.Success(entities);
-        }
-        catch (Exception ex) { return Result.Failure<List<T>>(ex.Message); }
-        finally { _context.ChangeTracker.AutoDetectChangesEnabled = true; }
-
+        throw new NotSupportedException(
+        $"{typeof(T).Name} must implement a SQLite-native UpsertRangeAsync.");
     }
 }
+

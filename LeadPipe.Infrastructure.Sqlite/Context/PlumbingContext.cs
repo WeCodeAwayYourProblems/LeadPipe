@@ -45,6 +45,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         call.HasIndex(c => c.PhoneNumber);
         call.Property(c => c.CallDate).IsRequired();
         call.Property(c => c.UnixCallDate).IsRequired();
+        call.HasIndex(c => new { c.PhoneNumber, c.CallDate }).IsUnique();
 
         // SubsPlumbingLink
         var spLink = modelBuilder.Entity<SubsPlumbingLink>();

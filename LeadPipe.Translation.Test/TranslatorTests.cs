@@ -117,9 +117,9 @@ public class TranslatorTests
             SubActive = false,
             Complete = false,
             Value = 100,
-            Seller = "SellerA",
-            Seller2 = "SellerB",
-            Seller3 = "SellerC"
+            Seller = 1,
+            Seller2 = 2,
+            Seller3 = 3
         };
 
         var vo = translator.Translate(entity);

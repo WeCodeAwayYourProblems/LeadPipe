@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
 
-public class TranscriptionMySqlRepository(MySqlContext context) : ITranscriptionMySqlRepository
+public class TranscriptionMySqlRepository(MySqlSchema2Context context) : ITranscriptionMySqlRepository
 {
     private readonly DbSet<TranscriptionMySqlEntity> _set = context.Set<TranscriptionMySqlEntity>();
 

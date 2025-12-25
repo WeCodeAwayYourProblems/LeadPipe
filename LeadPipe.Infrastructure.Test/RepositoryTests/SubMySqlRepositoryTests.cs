@@ -15,8 +15,8 @@ public class SubMySqlRepositoryTests
         settings.Schema1.Returns("dbo");
         settings.Schema2.Returns("dbo");
 
-        var context = new MySqlContext(
-            new DbContextOptionsBuilder<MySqlContext>()
+        var context = new MySqlSchemaContext(
+            new DbContextOptionsBuilder<MySqlSchemaContext>()
                 .UseInMemoryDatabase(nameof(SubMySqlRepositoryTests))
                 .Options,
             settings);

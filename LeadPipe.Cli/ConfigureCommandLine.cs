@@ -20,8 +20,11 @@ internal static class ConfigureCommandLine
         settings.PlumbingConnectionString =
             configuration.GetConnectionString("Plumbing");
 
-        settings.MySqlConnectionString =
-            configuration.GetConnectionString("MySql");
+        settings.Schema2ConnectionString =
+            configuration.GetConnectionString("Schema2");
+
+        settings.SchemaConnectionString =
+            configuration.GetConnectionString("Schema");
 
         // register once
         services.AddSingleton(settings);

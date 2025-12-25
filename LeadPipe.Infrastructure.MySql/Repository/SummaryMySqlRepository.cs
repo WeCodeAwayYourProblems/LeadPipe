@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
 
-public class SummaryMySqlRepository(MySqlContext context) : ISummaryMySqlRepository
+public class SummaryMySqlRepository(MySqlSchema2Context context) : ISummaryMySqlRepository
 {
     private readonly DbSet<SummaryMySqlEntity> _set = context.Set<SummaryMySqlEntity>();
 

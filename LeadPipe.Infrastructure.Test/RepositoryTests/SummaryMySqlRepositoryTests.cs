@@ -15,8 +15,8 @@ public class SummaryMySqlRepositoryTests
         settings.Schema1.Returns("dbo");
         settings.Schema2.Returns("dbo");
 
-        var context = new MySqlContext(
-            new DbContextOptionsBuilder<MySqlContext>()
+        var context = new MySqlSchema2Context(
+            new DbContextOptionsBuilder<MySqlSchema2Context>()
                 .UseInMemoryDatabase(nameof(SummaryMySqlRepositoryTests))
                 .Options,
             settings);

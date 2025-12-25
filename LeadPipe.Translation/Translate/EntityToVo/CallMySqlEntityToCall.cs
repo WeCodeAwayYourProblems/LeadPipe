@@ -12,7 +12,9 @@ internal class CallMySqlEntityToCall : IEntityToVo<CallMySqlEntity, Call>
         DateTimeOffset date = new(d, TimeSpan.Zero);
 
         PhoneNumber number = PhoneNumber.TryParse(entity.contact_number_clean, out PhoneNumber p) ? p : new(PhoneNumber.Default);
-        TimeSpan duration = TimeSpan.FromSeconds(entity.duration);
+
+        double dur = entity.duration is int dura ? dura : 0;
+        TimeSpan duration = TimeSpan.FromSeconds(dur);
 
         string? transcription = entity.transcriptions.Count == 0
             ? null

@@ -5,6 +5,7 @@ using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Pomelo.EntityFrameworkCore.MySql.Internal;
 
 namespace LeadPipe.Infrastructure.MySql;
 
@@ -12,16 +13,38 @@ public static class InjectInfrastructureMySql
 {
     public static IServiceCollection AddInfrastructureMySql(this IServiceCollection services, IMySqlSettings settings)
     {
-        // Register MySqlContext
-        if (string.IsNullOrWhiteSpace(settings.MySqlConnectionString))
-            throw new InvalidOperationException("MySqlConnectionString is missing.");
+        // Register MySqlContext for Schema1
+        if (string.IsNullOrWhiteSpace(settings.SchemaConnectionString))
+            throw new InvalidOperationException("MySqlConnectionString for Schema1 is missing.");
 
-        services.AddDbContext<MySqlContext>((serviceProvider, options) =>
+        services.AddDbContext<MySqlSchemaContext>((sp, options) =>
         {
             options.UseMySql(
-                settings.MySqlConnectionString,
-                ServerVersion.AutoDetect(settings.MySqlConnectionString)
-            )
+                settings.SchemaConnectionString,
+                ServerVersion.AutoDetect(settings.SchemaConnectionString),
+                mySqlOptions =>
+                {
+                    mySqlOptions.UseQuerySplittingBehavior(
+                        QuerySplittingBehavior.SplitQuery);
+                })
+            .LogTo(Console.WriteLine, LogLevel.Information)
+            .EnableSensitiveDataLogging();
+        });
+
+
+        // Register MySqlContext for Schema2 
+        if (string.IsNullOrWhiteSpace(settings.Schema2ConnectionString))
+            throw new InvalidOperationException("MySqlConnectionString for Schema2 is missing.");
+
+        services.AddDbContext<MySqlSchema2Context>((serviceProvider, options) =>
+        {
+            options.UseMySql(
+                settings.Schema2ConnectionString,
+                ServerVersion.AutoDetect(settings.Schema2ConnectionString),
+                mySqlOptions =>
+                {
+                    mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                })
             .LogTo(Console.WriteLine,LogLevel.Information)
             .EnableSensitiveDataLogging();
         });

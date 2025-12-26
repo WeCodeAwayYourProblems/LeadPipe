@@ -45,8 +45,7 @@ public sealed class CallRepository(PlumbingContext context) : PlumbingContextRep
                 for (int i = 0; i < batch.Count; i++)
                 {
                     CallEntity e = batch[i];
-                    sqlBuilder.Append(
-                        $"(@PhoneNumber{i}, @CallDate{i}, @UnixCallDate{i}, @Note{i}, @Source{i}, @Location{i}, @Duration{i}, @Billable{i})");
+                    sqlBuilder.Append($"(@PhoneNumber{i}, @CallDate{i}, @UnixCallDate{i}, @Note{i}, @Source{i}, @Location{i}, @Duration{i}, @Billable{i})");
                     if (i < batch.Count - 1)
                         sqlBuilder.Append(", ");
 

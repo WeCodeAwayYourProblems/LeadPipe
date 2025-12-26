@@ -24,6 +24,8 @@ internal class DataUpdateReportVerb : IVerbAsync
         Yeller
         """)]
     public Source Source { get; set; } = Source.Test;
+    [Option('r', "report", Required = false, HelpText = "Whether to include the report in the update")]
+    public bool IncludeReport { get; set; } = false;
 
     #endregion
 
@@ -34,8 +36,8 @@ internal class DataUpdateReportVerb : IVerbAsync
         IUpdateAndReportAllManager manager = service.GetRequiredService<IUpdateAndReportAllManager>();
         Result result = Source == Source.Test
             ? await manager.Manage()
-            : await manager.Manage(Source);
-        
+            : await manager.Manage(Source, IncludeReport);
+
         int code = result.IsSuccess ? 1 : 0;
         Environment.ExitCode = code;
         return Environment.ExitCode;

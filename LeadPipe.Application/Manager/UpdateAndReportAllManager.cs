@@ -53,12 +53,12 @@ internal sealed class UpdateAndReportAllManager(
     private readonly IReportPanManager _panReport = panReport;
     private readonly IReportYellerManager _yellerReport = yellerReport;
     private const string ErrorMessagesSeparator = " | ";
-    public async Task<Result> Manage()
+    public async Task<Result> Manage(bool includeReport)
     {
         // Updaters
         Result<List<Call>> callsUpdateResult = await _callsUpdate.ManageAsync();
         Result<List<Sandwich>> sandwichUpdateResult = await _sandwichUpdate.ManageAsync();
-        
+
         // Plumbing updaters
         Result<List<Plumbing>> calliUpdateResult = await _calliUpdate.ManageAsync();
         Result<List<Plumbing>> labUpdateResult = await _labUpdate.ManageAsync();
@@ -68,53 +68,67 @@ internal sealed class UpdateAndReportAllManager(
         Result<List<Plumbing>> panUpdateResult = await _panUpdate.ManageAsync();
         Result<List<Plumbing>> yellerUpdateResult = await _yellerUpdate.ManageAsync();
 
-        Result associated = await _associate.ManageAsync();
+        if (includeReport)
+        {
+            Result associated = await _associate.ManageAsync();
 
-        Result associatedCallsSandwich = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult, associated);
+            Result associatedCallsSandwich = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult, associated);
 
-        // We can't do the reporters because this step must succeed first
-        if (associatedCallsSandwich.IsFailure) 
-            return Result.Failure(associatedCallsSandwich.Error);
+            // We can't do the reporters because this step must succeed first
+            if (associatedCallsSandwich.IsFailure)
+                return Result.Failure(associatedCallsSandwich.Error);
 
-        // Reporters
-        Result<List<Plumbing>> calliReportResult = calliUpdateResult.IsSuccess
-            ? await _calliReport.ManageAsync()
-            : Result.Failure<List<Plumbing>>(calliUpdateResult.Error);
-        Result<List<Plumbing>> labReportResult = labUpdateResult.IsSuccess
-            ? await _labReport.ManageAsync()
-            : Result.Failure<List<Plumbing>>(labUpdateResult.Error);
-        Result<List<Plumbing>> leafReportResult = leafUpdateResult.IsSuccess
-            ? await _leafReport.ManageAsync()
-            : Result.Failure<List<Plumbing>>(leafUpdateResult.Error);
-        Result<List<Plumbing>> leasedReportResult = leasedUpdateResult.IsSuccess
-            ? await _leasedReport.ManageAsync()
-            : Result.Failure<List<Plumbing>>(leasedUpdateResult.Error);
-        Result<List<Plumbing>> libacionReportResult = libacionUpdateResult.IsSuccess
-            ? await _libacionReport.ManageAsync()
-            : Result.Failure<List<Plumbing>>(libacionUpdateResult.Error);
-        Result<List<Plumbing>> panReportResult = panUpdateResult.IsSuccess
-            ? await _panReport.ManageAsync()
-            : Result.Failure<List<Plumbing>>(panUpdateResult.Error);
-        Result<List<Plumbing>> yellerReportResult = yellerUpdateResult.IsSuccess
-            ? await _yellerReport.ManageAsync()
-            : Result.Failure<List<Plumbing>>(yellerUpdateResult.Error);
+            // Reporters
+            Result<List<Plumbing>> calliReportResult = calliUpdateResult.IsSuccess
+                ? await _calliReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(calliUpdateResult.Error);
+            Result<List<Plumbing>> labReportResult = labUpdateResult.IsSuccess
+                ? await _labReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(labUpdateResult.Error);
+            Result<List<Plumbing>> leafReportResult = leafUpdateResult.IsSuccess
+                ? await _leafReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(leafUpdateResult.Error);
+            Result<List<Plumbing>> leasedReportResult = leasedUpdateResult.IsSuccess
+                ? await _leasedReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(leasedUpdateResult.Error);
+            Result<List<Plumbing>> libacionReportResult = libacionUpdateResult.IsSuccess
+                ? await _libacionReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(libacionUpdateResult.Error);
+            Result<List<Plumbing>> panReportResult = panUpdateResult.IsSuccess
+                ? await _panReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(panUpdateResult.Error);
+            Result<List<Plumbing>> yellerReportResult = yellerUpdateResult.IsSuccess
+                ? await _yellerReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(yellerUpdateResult.Error);
 
-        return Result.Combine(ErrorMessagesSeparator,
+            return Result.Combine(ErrorMessagesSeparator,
+                calliUpdateResult,
+                labUpdateResult,
+                leafUpdateResult,
+                leasedUpdateResult,
+                libacionUpdateResult,
+                panUpdateResult,
+                yellerUpdateResult,
+                calliReportResult,
+                labReportResult,
+                leafReportResult,
+                leasedReportResult,
+                libacionReportResult,
+                panReportResult,
+                yellerReportResult
+            );
+        }
+        return Result.Combine(
+            callsUpdateResult,
+            sandwichUpdateResult,
             calliUpdateResult,
             labUpdateResult,
             leafUpdateResult,
             leasedUpdateResult,
             libacionUpdateResult,
             panUpdateResult,
-            yellerUpdateResult,
-            calliReportResult,
-            labReportResult,
-            leafReportResult,
-            leasedReportResult,
-            libacionReportResult,
-            panReportResult,
-            yellerReportResult
-        );
+            yellerUpdateResult
+            );
     }
     public async Task<Result> Manage(Source source, bool includeReport)
     {
@@ -135,26 +149,26 @@ internal sealed class UpdateAndReportAllManager(
 
         if (includeReport)
         {
-        Result associate = await _associate.ManageAsync();
-        
-        Result combined = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult, sourceUpdateResult, associate);
-        
-        Result<List<Plumbing>> sourceReportResult = combined.IsSuccess
-            ? source switch
-            {
-                Source.Calli => await _calliReport.ManageAsync(),
-                Source.Lab => await _labReport.ManageAsync(),
-                Source.Leaf => await _leafReport.ManageAsync(),
-                Source.Leased => await _leasedReport.ManageAsync(),
-                Source.Libacion => await _libacionReport.ManageAsync(),
-                Source.Pan => await _panReport.ManageAsync(),
-                Source.Yeller => await _yellerReport.ManageAsync(),
-                _ => Result.Failure<List<Plumbing>>($"Unknown source: {source}")
-            }
-            : Result.Failure<List<Plumbing>>(combined.Error);
-        
-        return sourceReportResult;
-    }
+            Result associate = await _associate.ManageAsync();
+
+            Result combined = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult, sourceUpdateResult, associate);
+
+            Result<List<Plumbing>> sourceReportResult = combined.IsSuccess
+                ? source switch
+                {
+                    Source.Calli => await _calliReport.ManageAsync(),
+                    Source.Lab => await _labReport.ManageAsync(),
+                    Source.Leaf => await _leafReport.ManageAsync(),
+                    Source.Leased => await _leasedReport.ManageAsync(),
+                    Source.Libacion => await _libacionReport.ManageAsync(),
+                    Source.Pan => await _panReport.ManageAsync(),
+                    Source.Yeller => await _yellerReport.ManageAsync(),
+                    _ => Result.Failure<List<Plumbing>>($"Unknown source: {source}")
+                }
+                : Result.Failure<List<Plumbing>>(combined.Error);
+
+            return sourceReportResult;
+        }
         else return sourceUpdateResult;
     }
 }

@@ -14,6 +14,18 @@ public sealed class PlumbingCallLinkRepository(
     : PlumbingContextRepository<PlumbingCallLink, PlumbingCallLinkRepository>(context, logger),
       IPlumbingCallLinkRepository
 {
+    public override async Task<Result<List<PlumbingCallLink>>> GetAllAsync()
+    {
+        try
+        {
+            List<PlumbingCallLink> list = await _context.PlumbingCallLinks
+                .AsNoTracking()
+                .Select(s => new PlumbingCallLink() { Id = s.Id, CallId = s.CallId, PlumbingId = s.PlumbingId })
+                .ToListAsync();
+            return list;
+        }
+        catch (Exception ex) { return Result.Failure<List<PlumbingCallLink>>(ex.Message); }
+    }
     public override async Task<Result<List<PlumbingCallLink>>> UpsertRangeAsync(
         List<PlumbingCallLink> entities)
     {

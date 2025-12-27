@@ -85,7 +85,7 @@ public abstract class PlumbingContextRepository<T, T2>(PlumbingContext context, 
         return await DeleteAsync(entity.Id);
     }
 
-    public async Task<Result<List<T>>> GetAllAsync()
+    public virtual async Task<Result<List<T>>> GetAllAsync()
     {
         try
         {

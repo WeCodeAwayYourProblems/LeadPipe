@@ -39,7 +39,7 @@ internal class LabService : ILabService
     public async Task<Result<List<Plumbing>>> UpdateDataAsync(int errorLimit = 5)
     {
         // Retrieve persisted plumbing entities
-        var existingResult = await _plumbingRepo.GetAllAsync();
+        var existingResult = await _plumbingRepo.GetAllAsync(source: Source.Lab);
         if (existingResult.IsFailure)
         {
             _logger.LogError("Failed to retrieve existing Plumbings: {Error}", existingResult.Error);

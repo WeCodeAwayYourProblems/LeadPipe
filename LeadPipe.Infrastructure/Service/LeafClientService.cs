@@ -77,7 +77,7 @@ public class LeafClientService : ILeafService
     /// </summary>
     public async Task<Result<List<Plumbing>>> RefreshAsync(int errorLimit = 5)
     {
-        Result<List<PlumbingEntity>> plumbingEntities = await _repo.GetAllAsync();
+        Result<List<PlumbingEntity>> plumbingEntities = await _repo.GetAllAsync(source: Source.Leaf);
 
         if (plumbingEntities.IsFailure)
         {

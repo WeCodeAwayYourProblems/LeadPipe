@@ -43,12 +43,12 @@ public class LeafClientService : ILeafService
     private readonly IFileService _file;
     private readonly HttpClient _client;
     private readonly SemaphoreSlim _throttle;
-    private Uri LeafThreadUrl(int offset = 0, int limit = 1000) =>
+    private string LeafThreadUrl(int offset = 0, int limit = 1000) =>
         new($"{_settings.LeafThreadsEndpoint}?limit={limit}&offset={offset}");
-    private Uri LeafMessagesUrl(string thread, int limit = 10, string type = "sms") =>
+    private string LeafMessagesUrl(string thread, int limit = 10, string type = "sms") =>
         new($"{_settings.LeafThreadsEndpoint}/{thread}/{_settings.LeafMessagesEndpoint}?limit={limit}&type={type}&offset=0");
     private static async void Wait(int sleepInterval = 500) => await Task.Delay(sleepInterval);
-    private static async Task<Result<T>> GetSingleAsync<T>(Uri url, HttpClient client)
+    private static async Task<Result<T>> GetSingleAsync<T>(string url, HttpClient client)
     {
         try
         {
@@ -107,7 +107,7 @@ public class LeafClientService : ILeafService
         bool failure = false;
         while (resume)
         {
-            if (errorCount == errorLimit)
+            if (errorCount >= errorLimit)
             {
                 failure = true;
                 break;
@@ -117,7 +117,7 @@ public class LeafClientService : ILeafService
             try
             {
                 // Call the api
-                Uri newurl = LeafThreadUrl(offset, limit);
+                string newurl = LeafThreadUrl(offset, limit);
                 Result<List<LeafDto>> result = await GetSingleAsync<List<LeafDto>>(newurl, _client);
 
                 // Unwrap result
@@ -220,7 +220,7 @@ public class LeafClientService : ILeafService
                 await _throttle.WaitAsync();
                 try
                 {
-                    Uri uri = LeafMessagesUrl(leaf.uuid!);
+                    string uri = LeafMessagesUrl(leaf.uuid!);
                     return await GetSingleAsync<List<Message>>(uri, _client);
                 }
                 finally

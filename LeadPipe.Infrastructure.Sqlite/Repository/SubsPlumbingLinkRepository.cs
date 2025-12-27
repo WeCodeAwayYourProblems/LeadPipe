@@ -20,58 +20,133 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
 
         // Deduplicate in-memory by (SubsId, PlumbingId)
         List<SubsPlumbingLink> uniqueEntities = [.. entities
-                .GroupBy(e => (e.SubsId, e.PlumbingId))
-                .Select(g => g.Last())];
+            .GroupBy(e => (e.SubsId, e.PlumbingId))
+            .Select(g => g.Last())];
 
-        const int parametersPerRow = 3;
-        const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        var batches = uniqueEntities
-            .Select((e, i) => new { e, i })
-            .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())
-            .ToList();
+        int batchSize = 200;
+        const int minBatchSize = 1;
+        int stagedCount = 0;
+        int skipped = 0;
 
         try
         {
-            await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (var batch in batches)
+            // Temp table for staging
+            await _context.Database.ExecuteSqlRawAsync("""
+                CREATE TEMP TABLE IF NOT EXISTS temp_subs_plumbing_links (
+                    SubsId INTEGER NOT NULL,
+                    PlumbingId INTEGER NOT NULL,
+                    MatchingSubPhone INTEGER NOT NULL,
+                    PRIMARY KEY (SubsId, PlumbingId)
+                ) WITHOUT ROWID;
+            """);
+
+            int index = 0;
+
+            while (index < uniqueEntities.Count)
             {
-                StringBuilder sqlBuilder = new();
-                sqlBuilder.Append(
-                    "INSERT INTO SubsPlumbingLinks " +
-                    "(SubsId, PlumbingId, MatchingSubPhone) VALUES ");
+                int take = Math.Min(batchSize, uniqueEntities.Count - index);
+                var batch = uniqueEntities.GetRange(index, take);
 
-                List<SqliteParameter> parameters = [];
-                for (int i = 0; i < batch.Count; i++)
+                try
                 {
-                    SubsPlumbingLink e = batch[i];
-                    sqlBuilder.Append($"(@SubsId{i}, @PlumbingId{i}, @MatchingSubPhone{i})");
-                    if (i < batch.Count - 1)
-                        sqlBuilder.Append(", ");
+                    InsertBatch(batch);
+                    stagedCount += batch.Count;
+                    index += take;
 
-                    parameters.AddRange(
-                    [
-                        new SqliteParameter($"@SubsId{i}", e.SubsId),
-                        new SqliteParameter($"@PlumbingId{i}", e.PlumbingId),
-                        new SqliteParameter($"@MatchingSubPhone{i}", e.MatchingSubPhone)
-                    ]);
+                    if (batchSize < 200)
+                        batchSize = Math.Min(batchSize * 2, 200);
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Batch insert failed (size={BatchSize}). Reducing batch size.", batchSize);
 
-                sqlBuilder.AppendLine(
-                    " ON CONFLICT(SubsId, PlumbingId) DO UPDATE SET " +
-                    "MatchingSubPhone = excluded.MatchingSubPhone;");
+                    if (batchSize == minBatchSize)
+                    {
+                        var row = batch[0];
+                        _logger.LogError(
+                            "Row insert failed: SubsId={SubsId}, PlumbingId={PlumbingId}, MatchingSubPhone={MatchingSubPhone}",
+                            row.SubsId, row.PlumbingId, row.MatchingSubPhone);
 
-                await _context.Database.ExecuteSqlRawAsync(sqlBuilder.ToString(), parameters);
+                        index++;
+                        batchSize = 100;
+                        skipped++;
+                    }
+                    else
+                    {
+                        batchSize = Math.Max(minBatchSize, batchSize / 2);
+                    }
+                }
             }
 
+            // ---- Phase 1: UPDATE existing rows ----
+            int updated = await _context.Database.ExecuteSqlRawAsync("""
+                UPDATE SubsPlumbingLinks
+                SET MatchingSubPhone = (
+                    SELECT t.MatchingSubPhone
+                    FROM temp_subs_plumbing_links t
+                    WHERE t.SubsId = SubsPlumbingLinks.SubsId
+                      AND t.PlumbingId = SubsPlumbingLinks.PlumbingId
+                )
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM temp_subs_plumbing_links t
+                    WHERE t.SubsId = SubsPlumbingLinks.SubsId
+                      AND t.PlumbingId = SubsPlumbingLinks.PlumbingId
+                );
+            """);
+
+            // ---- Phase 2: INSERT missing rows ----
+            int inserted = await _context.Database.ExecuteSqlRawAsync("""
+                INSERT INTO SubsPlumbingLinks (SubsId, PlumbingId, MatchingSubPhone)
+                SELECT t.SubsId, t.PlumbingId, t.MatchingSubPhone
+                FROM temp_subs_plumbing_links t
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM SubsPlumbingLinks s
+                    WHERE s.SubsId = t.SubsId
+                      AND s.PlumbingId = t.PlumbingId
+                );
+            """);
+
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_subs_plumbing_links;");
             await transaction.CommitAsync();
-            _logger.LogDebug("SubsPlumbingLink upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
+
+            _logger.LogInformation(
+                "SubsPlumbingLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                entities.Count, uniqueEntities.Count, stagedCount, updated, inserted, skipped);
+
             return Result.Success(uniqueEntities);
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.Message); }
-    }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SubsPlumbingLink upsert failed");
+            return Result.Failure<List<SubsPlumbingLink>>(ex.Message);
+        }
 
+        void InsertBatch(List<SubsPlumbingLink> batch)
+        {
+            var sql = new StringBuilder();
+            sql.Append("INSERT INTO temp_subs_plumbing_links VALUES ");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                var e = batch[i];
+                sql.Append($"({e.SubsId}, {e.PlumbingId}, {e.MatchingSubPhone})");
+
+                if (i < batch.Count - 1)
+                    sql.Append(", ");
+            }
+
+            sql.Append(';');
+            _context.Database.ExecuteSqlRaw(sql.ToString());
+        }
+    }
     public async Task<Result<List<SubsPlumbingLink>>> GetAllAsync(IEnumerable<PlumbingEntity> filter)
     {
         try

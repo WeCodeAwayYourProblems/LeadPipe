@@ -8,20 +8,12 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 namespace LeadPipe.Infrastructure.Service;
 
 internal class PlumbingAssociationService(
-#region Ctor Params
     IPlumbingRepository plumbingRepo,
     ISubsRepository subsRepo,
     ICallRepository callRepo,
     ISubsPlumbingLinkRepository linkRepo,
     ISubsCallLinkRepository subsCallRepo,
-    IPlumbingCallLinkRepository plumbingCallRepo,
-    IVoToEntity<Plumbing, PlumbingEntity> plumbToEntity,
-    IVoToEntity<Call, CallEntity> callToEntity,
-    IVoToEntity<Sandwich, SubsEntity> sandToEntity,
-    IEntityToVo<PlumbingEntity, Plumbing> entityToPlumb,
-    IEntityToVo<SubsEntity, Sandwich> entityToSand,
-    IEntityToVo<CallEntity, Call> entityToCall
-#endregion
+    IPlumbingCallLinkRepository plumbingCallRepo
     ) : IPlumbingAssociationService
 {
     #region Private
@@ -33,56 +25,22 @@ internal class PlumbingAssociationService(
     private readonly ISubsCallLinkRepository _subsCallRepo = subsCallRepo;
     private readonly IPlumbingCallLinkRepository _plumbingCallRepo = plumbingCallRepo;
 
-    private readonly IVoToEntity<Plumbing, PlumbingEntity> _plumbToEntity = plumbToEntity;
-    private readonly IVoToEntity<Call, CallEntity> _callToEntity = callToEntity;
-    private readonly IVoToEntity<Sandwich, SubsEntity> _sandToEntity = sandToEntity;
-
-    private readonly IEntityToVo<PlumbingEntity, Plumbing> _entityToPlumb = entityToPlumb;
-    private readonly IEntityToVo<SubsEntity, Sandwich> _entityToSand = entityToSand;
-    private readonly IEntityToVo<CallEntity, Call> _entityToCall = entityToCall;
     #endregion
 
-    public async Task<Result<List<Plumbing>>> GetPlumbingAsync()
+    public async Task<Result> SaveLinksAsync()
     {
-        Result<List<PlumbingEntity>> entitiesResult = await _plumbingRepo.GetAllAsync();
-        if (entitiesResult.IsFailure)
-            return Result.Failure<List<Plumbing>>(entitiesResult.Error);
+        Result<List<PlumbingEntity>> plumbingEntityResult = await _plumbingRepo.GetAllAsync();
+        Result<List<SubsEntity>> subsEntityResult = await _subsRepo.GetAllAsync();
+        Result<List<CallEntity>> callEntityResult = await _callRepo.GetAllAsync();
+        
+        Result combined = Result.Combine(plumbingEntityResult, subsEntityResult, callEntityResult);
+        if (combined.IsFailure)
+            return combined;
 
-        List<Plumbing> voList = [.. entitiesResult.Value.Select(_entityToPlumb.Translate)];
-        return Result.Success(voList);
-    }
-
-    public async Task<Result<List<Sandwich>>> GetSandwichAsync()
-    {
-        Result<List<SubsEntity>> entitiesResult = await _subsRepo.GetAllAsync();
-        if (entitiesResult.IsFailure)
-            return Result.Failure<List<Sandwich>>(entitiesResult.Error);
-
-        List<Sandwich> voList = [.. entitiesResult.Value.Select(_entityToSand.Translate)];
-        return Result.Success(voList);
-    }
-
-    public async Task<Result<List<Call>>> GetCallAsync()
-    {
-        Result<List<CallEntity>> entitiesResult = await _callRepo.GetAllAsync();
-        if (entitiesResult.IsFailure)
-            return Result.Failure<List<Call>>(entitiesResult.Error);
-
-        List<Call> voList = [.. entitiesResult.Value.Select(_entityToCall.Translate)];
-        return Result.Success(voList);
-    }
-
-    public async Task<Result> SaveAllAsync(List<Plumbing> plumb, List<Sandwich> subs, List<Call> calls)
-    {
         // Convert VOs to Entities
-        List<PlumbingEntity> plumbingEntities = [.. plumb.Select(_plumbToEntity.Translate)];
-        List<SubsEntity> subsEntities = [.. subs.Select(_sandToEntity.Translate)];
-        List<CallEntity> callEntities = [.. calls.Select(_callToEntity.Translate)];
-
-        // Batch upsert Plumbing, Subs, and Calls
-        await _plumbingRepo.UpsertRangeAsync(plumbingEntities);
-        await _subsRepo.UpsertRangeAsync(subsEntities);
-        await _callRepo.UpsertRangeAsync(callEntities);
+        List<PlumbingEntity> plumbingEntities = plumbingEntityResult.Value;
+        List<SubsEntity> subsEntities = subsEntityResult.Value;
+        List<CallEntity> callEntities = callEntityResult.Value;
 
         // Create dictionaries for quick lookup by PhoneNumber
         Dictionary<long, PlumbingEntity> plumbingDict = plumbingEntities.ToDictionary(p => p.PhoneNumber);

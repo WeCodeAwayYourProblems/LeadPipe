@@ -14,14 +14,6 @@ internal class PlumbingAssociationManager(IPlumbingAssociationService plumbs) : 
     private readonly IPlumbingAssociationService _plumbs = plumbs;
     public async Task<Result> ManageAsync()
     {
-        Result<List<Call>> callsResult = await _plumbs.GetCallAsync();
-        Result<List<Sandwich>> sandResult = await _plumbs.GetSandwichAsync();
-        Result<List<Plumbing>> plumbResult = await _plumbs.GetPlumbingAsync();
-
-        Result success = Result.Combine(callsResult, sandResult, plumbResult);
-        if (success.IsFailure)
-            return success;
-
-        return await _plumbs.SaveAllAsync(plumbResult.Value, sandResult.Value, callsResult.Value);
+        return await _plumbs.SaveLinksAsync();
     }
 }

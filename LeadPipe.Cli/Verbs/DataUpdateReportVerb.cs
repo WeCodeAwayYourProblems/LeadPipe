@@ -35,7 +35,7 @@ internal class DataUpdateReportVerb : IVerbAsync
     {
         IUpdateAndReportAllManager manager = service.GetRequiredService<IUpdateAndReportAllManager>();
         Result result = Source == Source.Test
-            ? await manager.Manage()
+            ? await manager.Manage(IncludeReport)
             : await manager.Manage(Source, IncludeReport);
 
         int code = result.IsSuccess ? 0 : 1;

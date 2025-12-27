@@ -29,90 +29,177 @@ internal class PlumbingAssociationService(
 
     public async Task<Result> SaveLinksAsync()
     {
-        Result<List<PlumbingEntity>> plumbingEntityResult = await _plumbingRepo.GetAllAsync();
-        Result<List<SubsEntity>> subsEntityResult = await _subsRepo.GetAllAsync();
-        Result<List<CallEntity>> callEntityResult = await _callRepo.GetAllAsync();
-        
-        Result combined = Result.Combine(plumbingEntityResult, subsEntityResult, callEntityResult);
+        // Fetch base entities
+        var plumbingResult = await _plumbingRepo.GetAllAsync();
+        var subsResult = await _subsRepo.GetAllAsync();
+        var callResult = await _callRepo.GetAllAsync();
+
+        var combined = Result.Combine(plumbingResult, subsResult, callResult);
         if (combined.IsFailure)
             return combined;
 
-        // Convert VOs to Entities
-        List<PlumbingEntity> plumbingEntities = plumbingEntityResult.Value;
-        List<SubsEntity> subsEntities = subsEntityResult.Value;
-        List<CallEntity> callEntities = callEntityResult.Value;
+        var plumbingEntities = plumbingResult.Value;
+        var subsEntities = subsResult.Value;
+        var callEntities = callResult.Value;
 
-        // Create dictionaries for quick lookup by PhoneNumber
-        Dictionary<long, PlumbingEntity> plumbingDict = plumbingEntities.ToDictionary(p => p.PhoneNumber);
-        Dictionary<long, CallEntity> callDict = callEntities.ToDictionary(c => c.PhoneNumber);
+        // Build lookup dictionaries (deduped safely)
+        var plumbingByPhone = plumbingEntities
+            .GroupBy(p => p.PhoneNumber)
+            .ToDictionary(g => g.Key, g => g.Last());
 
-        // Fetch existing links to avoid duplication
-        Result<List<SubsPlumbingLink>> existingSubsPlumbingResult = await _subsPlumbingRepo.GetAllAsync();
-        HashSet<(long SubsId, long PlumbingId)> existingSubsPlumbing = existingSubsPlumbingResult.IsSuccess
-            ? [.. existingSubsPlumbingResult.Value.Select(l => (l.SubsId, l.PlumbingId))]
-            : [];
+        var callByPhone = callEntities
+            .GroupBy(c => c.PhoneNumber)
+            .ToDictionary(g => g.Key, g => g.Last());
 
-        Result<List<CallSubsLink>> existingSubsCallResult = await _subsCallRepo.GetAllAsync();
-        HashSet<(long SubsId, long CallId)> existingSubsCall = existingSubsCallResult.IsSuccess
-            ? [.. existingSubsCallResult.Value.Select(l => (l.SubsId, l.CallId))]
-            : [];
+        var subsById = subsEntities.ToDictionary(s => s.Id);
+        var plumbingById = plumbingEntities.ToDictionary(p => p.Id);
+        var callById = callEntities.ToDictionary(c => c.Id);
 
-        Result<List<PlumbingCallLink>> existingPlumbingCallResult = await _plumbingCallRepo.GetAllAsync();
-        HashSet<(long PlumbingId, long CallId)> existingPlumbingCall = existingPlumbingCallResult.IsSuccess
-            ? [.. existingPlumbingCallResult.Value.Select(l => (l.PlumbingId, l.CallId))]
-            : [];
+        // Load existing links
+        var existingSubsPlumbing = await LoadExistingSubsPlumbingAsync();
+        var existingSubsCall = await LoadExistingSubsCallAsync();
+        var existingPlumbingCall = await LoadExistingPlumbingCallAsync();
 
-        // Generate Subs-Plumbing links
-        List<SubsPlumbingLink> subsPlumbingLinks = [.. subsEntities
-            .SelectMany(s => new[] { s.Number, s.Number2 }
-                .Where(num => plumbingDict.ContainsKey(num))
-                .Select(num => (SubsId: s.Id, PlumbingId: plumbingDict[num].Id, MatchingNumber: num))
-            )
-            .Where(pair => !existingSubsPlumbing.Contains((pair.SubsId, pair.PlumbingId)))
-            .Select(pair => new SubsPlumbingLink
-            {
-                SubsId = pair.SubsId,
-                SubsEntity = subsEntities.First(s => s.Id == pair.SubsId),
-                PlumbingId = pair.PlumbingId,
-                PlumbingEntity = plumbingDict[pair.PlumbingId],
-                MatchingSubPhone = pair.MatchingNumber
-            })];
+        // Generate new links
+        var subsPlumbingLinks = GenerateSubsPlumbingLinks(
+            subsEntities,
+            plumbingByPhone,
+            subsById,
+            existingSubsPlumbing);
 
-        // Generate Subs-Call links
-        List<CallSubsLink> subsCallLinks = [.. subsEntities
-            .SelectMany(s => new[] { s.Number, s.Number2 }
-                .Where(num => callDict.ContainsKey(num))
-                .Select(num => (SubsId: s.Id, CallId: callDict[num].Id, MatchingNumber: num))
-            )
-            .Where(pair => !existingSubsCall.Contains((pair.SubsId, pair.CallId)))
-            .Select(pair => new CallSubsLink
-            {
-                SubsId = pair.SubsId,
-                SubsEntity = subsEntities.First(s => s.Id == pair.SubsId),
-                CallId = pair.CallId,
-                CallEntity = callDict[pair.CallId],
-                MatchingNumber = pair.MatchingNumber
-            })];
+        var subsCallLinks = GenerateSubsCallLinks(
+            subsEntities,
+            callByPhone,
+            subsById,
+            existingSubsCall);
 
-        // Generate Plumbing-Call links
-        List<PlumbingCallLink> plumbingCallLinks = [.. plumbingEntities
-            .Where(p => callDict.ContainsKey(p.PhoneNumber))
-            .Select(p => (PlumbingId: p.Id, CallId: callDict[p.PhoneNumber].Id))
-            .Where(pair => !existingPlumbingCall.Contains((pair.PlumbingId, pair.CallId)))
-            .Select(pair => new PlumbingCallLink
-            {
-                PlumbingId = pair.PlumbingId,
-                PlumbingEntity = plumbingEntities.First(p => p.Id == pair.PlumbingId),
-                CallId = pair.CallId,
-                CallEntity = callDict[pair.CallId]
-            })];
+        var plumbingCallLinks = GeneratePlumbingCallLinks(
+            plumbingEntities,
+            callByPhone,
+            plumbingById,
+            existingPlumbingCall);
 
-        // Save links to DB
-        Result<List<SubsPlumbingLink>> addedSubsPlumbingLinks = await _subsPlumbingRepo.UpsertRangeAsync(subsPlumbingLinks);
-        Result<List<CallSubsLink>> addedSubsCallLinks = await _subsCallRepo.UpsertRangeAsync(subsCallLinks);
-        Result<List<PlumbingCallLink>> addedPlumbingCallLinks = await _plumbingCallRepo.UpsertRangeAsync(plumbingCallLinks);
+        // Persist
+        var saveSubsPlumbing = await _subsPlumbingRepo.UpsertRangeAsync(subsPlumbingLinks);
+        var saveSubsCall = await _subsCallRepo.UpsertRangeAsync(subsCallLinks);
+        var savePlumbingCall = await _plumbingCallRepo.UpsertRangeAsync(plumbingCallLinks);
 
-        // Combine all results
-        return Result.Combine(addedSubsPlumbingLinks, addedSubsCallLinks, addedPlumbingCallLinks);
+        return Result.Combine(saveSubsPlumbing, saveSubsCall, savePlumbingCall);
     }
+    private async Task<HashSet<(long SubsId, long PlumbingId)>> LoadExistingSubsPlumbingAsync()
+    {
+        var result = await _subsPlumbingRepo.GetAllAsync();
+        return result.IsSuccess
+            ? result.Value.Select(l => (l.SubsId, l.PlumbingId)).ToHashSet()
+            : [];
+    }
+
+    private async Task<HashSet<(long SubsId, long CallId)>> LoadExistingSubsCallAsync()
+    {
+        var result = await _subsCallRepo.GetAllAsync();
+        return result.IsSuccess
+            ? result.Value.Select(l => (l.SubsId, l.CallId)).ToHashSet()
+            : [];
+    }
+
+    private async Task<HashSet<(long PlumbingId, long CallId)>> LoadExistingPlumbingCallAsync()
+    {
+        var result = await _plumbingCallRepo.GetAllAsync();
+        return result.IsSuccess
+            ? result.Value.Select(l => (l.PlumbingId, l.CallId)).ToHashSet()
+            : [];
+    }
+    private static List<SubsPlumbingLink> GenerateSubsPlumbingLinks(
+        List<SubsEntity> subs,
+        Dictionary<long, PlumbingEntity> plumbingByPhone,
+        Dictionary<long, SubsEntity> subsById,
+        HashSet<(long SubsId, long PlumbingId)> existing)
+    {
+        var links = new List<SubsPlumbingLink>();
+
+        foreach (var s in subs)
+        {
+            foreach (var number in new[] { s.Number, s.Number2 })
+            {
+                if (!plumbingByPhone.TryGetValue(number, out var plumbing))
+                    continue;
+
+                var key = (s.Id, plumbing.Id);
+                if (existing.Contains(key))
+                    continue;
+
+                links.Add(new SubsPlumbingLink
+                {
+                    SubsId = s.Id,
+                    SubsEntity = subsById[s.Id],
+                    PlumbingId = plumbing.Id,
+                    PlumbingEntity = plumbing,
+                    MatchingSubPhone = number
+                });
+            }
+        }
+
+        return links;
+    }
+    private static List<CallSubsLink> GenerateSubsCallLinks(
+        List<SubsEntity> subs,
+        Dictionary<long, CallEntity> callByPhone,
+        Dictionary<long, SubsEntity> subsById,
+        HashSet<(long SubsId, long CallId)> existing)
+    {
+        var links = new List<CallSubsLink>();
+
+        foreach (var s in subs)
+        {
+            foreach (var number in new[] { s.Number, s.Number2 })
+            {
+                if (!callByPhone.TryGetValue(number, out var call))
+                    continue;
+
+                var key = (s.Id, call.Id);
+                if (existing.Contains(key))
+                    continue;
+
+                links.Add(new CallSubsLink
+                {
+                    SubsId = s.Id,
+                    SubsEntity = subsById[s.Id],
+                    CallId = call.Id,
+                    CallEntity = call,
+                    MatchingNumber = number
+                });
+            }
+        }
+
+        return links;
+    }
+    private static List<PlumbingCallLink> GeneratePlumbingCallLinks(
+        List<PlumbingEntity> plumbing,
+        Dictionary<long, CallEntity> callByPhone,
+        Dictionary<long, PlumbingEntity> plumbingById,
+        HashSet<(long PlumbingId, long CallId)> existing)
+    {
+        var links = new List<PlumbingCallLink>();
+
+        foreach (var p in plumbing)
+        {
+            if (!callByPhone.TryGetValue(p.PhoneNumber, out var call))
+                continue;
+
+            var key = (p.Id, call.Id);
+            if (existing.Contains(key))
+                continue;
+
+            links.Add(new PlumbingCallLink
+            {
+                PlumbingId = p.Id,
+                PlumbingEntity = plumbingById[p.Id],
+                CallId = call.Id,
+                CallEntity = call
+            });
+        }
+
+        return links;
+    }
+
 }

@@ -18,21 +18,24 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Sync State Entity
-        var sync = modelBuilder.Entity<SyncStateEntity>();
+        var sync = modelBuilder.Entity<SyncStateEntity>()
+            .ToTable("SyncState");
         sync.HasKey(x => x.Id);
         sync.HasIndex(x => x.Id)
             .IsUnique();
         sync.Property(x => x.Id).ValueGeneratedNever();
 
         // SubsEntity
-        var sub = modelBuilder.Entity<SubsEntity>();
+        var sub = modelBuilder.Entity<SubsEntity>()
+            .ToTable("SubsEntities");
         sub.HasKey(s => s.Id);
         sub.HasIndex(s => s.Number);
         sub.HasIndex(s => s.Number2);
         sub.Property(s => s.Type);
 
         // PlumbingEntity
-        var plumb = modelBuilder.Entity<PlumbingEntity>();
+        var plumb = modelBuilder.Entity<PlumbingEntity>()
+            .ToTable("PlumbingEntities");
         plumb.HasKey(p => p.Id);
         plumb.Property(p => p.Id).ValueGeneratedOnAdd();
         plumb.HasIndex(p => p.PhoneNumber);
@@ -40,7 +43,8 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         plumb.Property(p => p.Source).HasConversion<string>();
 
         // CallEntity
-        var call = modelBuilder.Entity<CallEntity>();
+        var call = modelBuilder.Entity<CallEntity>()
+            .ToTable("CallEntities");
         call.HasKey(c => c.Id);
         call.HasIndex(c => c.PhoneNumber);
         call.Property(c => c.CallDate).IsRequired();
@@ -48,7 +52,8 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         call.HasIndex(c => new { c.PhoneNumber, c.CallDate }).IsUnique();
 
         // SubsPlumbingLink
-        var spLink = modelBuilder.Entity<SubsPlumbingLink>();
+        var spLink = modelBuilder.Entity<SubsPlumbingLink>()
+            .ToTable("SubsPlumbingLinks");
         spLink.HasKey(l => l.Id);
         spLink.Property(l => l.Id).ValueGeneratedOnAdd();
         spLink.HasIndex(l => l.SubsId);
@@ -62,11 +67,11 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .WithMany(p => p.SubsPlumbingLinks)
             .HasForeignKey(l => l.PlumbingId)
             .OnDelete(DeleteBehavior.Cascade);
-
         spLink.Property(l => l.MatchingSubPhone).IsRequired();
 
         // SubsCallLink
-        var subsCall = modelBuilder.Entity<CallSubsLink>();
+        var subsCall = modelBuilder.Entity<CallSubsLink>()
+            .ToTable("SubsCallLinks");
         subsCall.HasKey(sc => sc.Id);
         subsCall.Property(sc => sc.Id).ValueGeneratedOnAdd();
         subsCall.HasIndex(sc => sc.SubsId);
@@ -83,7 +88,8 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         subsCall.Property(sc => sc.MatchingNumber).IsRequired();
 
         // PlumbingCallLink
-        var plumbCall = modelBuilder.Entity<PlumbingCallLink>();
+        var plumbCall = modelBuilder.Entity<PlumbingCallLink>()
+            .ToTable("PlumbingCallLinks");
         plumbCall.HasKey(pc => pc.Id);
         plumbCall.Property(pc => pc.Id).ValueGeneratedOnAdd();
         plumbCall.HasIndex(pc => pc.PlumbingId);

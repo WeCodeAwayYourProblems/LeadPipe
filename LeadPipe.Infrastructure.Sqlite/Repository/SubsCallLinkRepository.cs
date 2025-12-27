@@ -11,6 +11,19 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<SubsCallLinkRepository> logger)
     : PlumbingContextRepository<CallSubsLink, SubsCallLinkRepository>(context, logger), ISubsCallLinkRepository
 {
+    public async Task<Result<List<CallSubsLink>>> GetAllWithDetailsAsync()
+    {
+        try
+        {
+            List<CallSubsLink> list = await _context.SubsCallLinks
+                .AsNoTracking()
+                .Include(p => p.CallEntity)
+                .Include(p => p.SubsEntity)
+                .ToListAsync();
+            return list;
+        }
+        catch (Exception ex) { return Result.Failure<List<CallSubsLink>>(ex.ToString()); }
+    }
     public override async Task<Result<List<CallSubsLink>>> GetAllAsync()
     {
         try

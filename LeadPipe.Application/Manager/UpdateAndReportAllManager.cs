@@ -56,12 +56,12 @@ internal sealed class UpdateAndReportAllManager(
     public async Task<Result> Manage(bool includeReport)
     {
         // Updaters
-        //Result<List<Call>> callsUpdateResult = await _callsUpdate.ManageAsync();
-        //Result<List<Sandwich>> sandwichUpdateResult = await _sandwichUpdate.ManageAsync();
+        Result<List<Call>> callsUpdateResult = await _callsUpdate.ManageAsync();
+        Result<List<Sandwich>> sandwichUpdateResult = await _sandwichUpdate.ManageAsync();
 
         // Plumbing updaters
-        //Result<List<Plumbing>> calliUpdateResult = await _calliUpdate.ManageAsync();
-        //Result<List<Plumbing>> labUpdateResult = await _labUpdate.ManageAsync();
+        Result<List<Plumbing>> calliUpdateResult = await _calliUpdate.ManageAsync();
+        Result<List<Plumbing>> labUpdateResult = await _labUpdate.ManageAsync();
         Result<List<Plumbing>> leafUpdateResult = await _leafUpdate.ManageAsync();
         Result<List<Plumbing>> leasedUpdateResult = await _leasedUpdate.ManageAsync();
         Result<List<Plumbing>> libacionUpdateResult = await _libacionUpdate.ManageAsync();
@@ -72,7 +72,7 @@ internal sealed class UpdateAndReportAllManager(
         {
             Result associated = await _associate.ManageAsync();
 
-            Result associatedCallsSandwich = Result.Combine(ErrorMessagesSeparator, //callsUpdateResult, sandwichUpdateResult,
+            Result associatedCallsSandwich = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult,
                 associated);
 
             // We can't do the reporters because this step must succeed first
@@ -80,12 +80,12 @@ internal sealed class UpdateAndReportAllManager(
                 return Result.Failure(associatedCallsSandwich.Error);
 
             // Reporters
-            //Result<List<Plumbing>> calliReportResult = calliUpdateResult.IsSuccess
-            //    ? await _calliReport.ManageAsync()
-            //    : Result.Failure<List<Plumbing>>(calliUpdateResult.Error);
-            //Result<List<Plumbing>> labReportResult = labUpdateResult.IsSuccess
-            //    ? await _labReport.ManageAsync()
-            //    : Result.Failure<List<Plumbing>>(labUpdateResult.Error);
+            Result<List<Plumbing>> calliReportResult = calliUpdateResult.IsSuccess
+                ? await _calliReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(calliUpdateResult.Error);
+            Result<List<Plumbing>> labReportResult = labUpdateResult.IsSuccess
+                ? await _labReport.ManageAsync()
+                : Result.Failure<List<Plumbing>>(labUpdateResult.Error);
             Result<List<Plumbing>> leafReportResult = leafUpdateResult.IsSuccess
                 ? await _leafReport.ManageAsync()
                 : Result.Failure<List<Plumbing>>(leafUpdateResult.Error);
@@ -103,15 +103,15 @@ internal sealed class UpdateAndReportAllManager(
                 : Result.Failure<List<Plumbing>>(yellerUpdateResult.Error);
 
             return Result.Combine(ErrorMessagesSeparator,
-                //calliUpdateResult,
-                //labUpdateResult,
+                calliUpdateResult,
+                labUpdateResult,
                 leafUpdateResult,
                 leasedUpdateResult,
                 libacionUpdateResult,
                 panUpdateResult,
                 yellerUpdateResult,
-                //calliReportResult,
-                //labReportResult,
+                calliReportResult,
+                labReportResult,
                 leafReportResult,
                 leasedReportResult,
                 libacionReportResult,
@@ -120,10 +120,10 @@ internal sealed class UpdateAndReportAllManager(
             );
         }
         return Result.Combine(
-            //callsUpdateResult,
-            //sandwichUpdateResult,
-            //calliUpdateResult,
-            //labUpdateResult,
+            callsUpdateResult,
+            sandwichUpdateResult,
+            calliUpdateResult,
+            labUpdateResult,
             leafUpdateResult,
             leasedUpdateResult,
             libacionUpdateResult,

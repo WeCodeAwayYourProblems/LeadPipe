@@ -7,6 +7,7 @@ using LeadPipe.Infrastructure.Data.Transform;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Factory;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Service;
@@ -100,6 +101,10 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReportService<Plumbing>, PanReportService>(Source.Pan);
         services.AddKeyedScoped<IReportService<Plumbing>, YellerReportService>(Source.Yeller);
 
+        // Factories for keyed services
+        services.AddScoped<IReportSourceFactory, ReportSourceFactory>();
+        services.AddScoped<IUpdateSourceFactory, UpdateSourceFactory>();
+
         // Report services
         services.AddKeyedScoped<IReport<ReportPlumbing>, CalliReporter>(Source.Calli);
         services.AddKeyedScoped<IReport<ReportPlumbing>, LabReporter>(Source.Lab);
@@ -127,11 +132,11 @@ public static class InjectInfrastructure
         #region ADD CLIENTS
 
         // Add Leaf Client
-        if (string.IsNullOrWhiteSpace(settings.LeafName)) 
+        if (string.IsNullOrWhiteSpace(settings.LeafName))
             throw new Exception($"{nameof(settings.LeafName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LeafBase)) 
+        if (string.IsNullOrWhiteSpace(settings.LeafBase))
             throw new Exception($"{nameof(settings.LeafBase)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LeafTokenType)) 
+        if (string.IsNullOrWhiteSpace(settings.LeafTokenType))
             throw new Exception($"{nameof(settings.LeafTokenType)} cannot be null");
         services.AddHttpClient(settings.LeafName, c =>
         {
@@ -141,13 +146,13 @@ public static class InjectInfrastructure
         });
 
         // Add Lab Client
-        if (string.IsNullOrWhiteSpace(settings.LabName)) 
+        if (string.IsNullOrWhiteSpace(settings.LabName))
             throw new Exception($"{nameof(settings.LabName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LabUri)) 
+        if (string.IsNullOrWhiteSpace(settings.LabUri))
             throw new Exception($"{nameof(settings.LabUri)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LabAccept)) 
+        if (string.IsNullOrWhiteSpace(settings.LabAccept))
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LabToken)) 
+        if (string.IsNullOrWhiteSpace(settings.LabToken))
             throw new Exception($"{nameof(settings.LabToken)} cannot be null");
         services.AddHttpClient(settings.LabName, c =>
         {
@@ -157,11 +162,11 @@ public static class InjectInfrastructure
         });
 
         // Add Yeller Client
-        if (string.IsNullOrWhiteSpace(settings.YellerName)) 
+        if (string.IsNullOrWhiteSpace(settings.YellerName))
             throw new Exception($"{nameof(settings.YellerName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.YellerBase)) 
+        if (string.IsNullOrWhiteSpace(settings.YellerBase))
             throw new Exception($"{nameof(settings.YellerBase)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.YellerToken)) 
+        if (string.IsNullOrWhiteSpace(settings.YellerToken))
             throw new Exception($"{nameof(settings.YellerToken)} cannot be null");
         services.AddHttpClient(settings.YellerName, c =>
         {

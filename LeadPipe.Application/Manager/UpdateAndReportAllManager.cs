@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.UpdateReportPipeline;
 using LeadPipe.Domain.ValueObjects;
+using System.Runtime.CompilerServices;
 
 namespace LeadPipe.Application.Manager;
 
@@ -172,4 +173,10 @@ internal sealed class UpdateAndReportAllManager(
         }
         else return sourceUpdateResult;
     }
+}
+
+public interface IReportAndUpdateManager
+{
+    Task<Result> Manage(Source source, bool refresh);
+    Task<Result> Manage(bool refresh);
 }

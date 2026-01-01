@@ -33,6 +33,7 @@ public static class InjectApplication
         services.AddScoped<IReportYellerManager, ReportYellerManager>();
 
         // Add managers
+        services.AddScoped<IReportAndUpdateManager, ReportAndUpdateManager>();
         services.AddScoped<IFileRWManager, FileRWManager>();
         services.AddScoped<IPlumbingAssociationManager, PlumbingAssociationManager>();
 

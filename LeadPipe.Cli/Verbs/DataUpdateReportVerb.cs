@@ -38,6 +38,9 @@ internal class DataUpdateReportVerb : IVerbAsync
             ? await manager.Manage(IncludeReport)
             : await manager.Manage(Source, IncludeReport);
 
+        if (result.IsFailure)
+            Console.WriteLine(result.Error);
+
         int code = result.IsSuccess ? 0 : 1;
         Environment.ExitCode = code;
         return Environment.ExitCode;

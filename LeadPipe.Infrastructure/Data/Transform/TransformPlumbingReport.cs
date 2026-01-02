@@ -26,7 +26,8 @@ public sealed class TransformPlumbingReport(
         if (entities is null)
             return Result.Failure<List<ReportPlumbing>>(links.Error);
 
-        return entities.Select(TransformLink).ToList();
+        List<ReportPlumbing> result = entities.Select(TransformLink).ToList();
+        return result;
     }
     private static ReportPlumbing TransformLink(SubsPlumbingLink link)
     {

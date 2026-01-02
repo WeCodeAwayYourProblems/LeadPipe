@@ -26,6 +26,21 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
         }
         catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.ToString()); }
     }
+    public async Task<Result<List<SubsPlumbingLink>>> GetAllWithDetailsAsync(IEnumerable<PlumbingEntity> filter)
+    {
+        try
+        {
+            HashSet<long> ids = [.. filter.Select(p => p.Id)];
+            List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
+                .AsNoTracking()
+                .Where(e => ids.Contains(e.PlumbingId))
+                .Include(p => p.PlumbingEntity)
+                .Include(p => p.SubsEntity)
+                .ToListAsync();
+            return list;
+        }
+        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.ToString()); }
+    }
     public override async Task<Result<List<SubsPlumbingLink>>> GetAllAsync()
     {
         try

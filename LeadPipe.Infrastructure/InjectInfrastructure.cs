@@ -37,15 +37,6 @@ public static class InjectInfrastructure
         services.AddScoped<IDataPersistence<Call>, CallPersistence>();
         services.AddScoped<IDataPersistence<Sandwich>, SandwichPersistence>();
 
-        // Keyed Sources
-        services.AddKeyedScoped<ILoadData<Plumbing>, LoadCalli>(Source.Calli);
-        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLab>(Source.Lab);
-        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLeaf>(Source.Leaf);
-        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLeased>(Source.Leased);
-        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLibacion>(Source.Libacion);
-        services.AddKeyedScoped<ILoadData<Plumbing>, LoadPan>(Source.Pan);
-        services.AddKeyedScoped<ILoadData<Plumbing>, LoadYeller>(Source.Yeller);
-
         // Transformers
         services.AddScoped<ITransform<Plumbing, ReportYeller>, TransformYellerReport>();
         services.AddScoped<ITransform<Plumbing, ReportPlumbing>, TransformPlumbingReport>();
@@ -87,6 +78,8 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, LeasedUpdateFromFileService>(Source.Leased);
         services.AddKeyedScoped<IUpdateService<Plumbing>, PanUpdateFromFileService>(Source.Pan);
         services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, DummyUpdateService>(Source.Test);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, DummyUpdateService2>(Source.Test2);
 
         // Nonkeyed update services
         services.AddScoped<IUpdateService<Call>, CallsUpdateService>();

@@ -19,7 +19,7 @@ public sealed class TransformPlumbingReport(
     public async Task<Result<List<ReportPlumbing>>> TransformAsync(List<Plumbing> data)
     {
         List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
-        Result<List<SubsPlumbingLink>> links = await _repo.GetAllAsync(e);
+        Result<List<SubsPlumbingLink>> links = await _repo.GetAllWithDetailsAsync(e);
         List<SubsPlumbingLink>? entities = links.IsSuccess
             ? links.Value
             : null;
@@ -30,7 +30,7 @@ public sealed class TransformPlumbingReport(
     }
     private static ReportPlumbing TransformLink(SubsPlumbingLink link)
     {
-        long phoneNumber = link.PlumbingEntity.PhoneNumber;
+        long phoneNumber = link.PlumbingEntity!.PhoneNumber;
 
         DateTime d = DateTime.SpecifyKind(link.PlumbingEntity.Date, DateTimeKind.Utc);
         DateTimeOffset date = new(d, TimeSpan.Zero);
@@ -40,7 +40,7 @@ public sealed class TransformPlumbingReport(
         string source = link.PlumbingEntity.Source.ToString();
         string metadata = link.PlumbingEntity.MetaData;
 
-        long customerId = link.SubsEntity.CustomerId;
+        long customerId = link.SubsEntity!.CustomerId;
         long subId = link.SubsEntity.Id;
         bool subActive = link.SubsEntity.Active;
         bool completed = link.SubsEntity.Complete;

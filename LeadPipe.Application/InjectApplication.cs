@@ -10,7 +10,8 @@ public static class InjectApplication
         // Format: services.AddScoped<Interface, Class>();  
 
         // Add managers
-        services.AddScoped<IReportAndUpdateManager, ReportAndUpdateManager>();
+        services.AddScoped<IReportManager, ReportManager>();
+        services.AddScoped<IUpdateManager, UpdateManager>();
         services.AddScoped<IFileRWManager, FileRWManager>();
 
         return services;

@@ -30,7 +30,7 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
     {
         try
         {
-            HashSet<long> ids = [.. filter.Select(p => p.Id)];
+            List<long> ids = [.. filter.Select(p => p.Id)];
             List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
                 .AsNoTracking()
                 .Where(e => ids.Contains(e.PlumbingId))
@@ -191,7 +191,7 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
     {
         try
         {
-            HashSet<long> ids = [.. filter.Select(p => p.Id)];
+            List<long> ids = [.. filter.Select(p => p.Id)];
             List<SubsPlumbingLink> set = await _set
                 .Where(e => ids.Contains(e.PlumbingId))
                 .ToListAsync();

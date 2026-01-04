@@ -35,15 +35,14 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     #region Public
 
-    public async Task<int> Run(IServiceProvider service)
+    public async Task<int> Run(IServiceProvider provider)
     {
-        var manager = service.GetRequiredService<IReportAndUpdateManager>();
-        UpdateReportManagement m = !Update && !Report
-            ? new(update: true, report: true)
-            : new(Update, Report);
-        Result result = Source == Source.Test 
-            ? await manager.Manage(Refresh, m) 
-            : await manager.Manage(Source, Refresh, m);
+        Result result = (Update, Report) switch
+        {
+            (true, true) or (false, false) => await Both(provider, Source, Refresh),
+            (true, false) => await Updated(provider, Source, Refresh),
+            (false, true) => await Reported(provider, Source)
+        };
 
         if (result.IsFailure)
             Console.WriteLine(result.Error);
@@ -55,4 +54,31 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     #endregion
 
+    #region Private
+    private static async Task<Result> Updated(IServiceProvider service, Source source, bool refresh)
+    {
+        IUpdateManager update = service.GetRequiredService<IUpdateManager>();
+        Result updated = source == Source.Test
+            ? await update.Manage(refresh)
+            : await update.Manage(source, refresh);
+        return updated;
+    }
+    private static async Task<Result> Reported(IServiceProvider service, Source source)
+    {
+        IReportManager report = service.GetRequiredService<IReportManager>();
+        Result reported = source == Source.Test
+            ? await report.Manage()
+            : await report.Manage(source);
+        return reported;
+    }
+    private static async Task<Result> Both(IServiceProvider service, Source source, bool refresh)
+    {
+        Result updated = await Updated(service, source, refresh);
+        if (updated.IsFailure)
+            return updated;
+
+        Result reported = await Reported(service, source);
+        return reported;
+    }
+    #endregion
 }

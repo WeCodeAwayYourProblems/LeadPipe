@@ -18,7 +18,7 @@ internal abstract class ReportService<TVo, TReport>(
         return await _load.LoadAsync();
     }
 
-    public async Task<Result> SendReportAsync(List<TVo> data)
+    public async Task<Result> ReportAsync(List<TVo> data)
     {
         Result<List<TReport>> d = await _transform.TransformAsync(data);
         if (d.IsFailure)

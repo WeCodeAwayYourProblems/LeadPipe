@@ -67,7 +67,7 @@ internal class ReportAndUpdateManager(
             IReportService<Plumbing> reportService = _report.GetService(source);
             Result<List<Plumbing>> data = await reportService.GetDataAsync();
             Result reported = data.IsSuccess
-                ? await reportService.SendReportAsync(data.Value)
+                ? await reportService.ReportAsync(data.Value)
                 : data;
 
             return reported;

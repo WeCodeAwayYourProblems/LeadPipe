@@ -39,9 +39,9 @@ internal class DataUpdateReportVerb : IVerbAsync
     {
         Result result = (Update, Report) switch
         {
-            (true, true) or (false, false) => await Both(provider, Source, Refresh),
             (true, false) => await Updated(provider, Source, Refresh),
-            (false, true) => await Reported(provider, Source)
+            (false, true) => await Reported(provider, Source),
+            (true, true) or (false, false) => await Both(provider, Source, Refresh),
         };
 
         if (result.IsFailure)
@@ -55,6 +55,7 @@ internal class DataUpdateReportVerb : IVerbAsync
     #endregion
 
     #region Private
+
     private static async Task<Result> Updated(IServiceProvider service, Source source, bool refresh)
     {
         IUpdateManager update = service.GetRequiredService<IUpdateManager>();
@@ -80,5 +81,6 @@ internal class DataUpdateReportVerb : IVerbAsync
         Result reported = await Reported(service, source);
         return reported;
     }
+    
     #endregion
 }

@@ -39,10 +39,10 @@ internal class DataUpdateReportVerb : IVerbAsync
     {
         var manager = service.GetRequiredService<IReportAndUpdateManager>();
         UpdateReportManagement m = !Update && !Report
-            ? new(Update: true, Report: true)
+            ? new(update: true, report: true)
             : new(Update, Report);
-        Result result = Source == Source.Test
-            ? await manager.Manage(Refresh, m)
+        Result result = Source == Source.Test 
+            ? await manager.Manage(Refresh, m) 
             : await manager.Manage(Source, Refresh, m);
 
         if (result.IsFailure)

@@ -14,4 +14,6 @@ public class PanDto
     public string? Time { get; set; }
     [Name("FormCustomFields")]
     public string? Content { get; set; }
+    [Name("Email")]
+    public string? Metadata { get; set; }
 }

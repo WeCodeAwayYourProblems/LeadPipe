@@ -14,4 +14,6 @@ public class CalliDto
     public string? TimeZone { get; set; }
     [Name("Pest Problem/Message Content")]
     public string? PestProblem { get; set; }
+    [Name("UUID")]
+    public string? Metadata { get; set; }
 }

@@ -1,13 +1,11 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Translate;
-using LeadPipe.Translation.Primitives;
 
 namespace LeadPipe.Translation.Translate.DtoToVo;
 
-internal class LeafDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeafDto, Plumbing>
+internal class LeafDtoToPlumbing : IDtoToVo<LeafDto, Plumbing>
 {
-    private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(LeafDto v)
     {
         // PhoneNumber
@@ -46,7 +44,7 @@ internal class LeafDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeafDto, Plum
                 ? string.Empty
                 : soonestMsg.message;
         }
-        string metadata = metastr.Count == 0 ? string.Empty : string.Join(" | ", metastr);
+        string metadata = metastr.Count == 0 ? string.Empty : string.Join(" | ", metastr.Where(m => !string.IsNullOrWhiteSpace(m)));
 
         Plumbing result = new(0, PhoneNumber: number, Date: date, Contents: content, MetaData: metadata, Source: Source.Leaf);
         return result;

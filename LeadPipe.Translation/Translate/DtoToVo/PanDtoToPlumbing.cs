@@ -18,12 +18,13 @@ internal class PanDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<PanDto, Plumbi
         string contents = data.Content is null
             ? string.Empty
             : data.Content;
+        string meta = data.Metadata is string m ? m : string.Empty;
         return new(
             Id: 0,
             PhoneNumber: number,
             Date: date,
             Contents: contents,
-            MetaData: string.Empty,
+            MetaData: meta,
             Source.Pan);
     }
 }

@@ -2,9 +2,7 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System.Text;
 

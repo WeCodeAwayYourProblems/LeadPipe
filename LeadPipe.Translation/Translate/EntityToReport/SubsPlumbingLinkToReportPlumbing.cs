@@ -9,8 +9,21 @@ internal class SubsPlumbingLinkToReportPlumbing : IEntityToReport<SubsPlumbingLi
     private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
     public ReportPlumbing Translate(SubsPlumbingLink link)
     {
-        if (link.PlumbingEntity is not PlumbingEntity plumb || link.SubsEntity is not SubsEntity subs)
-            throw new Exception("Plumbing and subs entities cannot be null");
+        if (link.PlumbingEntity is not PlumbingEntity plumb)
+            throw new Exception("Plumbing entities cannot be null");
+
+        if (link.SubsEntity is not SubsEntity subs)
+            subs = new()
+            {
+                CustomerId = 0,
+                Id = 0,
+                Active = false,
+                Complete = false,
+                Date = DateTime.MinValue,
+                CancelDate = DateTime.MinValue,
+                SubDate = DateTime.MinValue,
+                SubCancelDate = DateTime.MinValue
+            };
 
         long phoneNumber = plumb.PhoneNumber;
 

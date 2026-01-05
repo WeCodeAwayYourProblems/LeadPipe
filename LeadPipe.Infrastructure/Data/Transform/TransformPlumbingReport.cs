@@ -19,15 +19,34 @@ public sealed class TransformPlumbingReport(
     private readonly IEntityToReport<SubsPlumbingLink, ReportPlumbing> _eToR = eToR;
     public async Task<Result<List<ReportPlumbing>>> TransformAsync(List<Plumbing> data)
     {
-        List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
-        Result<List<SubsPlumbingLink>> links = await _repo.GetAllWithDetailsAsync(e);
-        List<SubsPlumbingLink>? entities = links.IsSuccess
-            ? links.Value
-            : null;
-        if (entities is null)
-            return Result.Failure<List<ReportPlumbing>>(links.Error);
+        // Translate plumbing to plumbingentity
+        List<PlumbingEntity> plumbingEntities = [.. data.Select(_voToEntity.Translate)];
 
-        List<ReportPlumbing> result = [.. entities.Select(_eToR.Translate)];
+        // Get links to the plumbing
+        Result<List<SubsPlumbingLink>> linkResult = await _repo.GetAllWithDetailsAsync(plumbingEntities);
+
+        // Extract subs plumbing links
+        List<SubsPlumbingLink>? links = linkResult.IsSuccess
+            ? linkResult.Value
+            : null;
+        if (links is null)
+            return Result.Failure<List<ReportPlumbing>>(linkResult.Error);
+
+        // Turn subsplumbinglinks into a hashset of plumbingids for fast lookup
+        HashSet<long> ids = [.. links.Select(e => e.PlumbingId)];
+
+        // Turn empty PlumbingEntities into subsplumbinglinks
+        List<SubsPlumbingLink> unfoundPlumbing = [.. plumbingEntities
+            .Where(e => !ids.Contains(e.Id)) // We are creating a partition
+            .Select(e => new SubsPlumbingLink { PlumbingEntity = e, SubsId = 0})
+            ];
+
+        List<ReportPlumbing> result = 
+            [
+                .. links.Select(_eToR.Translate),
+                .. unfoundPlumbing.Select(_eToR.Translate)
+            ];
+
         return result;
     }
 }

@@ -4,7 +4,7 @@ namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
 public class PlumbingEntity : ISourceEntity
 {
-    public long Id { get; set; }
+    public required long Id { get; set; }
     public long PhoneNumber { get; set; }
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }

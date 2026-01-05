@@ -6,6 +6,7 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.DtoToVo;
+using LeadPipe.Translation.Translate.EntityToReport;
 using LeadPipe.Translation.Translate.EntityToVo;
 using LeadPipe.Translation.Translate.VoToDto;
 using LeadPipe.Translation.Translate.VoToEntity;
@@ -46,10 +47,14 @@ public static class InjectTranslation
         services.AddScoped<IVoToDto<Plumbing, LabDto>, PlumbingToLabDto>();
         services.AddScoped<IVoToDto<Plumbing, LeafDto>, PlumbingToLeafDto>();
         services.AddScoped<IVoToDto<Plumbing, YellerDto>, PlumbingToYellerDto>();
+
         // IVoToEntity
         services.AddScoped<IVoToEntity<Call, CallEntity>, CallToCallEntity>();
         services.AddScoped<IVoToEntity<Plumbing, PlumbingEntity>, PlumbingToPlumbingEntity>();
         services.AddScoped<IVoToEntity<Sandwich, SubsEntity>, SandToSub>();
+
+        // IEntityToReport
+        services.AddScoped<IEntityToReport<SubsPlumbingLink, ReportPlumbing>, SubsPlumbingLinkToReportPlumbing>();
 
         return services;
     }

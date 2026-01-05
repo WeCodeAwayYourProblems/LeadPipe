@@ -25,6 +25,6 @@ internal class CalliDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<CalliDto, Pl
         };
         DateTimeOffset date = _dt.Convert(DateTime.SpecifyKind(datetime, DateTimeKind.Unspecified), zone);
 
-        return new Plumbing(PhoneNumber: phone, Date: date, Contents: v.PestProblem, MetaData: string.Empty, Source: Source.Calli);
+        return new Plumbing(0, PhoneNumber: phone, Date: date, Contents: v.PestProblem, MetaData: string.Empty, Source: Source.Calli);
     }
 }

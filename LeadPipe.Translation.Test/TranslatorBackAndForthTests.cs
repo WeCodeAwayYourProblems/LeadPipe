@@ -27,6 +27,7 @@ public class TranslatorBackAndForthTests
         DateTime localDateTime = DateTime.Parse(dto.Date + " " + dto.Time);
         DateTimeOffset expectedDate = _dt.Convert(localDateTime, ETimeZone.Mountain);
         var expectedVo = new Plumbing(
+            Id: 0,
             PhoneNumber: new PhoneNumber(dto.Phone),
             Date: expectedDate,
             Contents: dto.PestProblem,
@@ -78,6 +79,7 @@ public class TranslatorBackAndForthTests
         // Expected VO
         DateTimeOffset expectedDate = _dt.Convert(DateTime.SpecifyKind(dto.creation, DateTimeKind.Unspecified), ETimeZone.Mountain);
         var expectedVo = new Plumbing(
+            Id: 0,
             PhoneNumber: new PhoneNumber(dto.prospect.cellphone),
             Date: expectedDate,
             Contents: dto.messages[0].message!,

@@ -14,7 +14,7 @@ internal class PlumbingEntityToPlumbing : IEntityToVo<PlumbingEntity, Plumbing>
         var contents = entity.Contents;
         var source = entity.Source;
 
-        var result = new Plumbing(PhoneNumber: number, Date: date, Contents: contents, MetaData: entity.MetaData, Source: source);
+        var result = new Plumbing(entity.Id, PhoneNumber: number, Date: date, Contents: contents, MetaData: entity.MetaData, Source: source);
         return result;
     }
 }

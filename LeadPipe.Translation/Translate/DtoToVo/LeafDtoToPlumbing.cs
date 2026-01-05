@@ -48,7 +48,7 @@ internal class LeafDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeafDto, Plum
         }
         string metadata = metastr.Count == 0 ? string.Empty : string.Join(" | ", metastr);
 
-        Plumbing result = new(PhoneNumber: number, Date: date, Contents: content, MetaData: metadata, Source: Source.Leaf);
+        Plumbing result = new(0, PhoneNumber: number, Date: date, Contents: content, MetaData: metadata, Source: Source.Leaf);
         return result;
     }
 }

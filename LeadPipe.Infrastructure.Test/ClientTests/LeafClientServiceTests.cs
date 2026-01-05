@@ -108,7 +108,7 @@ public class LeafClientServiceTests
             .Returns(Result.Success());
 
         _dto.Translate(Arg.Any<LeafDto>())
-            .Returns(new Plumbing(new(PhoneNumber.Default), DateTimeOffset.MaxValue, null, string.Empty, Source.Test));
+            .Returns(new Plumbing(0, new(PhoneNumber.Default), DateTimeOffset.MaxValue, null, string.Empty, Source.Test));
 
         var results = await service.GetAllAsync();
 

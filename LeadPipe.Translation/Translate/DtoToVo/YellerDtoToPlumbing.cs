@@ -47,6 +47,7 @@ internal class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
 
         string metadata = string.Empty;
         return new(
+            Id: 0,
             PhoneNumber: number,
             Date: date,
             Contents: contents,

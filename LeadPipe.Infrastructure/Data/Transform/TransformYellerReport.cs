@@ -10,13 +10,14 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 
 internal sealed class TransformYellerReport(
     ISubsPlumbingLinkRepository spRepo,
-    IVoToEntity<Plumbing, PlumbingEntity> toEntity
+    IVoToEntity<Plumbing, PlumbingEntity> toEntity,
+    IEntityToReport<SubsPlumbingLink, ReportYeller> eToR
     ) : ITransform<Plumbing, ReportYeller>
 {
     private readonly ISubsPlumbingLinkRepository _repo = spRepo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
-    private const string currency = "USD";
-    private const string country = "us";
+    private readonly IEntityToReport<SubsPlumbingLink, ReportYeller> _eToR = eToR;
+    
     public async Task<Result<List<ReportYeller>>> TransformAsync(List<Plumbing> data)
     {
         List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
@@ -27,15 +28,7 @@ internal sealed class TransformYellerReport(
         if (entities is null)
             return Result.Failure<List<ReportYeller>>(links.Error);
 
-        return entities.Select(TransformLink).ToList();
+        return entities.Select(_eToR.Translate).ToList();
     }
-    private static ReportYeller TransformLink(SubsPlumbingLink link)
-    {
-        long eventTime = link.SubsEntity.UnixDate;
-        UserData user = new() { ph = [link.SubsEntity.Number.ToString(), link.SubsEntity.Number2.ToString()], country = [country] };
-        CustomData custom = new() { currency = currency, value = link.SubsEntity.Value };
-        string eventid = link.SubsEntity.Id.ToString();
 
-        return new() { event_id = eventid, event_time = eventTime, custom_data = custom, user_data = user };
-    }
 }

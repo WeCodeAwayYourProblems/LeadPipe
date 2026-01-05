@@ -4,7 +4,7 @@ using LeadPipe.Domain.ValueObjects;
 
 namespace LeadPipe.Infrastructure.Service.Update;
 
-internal abstract class DummyAbstractService : IUpdateService<Plumbing>
+internal abstract class AbstractDummyUpdateService : IUpdateService<Plumbing>
 {
     public Task<Result<List<Plumbing>>> GetDataAsync()
     {
@@ -22,6 +22,6 @@ internal abstract class DummyAbstractService : IUpdateService<Plumbing>
     }
 }
 [SourceKey(Source.Test)]
-internal sealed class DummyUpdateService : DummyAbstractService, IUpdateService<Plumbing> { }
+internal sealed class DummyUpdateService : AbstractDummyUpdateService, IUpdateService<Plumbing> { }
 [SourceKey(Source.Test2)]
-internal sealed class DummyUpdateService2 : DummyAbstractService, IUpdateService<Plumbing> { }
+internal sealed class DummyUpdateService2 : AbstractDummyUpdateService, IUpdateService<Plumbing> { }

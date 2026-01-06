@@ -11,12 +11,12 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 public sealed class TransformPlumbingReport(
     ISubsPlumbingLinkRepository repo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
-    IEntityToReport<SubsEntity, ReportPlumbing> eToR
+    IEntityToReport<SubsPlumbingLink, ReportPlumbing> eToR
     ) : ITransform<Plumbing, ReportPlumbing>
 {
     private readonly ISubsPlumbingLinkRepository _repo = repo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = voToEntity;
-    private readonly IEntityToReport<SubsEntity, ReportPlumbing> _eToR = eToR;
+    private readonly IEntityToReport<SubsPlumbingLink, ReportPlumbing> _eToR = eToR;
     public async Task<Result<List<ReportPlumbing>>> TransformAsync(List<Plumbing> data)
     {
         // Translate plumbing to plumbingentity
@@ -47,8 +47,8 @@ public sealed class TransformPlumbingReport(
 
         List<ReportPlumbing> result =
             [
-                .. subsLinks.Select(s => _eToR.Translate(s.SubsEntity!)),
-                .. unfoundPlumbing.Select(p => _eToR.Translate(p.SubsEntity))
+                .. subsLinks.Select(_eToR.Translate),
+                .. unfoundPlumbing.Select(_eToR.Translate)
             ];
 
         return result;

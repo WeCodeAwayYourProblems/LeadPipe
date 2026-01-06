@@ -53,7 +53,7 @@ public static class InjectTranslation
 
         // IEntityToReport
         services.AddScoped<IEntityToReport<SubsPlumbingLink, ReportPlumbing>, SubsPlumbingLinkToReportPlumbing>();
-        services.AddScoped<IEntityToReport<SubsPlumbingLink, ReportYeller>, SubsPlumbingLinkToYellerReport>();
+        services.AddScoped<IEntityToReport<SubsEntity, ReportYeller>, SubsEntityToYellerReport>();
 
         return services;
     }

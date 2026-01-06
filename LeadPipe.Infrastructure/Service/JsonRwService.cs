@@ -37,6 +37,33 @@ internal class JsonRwService : IJsonRwService
         }
     }
 
+    public async Task<Result> WriteToFileAsync<T>(FileInfo path, List<T> items)
+    {
+        if (items.Count > 0)
+        {
+            int index = items.Count / 2;
+            List<T> list = [items[index]];
+            Result<string> result = Serialize(list);
+            if (result.IsFailure) return result;
+        }
+
+        try
+        {
+            await using FileStream fs = new(
+                path.FullName,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 8192,
+                useAsync: true);
+
+            await JsonSerializer.SerializeAsync(fs, items);
+            return Result.Success();
+        }
+        catch (JsonException jex) { return Result.Failure($"Serialization error: {jex}"); }
+        catch (Exception ex) { return Result.Failure(ex.ToString()); }
+    }
+
     #region Private
     private static readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
     internal/*fortestingonly*/ static Result<List<T>> Deserialize<T>(string jsonStr)

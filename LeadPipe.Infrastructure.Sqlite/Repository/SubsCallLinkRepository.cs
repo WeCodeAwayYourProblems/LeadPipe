@@ -24,6 +24,21 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
         }
         catch (Exception ex) { return Result.Failure<List<CallSubsLink>>(ex.ToString()); }
     }
+    public async Task<Result<List<CallSubsLink>>> GetAllWithDetailsAsync(List<CallEntity> list)
+    {
+        try
+        {
+            List<long> ids = [.. list.Select(l => l.Id)];
+            List<CallSubsLink> result = await _context.SubsCallLinks
+                .AsNoTracking()
+                .Where(p => ids.Contains(p.CallId))
+                .Include(p => p.CallEntity)
+                .Include(p => p.SubsEntity)
+                .ToListAsync();
+            return result;
+        }
+        catch (Exception ex) { return Result.Failure<List<CallSubsLink>>(ex.ToString()); }
+    }
     public override async Task<Result<List<CallSubsLink>>> GetAllAsync()
     {
         try

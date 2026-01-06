@@ -12,8 +12,8 @@ internal class SubsPlumbingLinkToReportPlumbing : IEntityToReport<SubsPlumbingLi
         if (link.PlumbingEntity is not PlumbingEntity plumb)
             throw new Exception("Plumbing entities cannot be null");
 
-        if (link.SubsEntity is not SubsEntity subs)
-            subs = new()
+        if (link.SubsEntity is not SubsEntity sub)
+            sub = new()
             {
                 CustomerId = 0,
                 Id = 0,
@@ -35,24 +35,24 @@ internal class SubsPlumbingLinkToReportPlumbing : IEntityToReport<SubsPlumbingLi
         string source = plumb.Source.ToString();
         string metadata = plumb.MetaData;
 
-        long customerId = subs.CustomerId;
-        long subId = subs.Id;
-        bool subActive = subs.Active;
-        bool completed = subs.Complete;
+        long customerId = sub.CustomerId;
+        long subId = sub.Id;
+        bool subActive = sub.Active;
+        bool completed = sub.Complete;
 
         // Dates
-        DateTime cd = DateTime.SpecifyKind(subs.Date, DateTimeKind.Utc);
+        DateTime cd = DateTime.SpecifyKind(sub.Date, DateTimeKind.Utc);
         DateTimeOffset custDate = new(cd, TimeSpan.Zero);
         string formattedCustDate = custDate.ToString(dateFormat);
 
-        DateTime cxl = DateTime.SpecifyKind(subs.CancelDate, DateTimeKind.Utc);
+        DateTime cxl = DateTime.SpecifyKind(sub.CancelDate, DateTimeKind.Utc);
         DateTimeOffset custCxlDate = new(cxl, TimeSpan.Zero);
 
-        DateTime sd = DateTime.SpecifyKind(subs.SubDate, DateTimeKind.Utc);
+        DateTime sd = DateTime.SpecifyKind(sub.SubDate, DateTimeKind.Utc);
         DateTimeOffset subDate = new(sd, TimeSpan.Zero);
         string formattedSubDate = subDate.ToString(dateFormat);
 
-        DateTime sCxl = DateTime.SpecifyKind(subs.SubCancelDate, DateTimeKind.Utc);
+        DateTime sCxl = DateTime.SpecifyKind(sub.SubCancelDate, DateTimeKind.Utc);
         DateTimeOffset subCxlDate = new(sCxl, TimeSpan.Zero);
 
         bool msgBeforeCust = date < custDate && date < subDate;

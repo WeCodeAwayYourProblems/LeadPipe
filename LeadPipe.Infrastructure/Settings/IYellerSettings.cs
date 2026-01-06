@@ -15,4 +15,5 @@ public interface IYellerSettings
     string? YellerPrelimId { get; set; }
     string? YellerCallSource1 { get; set; }
     string? YellerCallSource2 { get; set; }
+    string? YellerClientReporterLoc { get; set; }
 }

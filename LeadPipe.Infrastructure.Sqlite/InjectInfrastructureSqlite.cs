@@ -6,7 +6,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 
 namespace LeadPipe.Infrastructure.Sqlite;
 
@@ -22,8 +21,7 @@ public static class InjectInfrastructureSqlite
         {
             var cs = settings.PlumbingConnectionString;
 
-            var dataSource =
-                new SqliteConnectionStringBuilder(cs).DataSource;
+            var dataSource = new SqliteConnectionStringBuilder(cs).DataSource;
 
             Directory.CreateDirectory(Path.GetDirectoryName(dataSource)!);
 
@@ -32,8 +30,6 @@ public static class InjectInfrastructureSqlite
                 .LogTo(Console.WriteLine, LogLevel.Information)
                 .EnableSensitiveDataLogging();
         });
-
-        services.AddTransient<PlumbingRepository>();
 
         services.AddScoped<ICallRepository, CallRepository>();
         services.AddScoped<IPlumbingCallLinkRepository, PlumbingCallLinkRepository>();

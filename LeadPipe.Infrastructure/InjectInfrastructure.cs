@@ -65,11 +65,6 @@ public static class InjectInfrastructure
         // *****************************************
         #region ADD SERVICES
 
-        // Loggers 
-        services.AddTransient<LabService>();
-        services.AddTransient<LeafClientService>();
-        services.AddTransient<YellerClientService>();
-
         // Keyed update services
         services.AddKeyedScoped<IUpdateService<Plumbing>, CalliUpdateFromFileService>(Source.Calli);
         services.AddKeyedScoped<IUpdateService<Plumbing>, LabUpdateService>(Source.Lab);

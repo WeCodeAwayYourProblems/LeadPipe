@@ -23,15 +23,20 @@ internal sealed class TransformYellerReport(
     private readonly ICallRepository _callRepo = callRepo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
     private readonly IEntityToReport<SubsEntity, ReportYeller> _eToR = eToR;
+    private readonly IEntityToReport<SubsPlumbingLink, ReportYeller> _spLinkToR = spLinkToR;
     private readonly IYellerSettings _settings = settings;
 
     public async Task<Result<List<ReportYeller>>> TransformAsync(List<Plumbing> data)
     {
+        // *************************************
+        // SubsPlumbingLinks
+        // *************************************
+
         // Translate data to entity
-        List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
+        List<PlumbingEntity> plumbs = [.. data.Select(_voToEntity.Translate)];
 
         // Get links to subs for reporting
-        Result<List<SubsPlumbingLink>> links = await _subsPlumbRepo.GetAllWithDetailsAsync(e);
+        Result<List<SubsPlumbingLink>> links = await _subsPlumbRepo.GetAllWithDetailsAsync(plumbs);
 
         // Check success
         List<SubsPlumbingLink>? spLinks = links.IsSuccess
@@ -39,44 +44,38 @@ internal sealed class TransformYellerReport(
             : null;
         if (spLinks is null)
             return Result.Failure<List<ReportYeller>>(links.Error);
+        List<SubsPlumbingLink> subPlumbLinks = spLinks!; // Ensure the list is not null
 
-        // Ensure the list is not null
-        List<SubsPlumbingLink> subPlumbLinks = spLinks!;
+        // *************************************
+        // Calls
+        // *************************************
 
         // Get calls for reporting
         Result<List<CallEntity>> callsResult = await _callRepo.FindAsync(e => e.Source == _settings.YellerCallSource1 || e.Source == _settings.YellerCallSource2);
-
-        // Check success
-        List<CallEntity>? callsList = callsResult.IsSuccess
+        List<CallEntity>? callsList = callsResult.IsSuccess // Check success
             ? callsResult.Value
             : null;
         if (callsList is null)
             return Result.Failure<List<ReportYeller>>(callsResult.Error);
+        List<CallEntity> calls = callsList!; // Ensure the list is not null
 
-        // Ensure the list is not null
-        List<CallEntity> calls = callsList!;
-
-        // Get call links to subs for reporting
+        // Get Call links
         Result<List<CallSubsLink>> callLinksResult = await _subsCallRepo.GetAllWithDetailsAsync(calls);
-
-        // Check success
-        List<CallSubsLink>? cl = callLinksResult.IsSuccess
+        List<CallSubsLink>? cl = callLinksResult.IsSuccess // Check success
             ? callLinksResult.Value
             : null;
-
-        // Ensure the list is not null
-        List<CallSubsLink> callLinks = cl!;
+        List<CallSubsLink> callLinks = cl!; // Ensure the list is not null
 
         // Generate report
-        List<ReportYeller> spLinksReport = 
+        List<ReportYeller> spLinksReport =
             [.. subPlumbLinks
                 .Where(s => s.SubsEntity is not null)
-                .Select(s => _eToR.Translate(s.SubsEntity!))
+                .Select(s=>_eToR.Translate(s.SubsEntity!)),
             ];
-        List<ReportYeller> callLinksReport = 
+        List<ReportYeller> callLinksReport =
             [.. callLinks
-                .Where(s => s.SubsEntity is not null)
-                .Select(c => _eToR.Translate(c.SubsEntity!))
+                .Where(c => c.SubsEntity is not null)
+                .Select(c => _eToR.Translate(c.SubsEntity!)),
             ];
 
         return Result.Success<List<ReportYeller>>([.. spLinksReport, .. callLinksReport]);

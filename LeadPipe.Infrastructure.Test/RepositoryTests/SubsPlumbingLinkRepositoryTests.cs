@@ -19,8 +19,8 @@ public class SubsPlumbingLinkRepositoryTests
 
         var entities = new List<SubsPlumbingLink>
         {
-            new() { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } },
-            new() { Id = 2, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } }
+            new() { Id = 1, SubsEntity = new(), PlumbingEntity = new() { Id=0,MetaData = string.Empty } },
+            new() { Id = 2, SubsEntity = new(), PlumbingEntity = new() { Id=0,MetaData = string.Empty } }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -53,7 +53,7 @@ public class SubsPlumbingLinkRepositoryTests
 
         var repo = new SubsPlumbingLinkRepository(context, logger);
 
-        var plumbing = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
+        var plumbing = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -62,7 +62,7 @@ public class SubsPlumbingLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SubsPlumbingLinks.Add(new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } });
+        context.SubsPlumbingLinks.Add(new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { Id = 0, MetaData = string.Empty } });
         await context.SaveChangesAsync();
 
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
@@ -79,7 +79,7 @@ public class SubsPlumbingLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
+        var plumbing = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
         context.SubsPlumbingLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -111,7 +111,7 @@ public class SubsPlumbingLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
+        var plumbing = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
         context.SubsPlumbingLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -119,7 +119,7 @@ public class SubsPlumbingLinkRepositoryTests
                           .CreateLogger<SubsPlumbingLinkRepository>();
 
         var repo = new SubsPlumbingLinkRepository(context, logger);
-        var updatedSubsPlumbingLink = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
+        var updatedSubsPlumbingLink = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -136,7 +136,7 @@ public class SubsPlumbingLinkRepositoryTests
                           .CreateLogger<SubsPlumbingLinkRepository>();
 
         var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var updatedSubsPlumbingLink = new SubsPlumbingLink { Id = 99, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
+        var updatedSubsPlumbingLink = new SubsPlumbingLink { Id = 99, SubsEntity = new(), PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
 

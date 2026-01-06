@@ -15,7 +15,7 @@ public class PersistenceTests
     public async Task PlumbingPersistence_SaveAsync_ReturnsSuccess()
     {
         var repo = Substitute.For<IPlumbingRepository>();
-        var entity = new PlumbingEntity() { MetaData = string.Empty };
+        var entity = new PlumbingEntity() { Id = 0, MetaData = string.Empty };
         repo.AddRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<PlumbingEntity> { entity })));
 
@@ -36,7 +36,7 @@ public class PersistenceTests
 
         var persistence = new PlumbingPersistence(repo);
 
-        var result = await persistence.SaveAsync(new List<PlumbingEntity> { new PlumbingEntity() { MetaData = string.Empty } });
+        var result = await persistence.SaveAsync(new List<PlumbingEntity> { new PlumbingEntity() { Id = 0, MetaData = string.Empty } });
 
         Assert.True(result.IsFailure);
         Assert.Equal("error", result.Error);

@@ -74,7 +74,7 @@ public class TranslatorBackAndForthTests
                 new Message { creation = DateTime.MinValue, message = "Hello world" }
             ]
         };
-        var translator = new LeafDtoToPlumbing(_dt);
+        var translator = new LeafDtoToPlumbing();
 
         // Expected VO
         DateTimeOffset expectedDate = _dt.Convert(DateTime.SpecifyKind(dto.creation, DateTimeKind.Unspecified), ETimeZone.Mountain);

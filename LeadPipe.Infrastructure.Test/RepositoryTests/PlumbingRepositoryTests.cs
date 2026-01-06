@@ -137,13 +137,13 @@ public class PlumbingRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new PlumbingRepository(context, logger);
 
-        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
+        var entity = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(entity);
 
         // Attempt to add the same entity again
         var duplicates = new List<PlumbingEntity>
         {
-            new() { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty  }
+            new() { Id=0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty  }
         };
 
         var result = await repo.AddRangeAsync(duplicates);
@@ -161,14 +161,14 @@ public class PlumbingRepositoryTests
         var repo = new PlumbingRepository(context, logger);
 
         // Existing entity in database
-        var existing = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
+        var existing = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(existing);
 
         // New batch contains one existing + one new
         var batch = new List<PlumbingEntity>
         {
-            new() { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty  }, // duplicate
-            new() { PhoneNumber = 67890, Source = Source.Test, MetaData = string.Empty  }  // new
+            new() { Id=0,PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty  }, // duplicate
+            new() { Id=0,PhoneNumber = 67890, Source = Source.Test, MetaData = string.Empty  }  // new
         };
 
         var result = await repo.AddRangeAsync(batch);
@@ -187,11 +187,11 @@ public class PlumbingRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new PlumbingRepository(context, logger);
 
-        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
+        var entity = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(entity);
 
         // Same phone number but different source -> should be added
-        var newEntity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test2, MetaData = string.Empty };
+        var newEntity = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test2, MetaData = string.Empty };
 
         var result = await repo.AddRangeAsync([newEntity]);
 

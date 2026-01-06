@@ -83,7 +83,7 @@ public class TranslatorTests
     [Fact]
     public void LeafDtoToPlumbing_LocalTime_ShouldConvertToUtcOffsetZero()
     {
-        var translator = new LeafDtoToPlumbing(_dt);
+        var translator = new LeafDtoToPlumbing();
         var dto = new LeafDto
         {
             creation = new DateTime(2025, 3, 9, 2, 30, 0), // local DST gap

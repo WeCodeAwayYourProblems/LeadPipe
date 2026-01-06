@@ -21,7 +21,7 @@ public sealed class YellerClientReporter : IReport<ReportYeller>
         _client = factory.CreateClient(_settings.YellerName!);
     }
 
-    public Task<Result> ReportData(List<ReportYeller> d)
+    public async Task<Result> ReportData(List<ReportYeller> d)
     {
         throw new NotImplementedException();
     }

@@ -1,4 +1,5 @@
 ﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Attributes;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Attributes;
 
 namespace LeadPipe.Infrastructure.Service.Update;
 

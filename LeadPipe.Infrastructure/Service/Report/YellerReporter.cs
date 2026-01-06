@@ -1,11 +1,11 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Infrastructure.Attributes;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Service.Report;
 
-[SourceKey(Source.Yeller)]
+[ScheduleKey(Schedule.TwoDays)]
 public sealed class YellerReporter(
     ICsvRwService csv,
     IInfrastructureSettings settings

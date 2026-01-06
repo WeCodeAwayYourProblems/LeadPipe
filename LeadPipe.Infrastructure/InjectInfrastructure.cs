@@ -100,10 +100,11 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReport<ReportPlumbing>, LeafReporter>(Source.Leaf);
         services.AddKeyedScoped<IReport<ReportPlumbing>, LibacionReporter>(Source.Libacion);
         services.AddKeyedScoped<IReport<ReportPlumbing>, PanReporter>(Source.Pan);
-        services.AddKeyedScoped<IReport<ReportPlumbing>, YellerReporter>(Source.Yeller);
 
-        //services.AddScoped<IReport<ReportYeller>, YellerClientReporter>();
-        services.AddScoped<IReport<ReportYeller>, YellerJsonReporter>();
+        // Special Report Services
+        //services.AddScoped<IReport<ReportYeller>, YellerClientReporter>(YellerSchedule.Daily);
+        services.AddKeyedScoped<IReport<ReportYeller>, YellerJsonReporter>(Schedule.Daily);
+        services.AddKeyedScoped<IReport<ReportPlumbing>, YellerReporter>(Source.Yeller);
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();

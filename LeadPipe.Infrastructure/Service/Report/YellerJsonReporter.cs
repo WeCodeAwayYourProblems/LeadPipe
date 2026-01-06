@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Attributes;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
@@ -6,7 +7,7 @@ using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Service.Report;
 
-[SourceKey(Domain.ValueObjects.Source.Yeller)]
+[ScheduleKey(Schedule.Daily)]
 public sealed class YellerJsonReporter(
     IYellerSettings settings,
     IJsonRwService json

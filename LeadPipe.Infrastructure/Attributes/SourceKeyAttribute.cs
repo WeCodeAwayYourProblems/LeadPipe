@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 
-namespace LeadPipe.Infrastructure;
+namespace LeadPipe.Infrastructure.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 internal class SourceKeyAttribute(Source key) : Attribute, ISourceKeyAttribute

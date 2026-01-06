@@ -9,6 +9,7 @@ internal sealed class ReportSourceFactory(IServiceProvider provider) : IReportSo
     private readonly IServiceProvider _provider = provider;
     public IReportService<Plumbing> GetService(Source source)
     {
-        return _provider.GetRequiredKeyedService<IReportService<Plumbing>>(source);
+        IReportService<Plumbing> service = _provider.GetRequiredKeyedService<IReportService<Plumbing>>(source);
+        return service;
     }
 }

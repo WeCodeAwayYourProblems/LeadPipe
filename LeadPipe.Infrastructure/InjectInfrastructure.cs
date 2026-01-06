@@ -87,7 +87,11 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReportService<Plumbing>, LeasedReportService>(Source.Leased);
         services.AddKeyedScoped<IReportService<Plumbing>, LibacionReportService>(Source.Libacion);
         services.AddKeyedScoped<IReportService<Plumbing>, PanReportService>(Source.Pan);
-        services.AddKeyedScoped<IReportService<Plumbing>, YellerReportService>(Source.Yeller);
+        services.AddKeyedScoped<IReportService<Plumbing>, ReportBothYeller>(Source.Yeller);
+
+        // Special Report Services
+        services.AddKeyedScoped<IReportService<Plumbing>, YellerClientReportService>(Schedule.Daily);
+        services.AddKeyedScoped<IReportService<Plumbing>, YellerCsvReportService>(Schedule.TwoDays);
 
         // Factories for keyed services
         services.AddScoped<IReportSourceFactory, ReportSourceFactory>();
@@ -100,11 +104,9 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReport<ReportPlumbing>, LeafReporter>(Source.Leaf);
         services.AddKeyedScoped<IReport<ReportPlumbing>, LibacionReporter>(Source.Libacion);
         services.AddKeyedScoped<IReport<ReportPlumbing>, PanReporter>(Source.Pan);
-
-        // Special Report Services
-        //services.AddScoped<IReport<ReportYeller>, YellerClientReporter>(YellerSchedule.Daily);
-        services.AddKeyedScoped<IReport<ReportYeller>, YellerJsonReporter>(Schedule.Daily);
-        services.AddKeyedScoped<IReport<ReportPlumbing>, YellerReporter>(Source.Yeller);
+        services.AddKeyedScoped<IReport<ReportPlumbing>, YellerCsvReporter>(Source.Yeller);
+        //services.AddScoped<IReport<ReportYeller>, YellerClientReporter>();
+        services.AddScoped<IReport<ReportYeller>, YellerJsonReporter>();
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();

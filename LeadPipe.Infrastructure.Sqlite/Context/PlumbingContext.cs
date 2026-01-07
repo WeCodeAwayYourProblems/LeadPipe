@@ -6,21 +6,28 @@ namespace LeadPipe.Infrastructure.Sqlite.Context;
 public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbContext(options)
 {
 #pragma warning disable IDE0079
-    // TODO: Add CornFormation and CornFormationSubsLinks
-    // TODO: Add CornSubsCallPlumbingLinks
-    // TODO: Add appropriate repositories
+    // Entities
     public DbSet<SyncStateEntity> SyncState { get; set; }
-    public DbSet<SubsEntity> SubsEntities { get; set; }
-    public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
     public DbSet<CallEntity> CallEntities { get; set; }
-    public DbSet<SubsCallLink> SubsCallLinks { get; set; }
-    public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
-    public DbSet<CallSubsLink> SubsCallLinks { get; set; }
+    public DbSet<CornEntity> CornEntities { get; set; }
+    public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
+    public DbSet<SubsEntity> SubsEntities { get; set; }
+
+    // Links
+    public DbSet<CornCallLink> CornCallLinks { get; set; }
+    public DbSet<CornPlumbingLink> CornPlumbingLinks { get; set; }
     public DbSet<PlumbingCallLink> PlumbingCallLinks { get; set; }
+    public DbSet<SubsCallLink> SubsCallLinks { get; set; }
+    public DbSet<SubsCornLink> SubsCornLinks { get; set; }
+    public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
 #pragma warning restore IDE0079
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // **************************************
+        // Entities
+        // **************************************
+
         // Sync State Entity
         var sync = modelBuilder.Entity<SyncStateEntity>()
             .ToTable("SyncState");
@@ -54,6 +61,28 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         call.Property(c => c.CallDate).IsRequired();
         call.Property(c => c.UnixCallDate).IsRequired();
         call.HasIndex(c => new { c.PhoneNumber, c.CallDate }).IsUnique();
+        
+        // CornEntity
+        var corn = modelBuilder.Entity<CornEntity>()
+            .ToTable("CornEntities");
+        corn.HasKey(c => c.Id);
+        corn.Property(c => c.Id).ValueGeneratedOnAdd();
+        corn.HasIndex(c => c.PhoneNumber);
+        corn.HasIndex(c => new { c.PhoneNumber, c.Source }).IsUnique();
+        corn.Property(c => c.Source)
+            .HasConversion<string>();
+        corn.Property(c => c.MetaData)
+            .IsRequired();
+        corn.Property(c => c.Payload)
+            .IsRequired();
+        corn.Property(c => c.Date)
+            .IsRequired();
+        corn.Property(c => c.UnixDate)
+            .IsRequired();
+
+        // **************************************
+        // Links
+        // **************************************
 
         // SubsPlumbingLink
         var spLink = modelBuilder.Entity<SubsPlumbingLink>()
@@ -107,5 +136,62 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .WithMany(c => c.PlumbingCallLinks)
             .HasForeignKey(pc => pc.CallId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // SubsCornLink
+        var subsCorn = modelBuilder.Entity<SubsCornLink>()
+            .ToTable("SubsCornLinks");
+        subsCorn.HasKey(l => l.Id);
+        subsCorn.Property(l => l.Id).ValueGeneratedOnAdd();
+        subsCorn.HasIndex(l => l.SubsId);
+        subsCorn.HasIndex(l => l.CornId);
+        subsCorn.HasIndex(l => new { l.SubsId, l.CornId }).IsUnique();
+        subsCorn.HasOne(l => l.SubsEntity)
+            .WithMany(s => s.SubsCornLinks)
+            .HasForeignKey(l => l.SubsId)
+            .OnDelete(DeleteBehavior.Cascade);
+        subsCorn.HasOne(l => l.CornEntity)
+            .WithMany(c => c.SubsCornLinks)
+            .HasForeignKey(l => l.CornId)
+            .OnDelete(DeleteBehavior.Cascade);
+        subsCorn.Property(l => l.MatchingPhone)
+            .IsRequired();
+
+        // CornCallLink
+        var cornCall = modelBuilder.Entity<CornCallLink>()
+            .ToTable("CornCallLinks");
+        cornCall.HasKey(l => l.Id);
+        cornCall.Property(l => l.Id).ValueGeneratedOnAdd();
+        cornCall.HasIndex(l => l.CornId);
+        cornCall.HasIndex(l => l.CallId);
+        cornCall.HasIndex(l => new { l.CornId, l.CallId }).IsUnique();
+        cornCall.HasOne(l => l.CornEntity)
+            .WithMany(c => c.CornCallLinks)
+            .HasForeignKey(l => l.CornId)
+            .OnDelete(DeleteBehavior.Cascade);
+        cornCall.HasOne(l => l.CallEntity)
+            .WithMany(c => c.CornCallLinks)
+            .HasForeignKey(l => l.CallId)
+            .OnDelete(DeleteBehavior.Cascade);
+        cornCall.Property(l => l.MatchingPhone)
+            .IsRequired();
+
+        // CornPlumbingLink
+        var cornPlumb = modelBuilder.Entity<CornPlumbingLink>()
+            .ToTable("CornPlumbingLinks");
+        cornPlumb.HasKey(l => l.Id);
+        cornPlumb.Property(l => l.Id).ValueGeneratedOnAdd();
+        cornPlumb.HasIndex(l => l.CornId);
+        cornPlumb.HasIndex(l => l.PlumbingId);
+        cornPlumb.HasIndex(l => new { l.CornId, l.PlumbingId }).IsUnique();
+        cornPlumb.HasOne(l => l.CornEntity)
+            .WithMany(c => c.CornPlumbingLinks)
+            .HasForeignKey(l => l.CornId)
+            .OnDelete(DeleteBehavior.Cascade);
+        cornPlumb.HasOne(l => l.PlumbingEntity)
+            .WithMany(p => p.CornPlumbingLinks)
+            .HasForeignKey(l => l.PlumbingId)
+            .OnDelete(DeleteBehavior.Cascade);
+        cornPlumb.Property(l => l.MatchingPhone)
+            .IsRequired();
     }
 }

@@ -13,6 +13,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
     public DbSet<SubsEntity> SubsEntities { get; set; }
     public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
     public DbSet<CallEntity> CallEntities { get; set; }
+    public DbSet<SubsCallLink> SubsCallLinks { get; set; }
     public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
     public DbSet<CallSubsLink> SubsCallLinks { get; set; }
     public DbSet<PlumbingCallLink> PlumbingCallLinks { get; set; }
@@ -73,7 +74,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         spLink.Property(l => l.MatchingSubPhone).IsRequired();
 
         // SubsCallLink
-        var subsCall = modelBuilder.Entity<CallSubsLink>()
+        var subsCall = modelBuilder.Entity<SubsCallLink>()
             .ToTable("SubsCallLinks");
         subsCall.HasKey(sc => sc.Id);
         subsCall.Property(sc => sc.Id).ValueGeneratedOnAdd();

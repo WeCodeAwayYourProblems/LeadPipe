@@ -60,11 +60,11 @@ internal sealed class TransformYellerReport(
         List<CallEntity> calls = callsList!; // Ensure the list is not null
 
         // Get Call links
-        Result<List<CallSubsLink>> callLinksResult = await _subsCallRepo.GetAllWithDetailsAsync(calls);
-        List<CallSubsLink>? cl = callLinksResult.IsSuccess // Check success
+        Result<List<SubsCallLink>> callLinksResult = await _subsCallRepo.GetAllWithDetailsAsync(calls);
+        List<SubsCallLink>? cl = callLinksResult.IsSuccess // Check success
             ? callLinksResult.Value
             : null;
-        List<CallSubsLink> callLinks = cl!; // Ensure the list is not null
+        List<SubsCallLink> callLinks = cl!; // Ensure the list is not null
 
         // Generate report
         List<ReportYeller> spLinksReport =

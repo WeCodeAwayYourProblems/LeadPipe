@@ -139,13 +139,13 @@ internal class PlumbingAssociationService(
 
         return links;
     }
-    private static List<CallSubsLink> GenerateSubsCallLinks(
+    private static List<SubsCallLink> GenerateSubsCallLinks(
         List<SubsEntity> subs,
         Dictionary<long, CallEntity> callByPhone,
         Dictionary<long, SubsEntity> subsById,
         HashSet<(long SubsId, long CallId)> existing)
     {
-        var links = new List<CallSubsLink>();
+        var links = new List<SubsCallLink>();
 
         foreach (var s in subs)
         {
@@ -158,7 +158,7 @@ internal class PlumbingAssociationService(
                 if (existing.Contains(key))
                     continue;
 
-                links.Add(new CallSubsLink
+                links.Add(new SubsCallLink
                 {
                     SubsId = s.Id,
                     SubsEntity = subsById[s.Id],

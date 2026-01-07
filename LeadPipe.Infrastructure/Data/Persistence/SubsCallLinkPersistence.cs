@@ -4,4 +4,4 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
 namespace LeadPipe.Infrastructure.Data.Persistence;
 
-internal class SubsCallLinkPersistence(ISubsCallLinkRepository repo) : Persistence<ISubsCallLinkRepository, CallSubsLink>(repo), IDataPersistence<CallSubsLink>{ }
+internal class SubsCallLinkPersistence(ISubsCallLinkRepository repo) : Persistence<ISubsCallLinkRepository, SubsCallLink>(repo), IDataPersistence<SubsCallLink>{ }

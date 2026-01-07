@@ -9,27 +9,27 @@ using System.Text;
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
 public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<SubsCallLinkRepository> logger)
-    : PlumbingContextRepository<CallSubsLink, SubsCallLinkRepository>(context, logger), ISubsCallLinkRepository
+    : PlumbingContextRepository<SubsCallLink, SubsCallLinkRepository>(context, logger), ISubsCallLinkRepository
 {
-    public async Task<Result<List<CallSubsLink>>> GetAllWithDetailsAsync()
+    public async Task<Result<List<SubsCallLink>>> GetAllWithDetailsAsync()
     {
         try
         {
-            List<CallSubsLink> list = await _context.SubsCallLinks
+            List<SubsCallLink> list = await _context.SubsCallLinks
                 .AsNoTracking()
                 .Include(p => p.CallEntity)
                 .Include(p => p.SubsEntity)
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<CallSubsLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<SubsCallLink>>(ex.ToString()); }
     }
-    public async Task<Result<List<CallSubsLink>>> GetAllWithDetailsAsync(List<CallEntity> list)
+    public async Task<Result<List<SubsCallLink>>> GetAllWithDetailsAsync(List<CallEntity> list)
     {
         try
         {
             List<long> ids = [.. list.Select(l => l.Id)];
-            List<CallSubsLink> result = await _context.SubsCallLinks
+            List<SubsCallLink> result = await _context.SubsCallLinks
                 .AsNoTracking()
                 .Where(p => ids.Contains(p.CallId))
                 .Include(p => p.CallEntity)
@@ -37,27 +37,27 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
                 .ToListAsync();
             return result;
         }
-        catch (Exception ex) { return Result.Failure<List<CallSubsLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<SubsCallLink>>(ex.ToString()); }
     }
-    public override async Task<Result<List<CallSubsLink>>> GetAllAsync()
+    public override async Task<Result<List<SubsCallLink>>> GetAllAsync()
     {
         try
         {
-            List<CallSubsLink> list = await _context.SubsCallLinks
+            List<SubsCallLink> list = await _context.SubsCallLinks
                 .AsNoTracking()
-                .Select(s => new CallSubsLink() { Id = s.Id, SubsId = s.SubsId, CallId = s.CallId, MatchingNumber = s.MatchingNumber })
+                .Select(s => new SubsCallLink() { Id = s.Id, SubsId = s.SubsId, CallId = s.CallId, MatchingNumber = s.MatchingNumber })
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<CallSubsLink>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<SubsCallLink>>(ex.Message); }
     }
-    public override async Task<Result<List<CallSubsLink>>> UpsertRangeAsync(List<CallSubsLink> entities)
+    public override async Task<Result<List<SubsCallLink>>> UpsertRangeAsync(List<SubsCallLink> entities)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<CallSubsLink>());
+            return Result.Success(new List<SubsCallLink>());
 
         // Deduplicate in-memory by (SubsId, CallId)
-        List<CallSubsLink> uniqueEntities = [.. entities
+        List<SubsCallLink> uniqueEntities = [.. entities
             .GroupBy(e => (e.SubsId, e.CallId))
             .Select(g => g.Last())];
 
@@ -164,10 +164,10 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
         catch (Exception ex)
         {
             _logger.LogError(ex, "CallSubsLink upsert failed");
-            return Result.Failure<List<CallSubsLink>>(ex.Message);
+            return Result.Failure<List<SubsCallLink>>(ex.Message);
         }
 
-        void InsertBatch(List<CallSubsLink> batch)
+        void InsertBatch(List<SubsCallLink> batch)
         {
             var sql = new StringBuilder();
             sql.Append("INSERT INTO temp_subs_call_links VALUES ");

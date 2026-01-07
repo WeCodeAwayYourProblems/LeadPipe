@@ -31,7 +31,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataPersistence<CallEntity>, CallEntityPersistence>();
         services.AddScoped<IDataPersistence<PlumbingCallLink>, PlumbingCallLinkPersistence>();
         services.AddScoped<IDataPersistence<PlumbingEntity>, PlumbingPersistence>();
-        services.AddScoped<IDataPersistence<CallSubsLink>, SubsCallLinkPersistence>();
+        services.AddScoped<IDataPersistence<SubsCallLink>, SubsCallLinkPersistence>();
         services.AddScoped<IDataPersistence<SubsEntity>, SubsEntityPersistence>();
         services.AddScoped<IDataPersistence<SubsPlumbingLink>, SubsPlumbingLinkPersistence>();
         services.AddScoped<IDataPersistence<Call>, CallPersistence>();

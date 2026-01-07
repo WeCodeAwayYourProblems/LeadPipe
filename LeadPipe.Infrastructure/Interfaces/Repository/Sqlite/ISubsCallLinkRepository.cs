@@ -3,8 +3,8 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 
 namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
-public interface ISubsCallLinkRepository : IRepository<CallSubsLink>
+public interface ISubsCallLinkRepository : IRepository<SubsCallLink>
 {
-    Task<Result<List<CallSubsLink>>> GetAllWithDetailsAsync();
-    Task<Result<List<CallSubsLink>>> GetAllWithDetailsAsync(List<CallEntity> list);
+    Task<Result<List<SubsCallLink>>> GetAllWithDetailsAsync();
+    Task<Result<List<SubsCallLink>>> GetAllWithDetailsAsync(List<CallEntity> list);
 }

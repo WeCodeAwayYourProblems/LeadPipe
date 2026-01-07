@@ -11,8 +11,9 @@ public class CallEntity : IEntity
     public required string Location { get; set; }
     public long Duration { get; set; }
     public bool Billable { get; set; }
-
+    
     // Navigation properties
     public ICollection<SubsCallLink> SubsCallLinks { get; set; } = [];
     public ICollection<PlumbingCallLink> PlumbingCallLinks { get; set; } = [];
+    public ICollection<CornCallLink> CornCallLinks { get; set; } = [];
 }

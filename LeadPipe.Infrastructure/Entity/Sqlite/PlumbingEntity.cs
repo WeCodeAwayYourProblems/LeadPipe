@@ -12,6 +12,8 @@ public class PlumbingEntity : ISourceEntity
     public Source Source { get; set; }
     public required string MetaData { get; set; }
 
+    // Navigation properties
     public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];
     public ICollection<PlumbingCallLink> PlumbingCallLinks { get; set; } = [];
+    public ICollection<CornPlumbingLink> CornPlumbingLinks { get; set; } = [];
 }

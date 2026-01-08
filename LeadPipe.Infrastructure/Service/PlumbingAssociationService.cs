@@ -132,7 +132,7 @@ internal class PlumbingAssociationService(
                     SubsEntity = subsById[s.Id],
                     PlumbingId = plumbing.Id,
                     PlumbingEntity = plumbing,
-                    MatchingSubPhone = number
+                    MatchingPhone = number
                 });
             }
         }

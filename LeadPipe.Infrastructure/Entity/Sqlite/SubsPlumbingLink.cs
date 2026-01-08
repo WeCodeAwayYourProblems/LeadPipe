@@ -10,5 +10,5 @@ public class SubsPlumbingLink : IEntity
     public long PlumbingId { get; set; }
     public PlumbingEntity? PlumbingEntity { get; set; }
 
-    public long MatchingSubPhone { get; set; }
+    public long MatchingPhone { get; set; }
 }

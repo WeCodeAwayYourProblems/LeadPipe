@@ -8,65 +8,84 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlumbingLinkRepository> logger)
-    : PlumbingContextRepository<SubsPlumbingLink, SubsPlumbingLinkRepository>(context, logger), ISubsPlumbingLinkRepository
+public class SubsCornLinkRepository(
+    PlumbingContext context,
+    ILogger<SubsCornLinkRepository> logger)
+    : PlumbingContextRepository<SubsCornLink, SubsCornLinkRepository>(context, logger),
+      ISubsCornLinkRepository
 {
-    public async Task<Result<List<SubsPlumbingLink>>> GetAllWithDetailsAsync()
+    public async Task<Result<List<SubsCornLink>>> GetAllWithDetailsAsync()
     {
         try
         {
-            List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
+            List<SubsCornLink> list = await _context.SubsCornLinks
                 .AsNoTracking()
-                .Include(p => p.PlumbingEntity)
+                .Include(p => p.CornEntity)
                 .Include(p => p.SubsEntity)
                 .ToListAsync();
+
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.ToString()); }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<SubsCornLink>>(ex.ToString());
+        }
     }
-    public async Task<Result<List<SubsPlumbingLink>>> GetAllWithDetailsAsync(IEnumerable<PlumbingEntity> filter)
+
+    public async Task<Result<List<SubsCornLink>>> GetAllWithDetailsAsync(IEnumerable<CornEntity> filter)
     {
         try
         {
             List<long> ids = [.. filter.Select(p => p.Id)];
-            List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
+
+            List<SubsCornLink> list = await _context.SubsCornLinks
                 .AsNoTracking()
-                .Where(e => ids.Contains(e.PlumbingId))
-                .Include(p => p.PlumbingEntity)
+                .Where(e => ids.Contains(e.CornId))
+                .Include(p => p.CornEntity)
                 .Include(p => p.SubsEntity)
                 .ToListAsync();
+
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.ToString()); }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<SubsCornLink>>(ex.ToString());
+        }
     }
-    public override async Task<Result<List<SubsPlumbingLink>>> GetAllAsync()
+
+    public override async Task<Result<List<SubsCornLink>>> GetAllAsync()
     {
         try
         {
-            List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
+            List<SubsCornLink> list = await _context.SubsCornLinks
                 .AsNoTracking()
-                .Select(s => new SubsPlumbingLink()
+                .Select(s => new SubsCornLink
                 {
                     Id = s.Id,
                     SubsId = s.SubsId,
-                    PlumbingId = s.PlumbingId,
+                    CornId = s.CornId,
                     MatchingPhone = s.MatchingPhone
                 })
                 .ToListAsync();
+
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.Message); }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<SubsCornLink>>(ex.ToString());
+        }
     }
-    public override async Task<Result<List<SubsPlumbingLink>>> UpsertRangeAsync(List<SubsPlumbingLink> entities)
+
+    public override async Task<Result<List<SubsCornLink>>> UpsertRangeAsync(List<SubsCornLink> entities)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<SubsPlumbingLink>());
+            return Result.Success(new List<SubsCornLink>());
 
-        // Deduplicate in-memory by (SubsId, PlumbingId)
-        List<SubsPlumbingLink> uniqueEntities =
+        // Deduplicate in-memory by (SubsId, CornId)
+        List<SubsCornLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.SubsId, e.PlumbingId))
+                .GroupBy(e => (e.SubsId, e.CornId))
                 .Select(g => g.Last())
         ];
 
@@ -79,13 +98,12 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
         {
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            // Temp table for staging
             await _context.Database.ExecuteSqlRawAsync("""
-                CREATE TEMP TABLE IF NOT EXISTS temp_subs_plumbing_links (
+                CREATE TEMP TABLE IF NOT EXISTS temp_subs_corn_links (
                     SubsId INTEGER NOT NULL,
-                    PlumbingId INTEGER NOT NULL,
+                    CornId INTEGER NOT NULL,
                     MatchingPhone INTEGER NOT NULL,
-                    PRIMARY KEY (SubsId, PlumbingId)
+                    PRIMARY KEY (SubsId, CornId)
                 ) WITHOUT ROWID;
             """);
 
@@ -110,17 +128,17 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
                     _logger.LogWarning(
                         ex,
                         "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
-                       nameof(SubsPlumbingLink),
-                       batchSize);
+                        nameof(SubsCornLink),
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "{Entity} row insert failed: SubsId={SubsId}, PlumbingId={PlumbingId}, MatchingPhone={MatchingPhone}",
-                            nameof(SubsPlumbingLink),
+                            "{Entity} row insert failed: SubsId={SubsId}, CornId={CornId}, MatchingPhone={MatchingPhone}",
+                            nameof(SubsCornLink),
                             row.SubsId,
-                            row.PlumbingId,
+                            row.CornId,
                             row.MatchingPhone);
 
                         index++;
@@ -134,42 +152,42 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
                 }
             }
 
-            // ---- Phase 1: UPDATE existing rows ----
+            // Update existing rows
             int updated = await _context.Database.ExecuteSqlRawAsync("""
-                UPDATE SubsPlumbingLinks
+                UPDATE SubsCornLinks
                 SET MatchingPhone = (
                     SELECT t.MatchingPhone
-                    FROM temp_subs_plumbing_links t
-                    WHERE t.SubsId = SubsPlumbingLinks.SubsId
-                      AND t.PlumbingId = SubsPlumbingLinks.PlumbingId
+                    FROM temp_subs_corn_links t
+                    WHERE t.SubsId = SubsCornLinks.SubsId
+                      AND t.CornId = SubsCornLinks.CornId
                 )
                 WHERE EXISTS (
                     SELECT 1
-                    FROM temp_subs_plumbing_links t
-                    WHERE t.SubsId = SubsPlumbingLinks.SubsId
-                      AND t.PlumbingId = SubsPlumbingLinks.PlumbingId
+                    FROM temp_subs_corn_links t
+                    WHERE t.SubsId = SubsCornLinks.SubsId
+                      AND t.CornId = SubsCornLinks.CornId
                 );
             """);
 
-            // ---- Phase 2: INSERT missing rows ----
+            // Insert missing rows
             int inserted = await _context.Database.ExecuteSqlRawAsync("""
-                INSERT INTO SubsPlumbingLinks (SubsId, PlumbingId, MatchingPhone)
-                SELECT t.SubsId, t.PlumbingId, t.MatchingPhone
-                FROM temp_subs_plumbing_links t
+                INSERT INTO SubsCornLinks (SubsId, CornId, MatchingPhone)
+                SELECT t.SubsId, t.CornId, t.MatchingPhone
+                FROM temp_subs_corn_links t
                 WHERE NOT EXISTS (
                     SELECT 1
-                    FROM SubsPlumbingLinks s
+                    FROM SubsCornLinks s
                     WHERE s.SubsId = t.SubsId
-                      AND s.PlumbingId = t.PlumbingId
+                      AND s.CornId = t.CornId
                 );
             """);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_subs_plumbing_links;");
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_subs_corn_links;");
             await transaction.CommitAsync();
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
-                nameof(SubsPlumbingLink),
+                nameof(SubsCornLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
@@ -186,19 +204,19 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Entity} upsert failed",
-                nameof(SubsPlumbingLink));
-            return Result.Failure<List<SubsPlumbingLink>>(ex.Message);
+                nameof(SubsCornLink);
+            return Result.Failure<List<SubsCornLink>>(ex.Message);
         }
 
-        void InsertBatch(List<SubsPlumbingLink> batch)
+        void InsertBatch(List<SubsCornLink> batch)
         {
             var sql = new StringBuilder();
-            sql.Append("INSERT INTO temp_subs_plumbing_links VALUES ");
+            sql.Append("INSERT INTO temp_subs_corn_links VALUES ");
 
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append($"({e.SubsId}, {e.PlumbingId}, {e.MatchingPhone})");
+                sql.Append($"({e.SubsId}, {e.CornId}, {e.MatchingPhone})");
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");
@@ -208,16 +226,22 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
     }
-    public async Task<Result<List<SubsPlumbingLink>>> GetAllAsync(IEnumerable<PlumbingEntity> filter)
+
+    public async Task<Result<List<SubsCornLink>>> GetAllAsync(IEnumerable<CornEntity> filter)
     {
         try
         {
             List<long> ids = [.. filter.Select(p => p.Id)];
-            List<SubsPlumbingLink> set = await _set
-                .Where(e => ids.Contains(e.PlumbingId))
+
+            List<SubsCornLink> set = await _set
+                .Where(e => ids.Contains(e.CornId))
                 .ToListAsync();
+
             return Result.Success(set);
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.Message); }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<SubsCornLink>>(ex.Message);
+        }
     }
 }

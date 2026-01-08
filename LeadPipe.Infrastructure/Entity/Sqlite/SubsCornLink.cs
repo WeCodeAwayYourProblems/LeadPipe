@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class SubsCornLink
+public class SubsCornLink : IEntity
 {
     public long Id { get; set; }
 

@@ -103,7 +103,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .WithMany(p => p.SubsPlumbingLinks)
             .HasForeignKey(l => l.PlumbingId)
             .OnDelete(DeleteBehavior.Cascade);
-        spLink.Property(l => l.MatchingSubPhone).IsRequired();
+        spLink.Property(l => l.MatchingPhone).IsRequired();
 
         // SubsCallLink
         var subsCall = modelBuilder.Entity<SubsCallLink>()

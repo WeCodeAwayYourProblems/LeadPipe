@@ -204,7 +204,7 @@ public class SubsCornLinkRepository(
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Entity} upsert failed",
-                nameof(SubsCornLink);
+                nameof(SubsCornLink));
             return Result.Failure<List<SubsCornLink>>(ex.Message);
         }
 

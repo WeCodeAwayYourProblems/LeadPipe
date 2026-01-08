@@ -18,10 +18,13 @@ internal sealed class ReportBothYeller(
     private List<Plumbing>? TwoDaysData { get; set; }
     public async Task<Result<List<Plumbing>>> GetDataAsync()
     {
+        // Daily Data
         Result<List<Plumbing>> dailyData = await _daily.GetDataAsync();
         if (dailyData.IsFailure)
             return dailyData;
         DailyData = dailyData.Value;
+
+        // Two Days Data
         Result<List<Plumbing>> twoDaysData = await _twoDays.GetDataAsync();
         if (twoDaysData.IsFailure)
             return twoDaysData;

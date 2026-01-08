@@ -46,13 +46,16 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public Token? YellerToken { get; set; }
     public string? YellerBase { get; set; }
     public string? YellerId { get; set; }
-    public string? YellerPrelimEndpoint { get; set; }
+    public string? YellerPrelimEndpoint1 { get; set; }
+    public string? YellerPrelimEndpoint2 { get; set; }
     public int YellerConcurrentMax { get; set; }
     public string? YellerFinalEndpoint { get; set; }
     public string? YellerPrelimId { get; set; }
     public string? YellerCallSource1 { get; set; }
     public string? YellerCallSource2 { get; set; }
     public string? YellerClientReporterLoc { get; set; }
+    public string[]? YellerBellerId { get; }
+
 
     // Data
     public string? CalliSourceLoc { get; set; }

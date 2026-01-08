@@ -51,7 +51,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         plumb.Property(p => p.Id).ValueGeneratedOnAdd();
         plumb.HasIndex(p => p.PhoneNumber);
         plumb.HasIndex(p => new { p.PhoneNumber, p.Source }).IsUnique();
-        plumb.Property(p => p.Source).HasConversion<string>();
+        plumb.Property(p => p.Source)
+            .HasConversion<string>()
+            .IsRequired();
 
         // CallEntity
         var call = modelBuilder.Entity<CallEntity>()
@@ -70,7 +72,8 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         corn.HasIndex(c => c.PhoneNumber);
         corn.HasIndex(c => new { c.PhoneNumber, c.Source }).IsUnique();
         corn.Property(c => c.Source)
-            .HasConversion<string>();
+            .HasConversion<string>()
+            .IsRequired();
         corn.Property(c => c.MetaData)
             .IsRequired();
         corn.Property(c => c.Payload)

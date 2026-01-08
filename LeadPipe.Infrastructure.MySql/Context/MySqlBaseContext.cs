@@ -23,6 +23,7 @@ public abstract class MySqlBaseContext : DbContext
     public DbSet<SubMySqlEntity> Subscriptions => Set<SubMySqlEntity>();
     public DbSet<SummaryMySqlEntity> Summaries => Set<SummaryMySqlEntity>();
     public DbSet<TranscriptionMySqlEntity> Transcriptions => Set<TranscriptionMySqlEntity>();
+    public DbSet<CornMySqlEntity> Corn => Set<CornMySqlEntity>();
 #pragma warning restore IDE0079
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

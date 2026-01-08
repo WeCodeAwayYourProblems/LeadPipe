@@ -28,6 +28,6 @@ public class CornMySqlEntity
     public string? howCanWeHelp { get; set; }
     public string? referringURL { get; set; }
     public string? contactAcceptance { get; set; }
-    public int commercial { get; set; }
+    public bool commercial { get; set; }
 #pragma warning restore IDE1006
 }

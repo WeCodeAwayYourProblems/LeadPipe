@@ -23,6 +23,9 @@ internal static class ConfigureCommandLine
         settings.Schema2ConnectionString =
             configuration.GetConnectionString("Schema2");
 
+        settings.Schema3ConnectionString =
+            configuration.GetConnectionString("Schema3");
+
         settings.SchemaConnectionString =
             configuration.GetConnectionString("Schema");
 

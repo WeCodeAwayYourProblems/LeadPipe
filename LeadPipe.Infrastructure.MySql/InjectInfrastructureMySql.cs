@@ -23,8 +23,7 @@ public static class InjectInfrastructureMySql
                 ServerVersion.AutoDetect(settings.SchemaConnectionString),
                 mySqlOptions =>
                 {
-                    mySqlOptions.UseQuerySplittingBehavior(
-                        QuerySplittingBehavior.SplitQuery);
+                    mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 })
             .LogTo(Console.WriteLine, LogLevel.Information)
             .EnableSensitiveDataLogging();
@@ -46,6 +45,24 @@ public static class InjectInfrastructureMySql
             .LogTo(Console.WriteLine, LogLevel.Information)
             .EnableSensitiveDataLogging();
         });
+
+        // Register MySqlContext for Schema3
+        if (string.IsNullOrWhiteSpace(settings.Schema3ConnectionString))
+            throw new InvalidOperationException("MySqlConnectionString for Schema3 is missing.");
+
+        services.AddDbContext<MySqlSchema3Context>(options =>
+        {
+            options.UseMySql(
+                settings.Schema3ConnectionString,
+                ServerVersion.AutoDetect(settings.Schema3ConnectionString),
+                mySqlOptions =>
+                {
+                    mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                })
+            .LogTo(Console.WriteLine, LogLevel.Information)
+            .EnableSensitiveDataLogging();
+        });
+
 
         // Register repositories
         services.AddScoped<ICallMySqlRepository, CallMySqlRepository>();

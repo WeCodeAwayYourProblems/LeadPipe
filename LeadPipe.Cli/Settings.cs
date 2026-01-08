@@ -32,10 +32,12 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? LeafMessagesEndpoint { get; set; }
     public int LeafConcurrentMax { get; set; }
     public string? PlumbingConnectionString { get; set; }
-    public string? Schema2ConnectionString { get; set; }
     public string? SchemaConnectionString { get; set; }
+    public string? Schema2ConnectionString { get; set; }
+    public string? Schema3ConnectionString { get; set; }
     public string? Schema1 { get; set; }
     public string? Schema2 { get; set; }
+    public string? Schema3 { get; set; }
     
     // Yeller 
     public string? YellerName { get; set; }

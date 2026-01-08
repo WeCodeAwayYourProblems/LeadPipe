@@ -4,7 +4,7 @@ using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 
-namespace LeadPipe.Infrastructure.Test.RepositoryTests;
+namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
 public class SubMySqlRepositoryTests
 {

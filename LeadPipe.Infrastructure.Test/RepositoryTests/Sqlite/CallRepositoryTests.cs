@@ -3,9 +3,9 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.Extensions.Logging;
 
-namespace LeadPipe.Infrastructure.Test.RepositoryTests;
+namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
-public class SubsCallLinkRepositoryTests
+public class CallRepositoryTests
 {
 
     [Fact]
@@ -13,20 +13,21 @@ public class SubsCallLinkRepositoryTests
     {
         var context = RepoTestHelpers.GetInMemoryContext();
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(context, logger);
+        var repo = new CallRepository(context, logger);
 
-        var entities = new List<SubsCallLink>
+
+        var entities = new List<CallEntity>
         {
-            new() { Id = 1, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Location = string.Empty, Source=string.Empty } },
-            new() { Id = 2, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Location = string.Empty, Source=string.Empty } }
+            new() { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty },
+            new() { Id = 2, PhoneNumber = 67890, Note = string.Empty, Location = string.Empty, Source = string.Empty }
         };
 
         var result = await repo.AddRangeAsync(entities);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, context.SubsCallLinks.Count());
+        Assert.Equal(2, context.CallEntities.Count());
     }
 
     [Fact]
@@ -34,9 +35,9 @@ public class SubsCallLinkRepositoryTests
     {
         var context = RepoTestHelpers.GetInMemoryContext();
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(context, logger);
+        var repo = new CallRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
 
@@ -45,15 +46,15 @@ public class SubsCallLinkRepositoryTests
     }
 
     [Fact]
-    public async Task AddAsync_ShouldAddSubsCallLink()
+    public async Task AddAsync_ShouldAddCallEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(context, logger);
+        var repo = new CallRepository(context, logger);
 
-        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -62,31 +63,31 @@ public class SubsCallLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SubsCallLinks.Add(new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } });
+        context.CallEntities.Add(new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty });
         await context.SaveChangesAsync();
 
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(context, logger);
+        var repo = new CallRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.Value.Id);
+        Assert.Equal(12345, result.Value.PhoneNumber);
     }
 
     [Fact]
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
-        context.SubsCallLinks.Add(plumbing);
+        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
+        context.CallEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(context, logger);
+        var repo = new CallRepository(context, logger);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
 
@@ -98,9 +99,9 @@ public class SubsCallLinkRepositoryTests
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
+        var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var result = await repo.GetByIdAsync(99);
 
         Assert.False(result.IsSuccess);
@@ -111,34 +112,34 @@ public class SubsCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
-        context.SubsCallLinks.Add(plumbing);
+        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
+        context.CallEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(context, logger);
-        var updatedSubsCallLink = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var repo = new CallRepository(context, logger);
+        var updatedCall = new CallEntity { Id = 1, PhoneNumber = 99999, Note = string.Empty, Location = string.Empty, Source = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedSubsCallLink);
+        var result = await repo.UpdateAsync(updatedCall);
         var reloaded = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(1, reloaded.Value.Id);
+        Assert.Equal(99999, reloaded.Value.PhoneNumber);
     }
 
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(),logger);
-        var updatedSubsCallLink = new SubsCallLink { Id = 99, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
+        var updatedCall = new CallEntity { Id = 99, PhoneNumber = 11111, Note = string.Empty, Location = string.Empty, Source = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedSubsCallLink);
+        var result = await repo.UpdateAsync(updatedCall);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
@@ -148,9 +149,9 @@ public class SubsCallLinkRepositoryTests
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
         var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
+                          .CreateLogger<CallRepository>();
 
-        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
+        var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var result = await repo.DeleteAsync(99);
 
         Assert.True(result.IsSuccess);

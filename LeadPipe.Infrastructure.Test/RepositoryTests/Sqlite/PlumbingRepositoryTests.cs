@@ -5,7 +5,7 @@ using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace LeadPipe.Infrastructure.Test.RepositoryTests;
+namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class PlumbingRepositoryTests
 {

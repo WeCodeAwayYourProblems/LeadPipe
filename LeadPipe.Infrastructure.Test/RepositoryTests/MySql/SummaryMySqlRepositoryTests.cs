@@ -4,23 +4,23 @@ using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 
-namespace LeadPipe.Infrastructure.Test.RepositoryTests;
+namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
-public class CustomerMySqlRepositoryTests
+public class SummaryMySqlRepositoryTests
 {
-    private CustomerMySqlRepository CreateRepository()
+    private SummaryMySqlRepository CreateRepository()
     {
         var settings = Substitute.For<IMySqlSettings>();
         settings.Schema1.Returns("dbo");
         settings.Schema2.Returns("dbo");
 
-        var context = new MySqlSchemaContext(
-            new DbContextOptionsBuilder<MySqlSchemaContext>()
-                .UseInMemoryDatabase(nameof(CustomerMySqlRepositoryTests))
+        var context = new MySqlSchema2Context(
+            new DbContextOptionsBuilder<MySqlSchema2Context>()
+                .UseInMemoryDatabase(nameof(SummaryMySqlRepositoryTests))
                 .Options,
             settings);
-        return new CustomerMySqlRepository(context);
+        return new SummaryMySqlRepository(context);
     }
 
-   
+    
 }

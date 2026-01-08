@@ -3,7 +3,6 @@ using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 

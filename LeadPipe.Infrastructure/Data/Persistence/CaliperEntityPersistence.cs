@@ -4,4 +4,4 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
 namespace LeadPipe.Infrastructure.Data.Persistence;
 
-internal sealed class CallEntityPersistence(ICallRepository repo) : Persistence<ICallRepository, CallEntity>(repo), IDataPersistence<CallEntity> { }
+internal sealed class CaliperEntityPersistence(ICaliperRepository repo) : Persistence<ICaliperRepository, CaliperEntity>(repo), IDataPersistence<CaliperEntity> { }

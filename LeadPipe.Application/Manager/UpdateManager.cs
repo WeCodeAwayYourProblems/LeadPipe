@@ -11,19 +11,19 @@ public interface IUpdateManager
 }
 public sealed class UpdateManager(
     IUpdateSourceFactory update,
-    IUpdateService<Call> call,
+    IUpdateService<Caliper> call,
     IUpdateService<Sandwich> sandwich,
     IPlumbingAssociationService plumb
     ) : IUpdateManager
 {
     private readonly IUpdateSourceFactory _update = update;
-    private readonly IUpdateService<Call> _call = call;
+    private readonly IUpdateService<Caliper> _call = call;
     private readonly IUpdateService<Sandwich> _sandwich = sandwich;
     private readonly IPlumbingAssociationService _plumb = plumb;
     
     public async Task<Result> Manage(Source source, bool refresh)
     {
-        // Call
+        // Caliper
         Result callSaved = await UpdatedAndSaved(refresh, _call);
         if (callSaved.IsFailure)
             return callSaved;
@@ -48,7 +48,7 @@ public sealed class UpdateManager(
 
     public async Task<Result> Manage(bool refresh)
     {
-        // Call
+        // Caliper
         Result callSaved = await UpdatedAndSaved(refresh, _call);
         if (callSaved.IsFailure)
             return callSaved;

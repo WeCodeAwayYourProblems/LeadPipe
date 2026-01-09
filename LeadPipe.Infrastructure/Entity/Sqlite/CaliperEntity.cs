@@ -13,7 +13,7 @@ public class CaliperEntity : IEntity
     public bool Billable { get; set; }
     
     // Navigation properties
-    public ICollection<SandCaliperLink> SubsCaliperLinks { get; set; } = [];
+    public ICollection<SandCaliperLink> SandCaliperLinks { get; set; } = [];
     public ICollection<PlumbingCaliperLink> PlumbingCaliperLinks { get; set; } = [];
     public ICollection<CornCaliperLink> CornCaliperLinks { get; set; } = [];
 }

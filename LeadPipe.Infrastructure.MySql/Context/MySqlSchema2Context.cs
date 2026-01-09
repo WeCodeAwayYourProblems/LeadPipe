@@ -12,7 +12,7 @@ public sealed class MySqlSchema2Context(
     protected override void ApplyConfigurations(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(
-            new CallMySqlEntityConfiguration(Settings.Schema2!));
+            new CaliperMySqlEntityConfiguration(Settings.Schema2!));
 
         modelBuilder.ApplyConfiguration(
             new SummaryMySqlEntityConfiguration(Settings.Schema2!));

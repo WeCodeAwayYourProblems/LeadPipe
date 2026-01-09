@@ -4,16 +4,16 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.VoToEntity;
 
-internal class CallToCallEntity : IVoToEntity<Call, CallEntity>
+internal class CaliperToCaliperEntity : IVoToEntity<Caliper, CaliperEntity>
 {
-    public CallEntity Translate(Call c)
+    public CaliperEntity Translate(Caliper c)
     {
-        var result = new CallEntity()
+        var result = new CaliperEntity()
         {
             Id = c.Id,
             PhoneNumber = c.Number.Number,
-            CallDate = c.Date.UtcDateTime,
-            UnixCallDate = c.Date.ToUnixTimeSeconds(),
+            CaliperDate = c.Date.UtcDateTime,
+            UnixDate = c.Date.ToUnixTimeSeconds(),
             Note = c.Note,
             Source = c.Source,
             Location = c.Location,

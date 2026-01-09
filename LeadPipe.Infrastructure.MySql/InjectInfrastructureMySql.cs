@@ -65,7 +65,7 @@ public static class InjectInfrastructureMySql
 
 
         // Register repositories
-        services.AddScoped<ICallMySqlRepository, CallMySqlRepository>();
+        services.AddScoped<ICaliperMySqlRepository, CaliperMySqlRepository>();
         services.AddScoped<ICustomerMySqlRepository, CustomerMySqlRepository>();
         services.AddScoped<ISubMySqlRepository, SubMySqlRepository>();
         services.AddScoped<ISummaryMySqlRepository, SummaryMySqlRepository>();

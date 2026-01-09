@@ -8,48 +8,48 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class PlumbingCallLinkRepository(
+public sealed class PlumbingCaliperLinkRepository(
     PlumbingContext context,
-    ILogger<PlumbingCallLinkRepository> logger)
-    : PlumbingContextRepository<PlumbingCallLink, PlumbingCallLinkRepository>(context, logger),
-      IPlumbingCallLinkRepository
+    ILogger<PlumbingCaliperLinkRepository> logger)
+    : PlumbingContextRepository<PlumbingCaliperLink, PlumbingCaliperLinkRepository>(context, logger),
+      IPlumbingCaliperLinkRepository
 {
-    public async Task<Result<List<PlumbingCallLink>>> GetAllWithDetailsAsync()
+    public async Task<Result<List<PlumbingCaliperLink>>> GetAllWithDetailsAsync()
     {
         try
         {
-            List<PlumbingCallLink> list = await _context.PlumbingCallLinks
+            List<PlumbingCaliperLink> list = await _context.PlumbingCaliperLinks
                 .AsNoTracking()
-                .Include(p => p.CallEntity)
+                .Include(p => p.CaliperEntity)
                 .Include(p => p.PlumbingEntity)
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<PlumbingCallLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<PlumbingCaliperLink>>(ex.ToString()); }
     }
-    public override async Task<Result<List<PlumbingCallLink>>> GetAllAsync()
+    public override async Task<Result<List<PlumbingCaliperLink>>> GetAllAsync()
     {
         try
         {
-            List<PlumbingCallLink> list = await _context.PlumbingCallLinks
+            List<PlumbingCaliperLink> list = await _context.PlumbingCaliperLinks
                 .AsNoTracking()
-                .Select(s => new PlumbingCallLink() { Id = s.Id, CallId = s.CallId, PlumbingId = s.PlumbingId })
+                .Select(s => new PlumbingCaliperLink() { Id = s.Id, CaliperId = s.CaliperId, PlumbingId = s.PlumbingId })
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<PlumbingCallLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<PlumbingCaliperLink>>(ex.ToString()); }
     }
-    public override async Task<Result<List<PlumbingCallLink>>> UpsertRangeAsync(
-        List<PlumbingCallLink> entities)
+    public override async Task<Result<List<PlumbingCaliperLink>>> UpsertRangeAsync(
+        List<PlumbingCaliperLink> entities)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<PlumbingCallLink>());
+            return Result.Success(new List<PlumbingCaliperLink>());
 
         // Deduplicate in-memory
-        List<PlumbingCallLink> uniqueEntities =
+        List<PlumbingCaliperLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.PlumbingId, e.CallId))
+                .GroupBy(e => (e.PlumbingId, e.CaliperId))
                 .Select(g => g.Last())
         ];
 
@@ -65,8 +65,8 @@ public sealed class PlumbingCallLinkRepository(
             await _context.Database.ExecuteSqlRawAsync("""
             CREATE TEMP TABLE IF NOT EXISTS temp_plumbing_call_links (
                 PlumbingId INTEGER NOT NULL,
-                CallId INTEGER NOT NULL,
-                PRIMARY KEY (PlumbingId, CallId)
+                CaliperId INTEGER NOT NULL,
+                PRIMARY KEY (PlumbingId, CaliperId)
             ) WITHOUT ROWID;
             """);
 
@@ -100,9 +100,9 @@ public sealed class PlumbingCallLinkRepository(
                         var row = batch[0];
 
                         _logger.LogError(
-                            "Row insert failed: PlumbingId={PlumbingId}, CallId={CallId}",
+                            "Row insert failed: PlumbingId={PlumbingId}, CaliperId={CaliperId}",
                             row.PlumbingId,
-                            row.CallId);
+                            row.CaliperId);
 
                         index++;
                         skipped++;
@@ -117,40 +117,40 @@ public sealed class PlumbingCallLinkRepository(
 
             // ---- Phase 1: UPDATE (no-op but keeps symmetry & metrics) ----
             int updated = await _context.Database.ExecuteSqlRawAsync("""
-            UPDATE PlumbingCallLinks
+            UPDATE PlumbingCaliperLinks
             SET
                 PlumbingId = (
                     SELECT t.PlumbingId
                     FROM temp_plumbing_call_links t
-                    WHERE t.PlumbingId = PlumbingCallLinks.PlumbingId
-                      AND t.CallId = PlumbingCallLinks.CallId
+                    WHERE t.PlumbingId = PlumbingCaliperLinks.PlumbingId
+                      AND t.CaliperId = PlumbingCaliperLinks.CaliperId
                 ),
-                CallId = (
-                    SELECT t.CallId
+                CaliperId = (
+                    SELECT t.CaliperId
                     FROM temp_plumbing_call_links t
-                    WHERE t.PlumbingId = PlumbingCallLinks.PlumbingId
-                      AND t.CallId = PlumbingCallLinks.CallId
+                    WHERE t.PlumbingId = PlumbingCaliperLinks.PlumbingId
+                      AND t.CaliperId = PlumbingCaliperLinks.CaliperId
                 )
             WHERE EXISTS (
                 SELECT 1
                 FROM temp_plumbing_call_links t
-                WHERE t.PlumbingId = PlumbingCallLinks.PlumbingId
-                  AND t.CallId = PlumbingCallLinks.CallId
+                WHERE t.PlumbingId = PlumbingCaliperLinks.PlumbingId
+                  AND t.CaliperId = PlumbingCaliperLinks.CaliperId
             );
             """);
 
             // ---- Phase 2: INSERT missing rows ----
             int inserted = await _context.Database.ExecuteSqlRawAsync("""
-            INSERT INTO PlumbingCallLinks (PlumbingId, CallId)
+            INSERT INTO PlumbingCaliperLinks (PlumbingId, CaliperId)
             SELECT
                 t.PlumbingId,
-                t.CallId
+                t.CaliperId
             FROM temp_plumbing_call_links t
             WHERE NOT EXISTS (
                 SELECT 1
-                FROM PlumbingCallLinks p
+                FROM PlumbingCaliperLinks p
                 WHERE p.PlumbingId = t.PlumbingId
-                  AND p.CallId = t.CallId
+                  AND p.CaliperId = t.CaliperId
             );
             """);
 
@@ -160,7 +160,7 @@ public sealed class PlumbingCallLinkRepository(
             await transaction.CommitAsync();
 
             _logger.LogInformation(
-                "PlumbingCallLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "PlumbingCaliperLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
@@ -176,12 +176,12 @@ public sealed class PlumbingCallLinkRepository(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "PlumbingCallLink upsert failed");
-            return Result.Failure<List<PlumbingCallLink>>(ex.ToString());
+            _logger.LogError(ex, "PlumbingCaliperLink upsert failed");
+            return Result.Failure<List<PlumbingCaliperLink>>(ex.ToString());
         }
 
         // ---- Local helper ----
-        void InsertBatch(List<PlumbingCallLink> batch)
+        void InsertBatch(List<PlumbingCaliperLink> batch)
         {
             var sql = new StringBuilder();
             sql.Append("INSERT INTO temp_plumbing_call_links VALUES ");
@@ -190,7 +190,7 @@ public sealed class PlumbingCallLinkRepository(
             {
                 var e = batch[i];
 
-                sql.Append($"({e.PlumbingId}, {e.CallId})");
+                sql.Append($"({e.PlumbingId}, {e.CaliperId})");
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");

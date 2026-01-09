@@ -4,8 +4,8 @@ public class SandCornLink : IEntity
 {
     public long Id { get; set; }
 
-    public long SubsId { get; set; }
-    public SandEntity SubsEntity { get; set; } = default!;
+    public long SandId { get; set; }
+    public SandEntity SandEntity { get; set; } = default!;
 
     public long CornId { get; set; }
     public CornEntity CornEntity { get; set; } = default!;

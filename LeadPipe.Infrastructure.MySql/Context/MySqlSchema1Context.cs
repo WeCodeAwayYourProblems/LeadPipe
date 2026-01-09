@@ -18,7 +18,7 @@ public sealed class MySqlSchema1Context(
             new SubMySqlEntityConfiguration(Settings.Schema1!));
 
         modelBuilder.ApplyConfiguration(
-            new CallMySqlEntityConfiguration(Settings.Schema2!));
+            new CaliperMySqlEntityConfiguration(Settings.Schema2!));
 
         modelBuilder.ApplyConfiguration(
             new SummaryMySqlEntityConfiguration(Settings.Schema2!));

@@ -18,12 +18,12 @@ public abstract class MySqlBaseContext : DbContext
     }
 
 #pragma warning disable IDE0079
-    public DbSet<CallMySqlEntity> Calls => Set<CallMySqlEntity>();
+    public DbSet<CaliperMySqlEntity> Calipers => Set<CaliperMySqlEntity>();
     public DbSet<CustomerMySqlEntity> Customers => Set<CustomerMySqlEntity>();
     public DbSet<SubMySqlEntity> Subscriptions => Set<SubMySqlEntity>();
     public DbSet<SummaryMySqlEntity> Summaries => Set<SummaryMySqlEntity>();
     public DbSet<TranscriptionMySqlEntity> Transcriptions => Set<TranscriptionMySqlEntity>();
-    public DbSet<CornMySqlEntity> Corn => Set<CornMySqlEntity>();
+    public DbSet<CornMySqlEntity> Corns => Set<CornMySqlEntity>();
 #pragma warning restore IDE0079
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

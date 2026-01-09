@@ -5,17 +5,17 @@ using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
-public class CallRepositoryTests
+public class CaliperRepositoryTests
 {
-    private readonly ILogger<CallRepository> logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CallRepository>();
+    private readonly ILogger<CaliperRepository> logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CaliperRepository>();
     [Fact]
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
         
-        var repo = new CallRepository(context, logger);
+        var repo = new CaliperRepository(context, logger);
 
-        var entities = new List<CallEntity>
+        var entities = new List<CaliperEntity>
         {
             new() { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty },
             new() { Id = 2, PhoneNumber = 67890, Note = string.Empty, Location = string.Empty, Source = string.Empty }
@@ -24,7 +24,7 @@ public class CallRepositoryTests
         var result = await repo.AddRangeAsync(entities);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, context.CallEntities.Count());
+        Assert.Equal(2, context.CaliperEntities.Count());
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class CallRepositoryTests
     {
         var context = RepoTestHelpers.GetInMemoryContext();
         
-        var repo = new CallRepository(context, logger);
+        var repo = new CaliperRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
 
@@ -41,13 +41,13 @@ public class CallRepositoryTests
     }
 
     [Fact]
-    public async Task AddAsync_ShouldAddCallEntity()
+    public async Task AddAsync_ShouldAddCaliperEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
         
-        var repo = new CallRepository(context, logger);
+        var repo = new CaliperRepository(context, logger);
 
-        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
+        var plumbing = new CaliperEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -56,11 +56,11 @@ public class CallRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.CallEntities.Add(new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty });
+        context.CaliperEntities.Add(new CaliperEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty });
         await context.SaveChangesAsync();
 
         
-        var repo = new CallRepository(context, logger);
+        var repo = new CaliperRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
@@ -71,12 +71,12 @@ public class CallRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
-        context.CallEntities.Add(plumbing);
+        var plumbing = new CaliperEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
+        context.CaliperEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
         
-        var repo = new CallRepository(context, logger);
+        var repo = new CaliperRepository(context, logger);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
 
@@ -88,7 +88,7 @@ public class CallRepositoryTests
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
         
-        var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
+        var repo = new CaliperRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var result = await repo.GetByIdAsync(99);
 
         Assert.False(result.IsSuccess);
@@ -99,15 +99,15 @@ public class CallRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
-        context.CallEntities.Add(plumbing);
+        var plumbing = new CaliperEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
+        context.CaliperEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
         
-        var repo = new CallRepository(context, logger);
-        var updatedCall = new CallEntity { Id = 1, PhoneNumber = 99999, Note = string.Empty, Location = string.Empty, Source = string.Empty };
+        var repo = new CaliperRepository(context, logger);
+        var updatedCaliper = new CaliperEntity { Id = 1, PhoneNumber = 99999, Note = string.Empty, Location = string.Empty, Source = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedCall);
+        var result = await repo.UpdateAsync(updatedCaliper);
         var reloaded = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
@@ -119,10 +119,10 @@ public class CallRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         
-        var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
-        var updatedCall = new CallEntity { Id = 99, PhoneNumber = 11111, Note = string.Empty, Location = string.Empty, Source = string.Empty };
+        var repo = new CaliperRepository(RepoTestHelpers.GetInMemoryContext(),logger);
+        var updatedCaliper = new CaliperEntity { Id = 99, PhoneNumber = 11111, Note = string.Empty, Location = string.Empty, Source = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedCall);
+        var result = await repo.UpdateAsync(updatedCaliper);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
@@ -132,7 +132,7 @@ public class CallRepositoryTests
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
         
-        var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
+        var repo = new CaliperRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var result = await repo.DeleteAsync(99);
 
         Assert.True(result.IsSuccess);

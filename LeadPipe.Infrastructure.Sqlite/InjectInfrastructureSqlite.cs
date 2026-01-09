@@ -31,14 +31,14 @@ public static class InjectInfrastructureSqlite
                 .EnableSensitiveDataLogging();
         });
 
-        services.AddScoped<ICallRepository, CallRepository>();
+        services.AddScoped<ICaliperRepository, CaliperRepository>();
         services.AddScoped<ICornRepository, CornRepository>();
-        services.AddScoped<IPlumbingCallLinkRepository, PlumbingCallLinkRepository>();
+        services.AddScoped<IPlumbingCaliperLinkRepository, PlumbingCaliperLinkRepository>();
         services.AddScoped<IPlumbingRepository, PlumbingRepository>();
-        services.AddScoped<ISubsCallLinkRepository, SubsCallLinkRepository>();
-        services.AddScoped<ISubsCornLinkRepository, SubsCornLinkRepository>();
-        services.AddScoped<ISubsPlumbingLinkRepository, SubsPlumbingLinkRepository>();
-        services.AddScoped<ISubsRepository, SubsRepository>();
+        services.AddScoped<ISandCaliperLinkRepository, SubsCaliperLinkRepository>();
+        services.AddScoped<ISandCornLinkRepository, SandCornLinkRepository>();
+        services.AddScoped<ISandPlumbingLinkRepository, SandPlumbingLinkRepository>();
+        services.AddScoped<ISandRepository, SandRepository>();
         services.AddScoped<ISyncStateRepository, SyncStateRepository>();
 
         return services;

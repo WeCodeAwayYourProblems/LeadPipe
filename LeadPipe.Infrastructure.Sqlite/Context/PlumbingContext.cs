@@ -8,18 +8,18 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 #pragma warning disable IDE0079
     // Entities
     public DbSet<SyncStateEntity> SyncState { get; set; }
-    public DbSet<CallEntity> CallEntities { get; set; }
+    public DbSet<CaliperEntity> CaliperEntities { get; set; }
     public DbSet<CornEntity> CornEntities { get; set; }
     public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
-    public DbSet<SubsEntity> SubsEntities { get; set; }
+    public DbSet<SandEntity> SandEntities { get; set; }
 
     // Links
-    public DbSet<CornCallLink> CornCallLinks { get; set; }
+    public DbSet<CornCaliperLink> CornCaliperLinks { get; set; }
     public DbSet<CornPlumbingLink> CornPlumbingLinks { get; set; }
-    public DbSet<PlumbingCallLink> PlumbingCallLinks { get; set; }
-    public DbSet<SubsCallLink> SubsCallLinks { get; set; }
-    public DbSet<SubsCornLink> SubsCornLinks { get; set; }
-    public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
+    public DbSet<PlumbingCaliperLink> PlumbingCaliperLinks { get; set; }
+    public DbSet<SandCaliperLink> SandCaliperLinks { get; set; }
+    public DbSet<SandCornLink> SandCornLinks { get; set; }
+    public DbSet<SandPlumbingLink> SandPlumbingLinks { get; set; }
 #pragma warning restore IDE0079
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,9 +36,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .IsUnique();
         sync.Property(x => x.Id).ValueGeneratedNever();
 
-        // SubsEntity
-        var sub = modelBuilder.Entity<SubsEntity>()
-            .ToTable("SubsEntities");
+        // SandEntity
+        var sub = modelBuilder.Entity<SandEntity>()
+            .ToTable("SandEntities");
         sub.HasKey(s => s.Id);
         sub.Property(s => s.Id).ValueGeneratedNever();
         sub.HasIndex(s => s.PhoneNumber);
@@ -56,15 +56,15 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .HasConversion<string>()
             .IsRequired();
 
-        // CallEntity
-        var call = modelBuilder.Entity<CallEntity>()
-            .ToTable("CallEntities");
-        call.HasKey(c => c.Id);
-        call.Property(c => c.Id).ValueGeneratedNever();
-        call.HasIndex(c => c.PhoneNumber);
-        call.Property(c => c.CallDate).IsRequired();
-        call.Property(c => c.UnixCallDate).IsRequired();
-        call.HasIndex(c => new { c.PhoneNumber, c.CallDate }).IsUnique();
+        // CaliperEntity
+        var caliper = modelBuilder.Entity<CaliperEntity>()
+            .ToTable("CaliperEntities");
+        caliper.HasKey(c => c.Id);
+        caliper.Property(c => c.Id).ValueGeneratedNever();
+        caliper.HasIndex(c => c.PhoneNumber);
+        caliper.Property(c => c.CaliperDate).IsRequired();
+        caliper.Property(c => c.UnixDate).IsRequired();
+        caliper.HasIndex(c => new { c.PhoneNumber, c.CaliperDate }).IsUnique();
 
         // CornEntity
         var corn = modelBuilder.Entity<CornEntity>()
@@ -89,95 +89,95 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         // Links
         // **************************************
 
-        // SubsPlumbingLink
-        var spLink = modelBuilder.Entity<SubsPlumbingLink>()
-            .ToTable("SubsPlumbingLinks");
+        // SandPlumbingLink
+        var spLink = modelBuilder.Entity<SandPlumbingLink>()
+            .ToTable("SandPlumbingLinks");
         spLink.HasKey(l => l.Id);
         spLink.Property(l => l.Id).ValueGeneratedOnAdd();
-        spLink.HasIndex(l => l.SubsId);
+        spLink.HasIndex(l => l.SandId);
         spLink.HasIndex(l => l.PlumbingId);
-        spLink.HasIndex(l => new { l.SubsId, l.PlumbingId }).IsUnique();
-        spLink.HasOne(l => l.SubsEntity)
-            .WithMany(s => s.SubsPlumbingLinks)
-            .HasForeignKey(l => l.SubsId)
+        spLink.HasIndex(l => new { l.SandId, l.PlumbingId }).IsUnique();
+        spLink.HasOne(l => l.SandEntity)
+            .WithMany(s => s.SandPlumbingLinks)
+            .HasForeignKey(l => l.SandId)
             .OnDelete(DeleteBehavior.Cascade);
         spLink.HasOne(l => l.PlumbingEntity)
-            .WithMany(p => p.SubsPlumbingLinks)
+            .WithMany(p => p.SandPlumbingLinks)
             .HasForeignKey(l => l.PlumbingId)
             .OnDelete(DeleteBehavior.Cascade);
         spLink.Property(l => l.MatchingPhone).IsRequired();
 
-        // SubsCallLink
-        var subsCall = modelBuilder.Entity<SubsCallLink>()
-            .ToTable("SubsCallLinks");
-        subsCall.HasKey(sc => sc.Id);
-        subsCall.Property(sc => sc.Id).ValueGeneratedOnAdd();
-        subsCall.HasIndex(sc => sc.SubsId);
-        subsCall.HasIndex(sc => sc.CallId);
-        subsCall.HasIndex(l => new { l.SubsId, l.CallId }).IsUnique();
-        subsCall.HasOne(sc => sc.SubsEntity)
-            .WithMany(s => s.SubsCallLinks)
-            .HasForeignKey(sc => sc.SubsId)
+        // SandCaliperLink
+        var sandCaliper = modelBuilder.Entity<SandCaliperLink>()
+            .ToTable("SandCaliperLinks");
+        sandCaliper.HasKey(sc => sc.Id);
+        sandCaliper.Property(sc => sc.Id).ValueGeneratedOnAdd();
+        sandCaliper.HasIndex(sc => sc.SandId);
+        sandCaliper.HasIndex(sc => sc.CaliperId);
+        sandCaliper.HasIndex(l => new { l.SandId, l.CaliperId }).IsUnique();
+        sandCaliper.HasOne(sc => sc.SandEntity)
+            .WithMany(s => s.SandCaliperLinks)
+            .HasForeignKey(sc => sc.SandId)
             .OnDelete(DeleteBehavior.Cascade);
-        subsCall.HasOne(sc => sc.CallEntity)
-            .WithMany(c => c.SubsCallLinks)
-            .HasForeignKey(sc => sc.CallId)
+        sandCaliper.HasOne(sc => sc.CaliperEntity)
+            .WithMany(c => c.SandCaliperLinks)
+            .HasForeignKey(sc => sc.CaliperId)
             .OnDelete(DeleteBehavior.Cascade);
-        subsCall.Property(sc => sc.MatchingNumber).IsRequired();
+        sandCaliper.Property(sc => sc.MatchingNumber).IsRequired();
 
-        // PlumbingCallLink
-        var plumbCall = modelBuilder.Entity<PlumbingCallLink>()
-            .ToTable("PlumbingCallLinks");
-        plumbCall.HasKey(pc => pc.Id);
-        plumbCall.Property(pc => pc.Id).ValueGeneratedOnAdd();
-        plumbCall.HasIndex(pc => pc.PlumbingId);
-        plumbCall.HasIndex(pc => pc.CallId);
-        plumbCall.HasIndex(l => new { l.PlumbingId, l.CallId }).IsUnique();
-        plumbCall.HasOne(pc => pc.PlumbingEntity)
-            .WithMany(p => p.PlumbingCallLinks)
+        // PlumbingCaliperLink
+        var plumbCaliper = modelBuilder.Entity<PlumbingCaliperLink>()
+            .ToTable("PlumbingCaliperLinks");
+        plumbCaliper.HasKey(pc => pc.Id);
+        plumbCaliper.Property(pc => pc.Id).ValueGeneratedOnAdd();
+        plumbCaliper.HasIndex(pc => pc.PlumbingId);
+        plumbCaliper.HasIndex(pc => pc.CaliperId);
+        plumbCaliper.HasIndex(l => new { l.PlumbingId, l.CaliperId }).IsUnique();
+        plumbCaliper.HasOne(pc => pc.PlumbingEntity)
+            .WithMany(p => p.PlumbingCaliperLinks)
             .HasForeignKey(pc => pc.PlumbingId)
             .OnDelete(DeleteBehavior.Cascade);
-        plumbCall.HasOne(pc => pc.CallEntity)
-            .WithMany(c => c.PlumbingCallLinks)
-            .HasForeignKey(pc => pc.CallId)
+        plumbCaliper.HasOne(pc => pc.CaliperEntity)
+            .WithMany(c => c.PlumbingCaliperLinks)
+            .HasForeignKey(pc => pc.CaliperId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // SubsCornLink
-        var subsCorn = modelBuilder.Entity<SubsCornLink>()
-            .ToTable("SubsCornLinks");
-        subsCorn.HasKey(l => l.Id);
-        subsCorn.Property(l => l.Id).ValueGeneratedOnAdd();
-        subsCorn.HasIndex(l => l.SubsId);
-        subsCorn.HasIndex(l => l.CornId);
-        subsCorn.HasIndex(l => new { l.SubsId, l.CornId }).IsUnique();
-        subsCorn.HasOne(l => l.SubsEntity)
-            .WithMany(s => s.SubsCornLinks)
-            .HasForeignKey(l => l.SubsId)
+        // SandCornLink
+        var sandCorn = modelBuilder.Entity<SandCornLink>()
+            .ToTable("SandCornLinks");
+        sandCorn.HasKey(l => l.Id);
+        sandCorn.Property(l => l.Id).ValueGeneratedOnAdd();
+        sandCorn.HasIndex(l => l.SandId);
+        sandCorn.HasIndex(l => l.CornId);
+        sandCorn.HasIndex(l => new { l.SandId, l.CornId }).IsUnique();
+        sandCorn.HasOne(l => l.SandEntity)
+            .WithMany(s => s.SandCornLinks)
+            .HasForeignKey(l => l.SandId)
             .OnDelete(DeleteBehavior.Cascade);
-        subsCorn.HasOne(l => l.CornEntity)
-            .WithMany(c => c.SubsCornLinks)
+        sandCorn.HasOne(l => l.CornEntity)
+            .WithMany(c => c.SandCornLinks)
             .HasForeignKey(l => l.CornId)
             .OnDelete(DeleteBehavior.Cascade);
-        subsCorn.Property(l => l.MatchingPhone)
+        sandCorn.Property(l => l.MatchingPhone)
             .IsRequired();
 
-        // CornCallLink
-        var cornCall = modelBuilder.Entity<CornCallLink>()
-            .ToTable("CornCallLinks");
-        cornCall.HasKey(l => l.Id);
-        cornCall.Property(l => l.Id).ValueGeneratedOnAdd();
-        cornCall.HasIndex(l => l.CornId);
-        cornCall.HasIndex(l => l.CallId);
-        cornCall.HasIndex(l => new { l.CornId, l.CallId }).IsUnique();
-        cornCall.HasOne(l => l.CornEntity)
-            .WithMany(c => c.CornCallLinks)
+        // CornCaliperLink
+        var cornCaliper = modelBuilder.Entity<CornCaliperLink>()
+            .ToTable("CornCaliperLinks");
+        cornCaliper.HasKey(l => l.Id);
+        cornCaliper.Property(l => l.Id).ValueGeneratedOnAdd();
+        cornCaliper.HasIndex(l => l.CornId);
+        cornCaliper.HasIndex(l => l.CaliperId);
+        cornCaliper.HasIndex(l => new { l.CornId, l.CaliperId }).IsUnique();
+        cornCaliper.HasOne(l => l.CornEntity)
+            .WithMany(c => c.CornCaliperLinks)
             .HasForeignKey(l => l.CornId)
             .OnDelete(DeleteBehavior.Cascade);
-        cornCall.HasOne(l => l.CallEntity)
-            .WithMany(c => c.CornCallLinks)
-            .HasForeignKey(l => l.CallId)
+        cornCaliper.HasOne(l => l.CaliperEntity)
+            .WithMany(c => c.CornCaliperLinks)
+            .HasForeignKey(l => l.CaliperId)
             .OnDelete(DeleteBehavior.Cascade);
-        cornCall.Property(l => l.MatchingPhone)
+        cornCaliper.Property(l => l.MatchingPhone)
             .IsRequired();
 
         // CornPlumbingLink

@@ -12,26 +12,26 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 internal sealed class TransformYellerReport(
     ISubsPlumbingLinkRepository spRepo,
     ISubsCallLinkRepository subsCallRepo,
-    ICallRepository callRepo,
+    ICaliperRepository caliperRepo,
     ICornRepository cornRepo,
     ISubsCornLinkRepository cornLinksRepo,
     IVoToEntity<Plumbing, PlumbingEntity> toEntity,
     IEntityToReport<SubsEntity, ReportYeller> subsToR,
     IEntityToReport<PlumbingEntity, ReportYeller> plumbToR,
-    IEntityToReport<CallEntity, ReportYeller> callToR,
+    IEntityToReport<CaliperEntity, ReportYeller> callToR,
     IEntityToReport<CornEntity, ReportYeller> cornToR,
     IYellerSettings settings
     ) : ITransform<Plumbing, ReportYeller>
 {
     private readonly ISubsPlumbingLinkRepository _subsPlumbRepo = spRepo;
     private readonly ISubsCallLinkRepository _subsCallRepo = subsCallRepo;
-    private readonly ICallRepository _callRepo = callRepo;
+    private readonly ICaliperRepository _caliperRepo = caliperRepo;
     private readonly ICornRepository _cornRepo = cornRepo;
     private readonly ISubsCornLinkRepository _cornLinksRepo = cornLinksRepo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
     private readonly IEntityToReport<SubsEntity, ReportYeller> _subsToR = subsToR;
     private readonly IEntityToReport<PlumbingEntity, ReportYeller> _plumbToR = plumbToR;
-    private readonly IEntityToReport<CallEntity, ReportYeller> _callToR = callToR;
+    private readonly IEntityToReport<CaliperEntity, ReportYeller> _caliperToR = caliperToR;
     private readonly IEntityToReport<CornEntity, ReportYeller> _cornToR = cornToR;
     private readonly IYellerSettings _settings = settings;
 
@@ -63,30 +63,30 @@ internal sealed class TransformYellerReport(
             ];
 
         // *************************************
-        // Calls
+        // Calipers
         // *************************************
 
         // Get calls for reporting
-        Result<List<CallEntity>> callsResult = await _callRepo.FindAsync(e => e.Source == _settings.YellerCallSource1 || e.Source == _settings.YellerCallSource2);
-        if (callsResult.IsFailure)
-            return Result.Failure<List<ReportYeller>>(callsResult.Error);
-        List<CallEntity> calls = callsResult.Value;
+        Result<List<CaliperEntity>> calipersResult = await _caliperRepo.FindAsync(e => e.Source == _settings.YellerCaliperSource1 || e.Source == _settings.YellerCaliperSource2);
+        if (calipersResult.IsFailure)
+            return Result.Failure<List<ReportYeller>>(calipersResult.Error);
+        List<CaliperEntity> calipers = calipersResult.Value;
 
-        // Get Call links
+        // Get Caliper links
         Result<List<SubsCallLink>> callLinksResult = await _subsCallRepo.GetAllWithDetailsAsync(calls);
-        if (callLinksResult.IsFailure)
-            return Result.Failure<List<ReportYeller>>(callLinksResult.Error);
-        List<SubsCallLink> callLinks = callLinksResult.Value;
+        if (caliperLinksResult.IsFailure)
+            return Result.Failure<List<ReportYeller>>(caliperLinksResult.Error);
+        List<SandCaliperLink> caliperLinks = caliperLinksResult.Value;
 
         // Generate calls report
         // Hashset for easy lookup
-        HashSet<long> callIds = [.. callLinks.Select(c => c.CallId)];
-        List<ReportYeller> callReport =
+        HashSet<long> caliperIds = [.. caliperLinks.Select(c => c.CaliperId)];
+        List<ReportYeller> caliperReport =
             [
-                .. calls
-                   .Where(c => !callIds.Contains(c.Id))
-                   .Select(_callToR.Translate),
-                .. callLinks
+                .. calipers
+                   .Where(c => !caliperIds.Contains(c.Id))
+                   .Select(_caliperToR.Translate),
+                .. caliperLinks
                     .Select(c => _subsToR.Translate(c.SubsEntity!))
             ];
 
@@ -122,7 +122,7 @@ internal sealed class TransformYellerReport(
         List<ReportYeller> result =
             [
                 .. plumbingReport,
-                .. callReport,
+                .. caliperReport,
                 .. cornReport,
             ];
 

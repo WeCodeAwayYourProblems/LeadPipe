@@ -1,11 +1,11 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class CallEntity : IEntity
+public class CaliperEntity : IEntity
 {
     public required long Id { get; set; }
     public long PhoneNumber { get; set; }
-    public DateTime CallDate { get; set; }
-    public long UnixCallDate { get; set; }
+    public DateTime CaliperDate { get; set; }
+    public long UnixDate { get; set; }
     public required string Note { get; set; }
     public required string Source { get; set; }
     public required string Location { get; set; }
@@ -13,7 +13,7 @@ public class CallEntity : IEntity
     public bool Billable { get; set; }
     
     // Navigation properties
-    public ICollection<SubsCallLink> SubsCallLinks { get; set; } = [];
-    public ICollection<PlumbingCallLink> PlumbingCallLinks { get; set; } = [];
-    public ICollection<CornCallLink> CornCallLinks { get; set; } = [];
+    public ICollection<SandCaliperLink> SubsCaliperLinks { get; set; } = [];
+    public ICollection<PlumbingCaliperLink> PlumbingCaliperLinks { get; set; } = [];
+    public ICollection<CornCaliperLink> CornCaliperLinks { get; set; } = [];
 }

@@ -8,61 +8,61 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class SubsCornLinkRepository(
+public class SandCornLinkRepository(
     PlumbingContext context,
-    ILogger<SubsCornLinkRepository> logger)
-    : PlumbingContextRepository<SubsCornLink, SubsCornLinkRepository>(context, logger),
-      ISubsCornLinkRepository
+    ILogger<SandCornLinkRepository> logger)
+    : PlumbingContextRepository<SandCornLink, SandCornLinkRepository>(context, logger),
+      ISandCornLinkRepository
 {
-    public async Task<Result<List<SubsCornLink>>> GetAllWithDetailsAsync()
+    public async Task<Result<List<SandCornLink>>> GetAllWithDetailsAsync()
     {
         try
         {
-            List<SubsCornLink> list = await _context.SubsCornLinks
+            List<SandCornLink> list = await _context.SandCornLinks
                 .AsNoTracking()
                 .Include(p => p.CornEntity)
-                .Include(p => p.SubsEntity)
+                .Include(p => p.SandEntity)
                 .ToListAsync();
 
             return list;
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<SubsCornLink>>(ex.ToString());
+            return Result.Failure<List<SandCornLink>>(ex.ToString());
         }
     }
 
-    public async Task<Result<List<SubsCornLink>>> GetAllWithDetailsAsync(IEnumerable<CornEntity> filter)
+    public async Task<Result<List<SandCornLink>>> GetAllWithDetailsAsync(IEnumerable<CornEntity> filter)
     {
         try
         {
             List<long> ids = [.. filter.Select(p => p.Id)];
 
-            List<SubsCornLink> list = await _context.SubsCornLinks
+            List<SandCornLink> list = await _context.SandCornLinks
                 .AsNoTracking()
                 .Where(e => ids.Contains(e.CornId))
                 .Include(p => p.CornEntity)
-                .Include(p => p.SubsEntity)
+                .Include(p => p.SandEntity)
                 .ToListAsync();
 
             return list;
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<SubsCornLink>>(ex.ToString());
+            return Result.Failure<List<SandCornLink>>(ex.ToString());
         }
     }
 
-    public override async Task<Result<List<SubsCornLink>>> GetAllAsync()
+    public override async Task<Result<List<SandCornLink>>> GetAllAsync()
     {
         try
         {
-            List<SubsCornLink> list = await _context.SubsCornLinks
+            List<SandCornLink> list = await _context.SandCornLinks
                 .AsNoTracking()
-                .Select(s => new SubsCornLink
+                .Select(s => new SandCornLink
                 {
                     Id = s.Id,
-                    SubsId = s.SubsId,
+                    SandId = s.SandId,
                     CornId = s.CornId,
                     MatchingPhone = s.MatchingPhone
                 })
@@ -72,20 +72,20 @@ public class SubsCornLinkRepository(
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<SubsCornLink>>(ex.ToString());
+            return Result.Failure<List<SandCornLink>>(ex.ToString());
         }
     }
 
-    public override async Task<Result<List<SubsCornLink>>> UpsertRangeAsync(List<SubsCornLink> entities)
+    public override async Task<Result<List<SandCornLink>>> UpsertRangeAsync(List<SandCornLink> entities)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<SubsCornLink>());
+            return Result.Success(new List<SandCornLink>());
 
         // Deduplicate in-memory by (SubsId, CornId)
-        List<SubsCornLink> uniqueEntities =
+        List<SandCornLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.SubsId, e.CornId))
+                .GroupBy(e => (e.SandId, e.CornId))
                 .Select(g => g.Last())
         ];
 
@@ -128,7 +128,7 @@ public class SubsCornLinkRepository(
                     _logger.LogWarning(
                         ex,
                         "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
-                        nameof(SubsCornLink),
+                        nameof(SandCornLink),
                         batchSize);
 
                     if (batchSize == minBatchSize)
@@ -136,8 +136,8 @@ public class SubsCornLinkRepository(
                         var row = batch[0];
                         _logger.LogError(
                             "{Entity} row insert failed: SubsId={SubsId}, CornId={CornId}, MatchingPhone={MatchingPhone}",
-                            nameof(SubsCornLink),
-                            row.SubsId,
+                            nameof(SandCornLink),
+                            row.SandId,
                             row.CornId,
                             row.MatchingPhone);
 
@@ -187,7 +187,7 @@ public class SubsCornLinkRepository(
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
-                nameof(SubsCornLink),
+                nameof(SandCornLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
@@ -204,11 +204,11 @@ public class SubsCornLinkRepository(
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Entity} upsert failed",
-                nameof(SubsCornLink));
-            return Result.Failure<List<SubsCornLink>>(ex.Message);
+                nameof(SandCornLink));
+            return Result.Failure<List<SandCornLink>>(ex.Message);
         }
 
-        void InsertBatch(List<SubsCornLink> batch)
+        void InsertBatch(List<SandCornLink> batch)
         {
             var sql = new StringBuilder();
             sql.Append("INSERT INTO temp_subs_corn_links VALUES ");
@@ -216,7 +216,7 @@ public class SubsCornLinkRepository(
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append($"({e.SubsId}, {e.CornId}, {e.MatchingPhone})");
+                sql.Append($"({e.SandId}, {e.CornId}, {e.MatchingPhone})");
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");
@@ -227,13 +227,13 @@ public class SubsCornLinkRepository(
         }
     }
 
-    public async Task<Result<List<SubsCornLink>>> GetAllAsync(IEnumerable<CornEntity> filter)
+    public async Task<Result<List<SandCornLink>>> GetAllAsync(IEnumerable<CornEntity> filter)
     {
         try
         {
             List<long> ids = [.. filter.Select(p => p.Id)];
 
-            List<SubsCornLink> set = await _set
+            List<SandCornLink> set = await _set
                 .Where(e => ids.Contains(e.CornId))
                 .ToListAsync();
 
@@ -241,7 +241,7 @@ public class SubsCornLinkRepository(
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<SubsCornLink>>(ex.Message);
+            return Result.Failure<List<SandCornLink>>(ex.Message);
         }
     }
 }

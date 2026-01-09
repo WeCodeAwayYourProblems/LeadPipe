@@ -115,7 +115,7 @@ internal sealed class TransformYellerReport(
                     .Where(c => !cornIds.Contains(c.Id))
                     .Select(_cornToR.Translate),
                 .. cornLinks
-                    .Select(c => _subsToR.Translate(c.SubsEntity!))
+                    .Select(c => _subsToR.Translate(c.SandEntity!))
             ];
 
         // Aggregate report lists

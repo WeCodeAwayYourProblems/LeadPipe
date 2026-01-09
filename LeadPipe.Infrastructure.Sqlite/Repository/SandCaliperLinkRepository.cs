@@ -8,57 +8,57 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<SubsCallLinkRepository> logger)
-    : PlumbingContextRepository<SubsCallLink, SubsCallLinkRepository>(context, logger), ISubsCallLinkRepository
+public sealed class SubsCaliperLinkRepository(PlumbingContext context, ILogger<SubsCaliperLinkRepository> logger)
+    : PlumbingContextRepository<SandCaliperLink, SubsCaliperLinkRepository>(context, logger), ISandCaliperLinkRepository
 {
-    public async Task<Result<List<SubsCallLink>>> GetAllWithDetailsAsync()
+    public async Task<Result<List<SandCaliperLink>>> GetAllWithDetailsAsync()
     {
         try
         {
-            List<SubsCallLink> list = await _context.SubsCallLinks
+            List<SandCaliperLink> list = await _context.SandCaliperLinks
                 .AsNoTracking()
-                .Include(p => p.CallEntity)
-                .Include(p => p.SubsEntity)
+                .Include(p => p.CaliperEntity)
+                .Include(p => p.SandEntity)
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsCallLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<SandCaliperLink>>(ex.ToString()); }
     }
-    public async Task<Result<List<SubsCallLink>>> GetAllWithDetailsAsync(List<CallEntity> list)
+    public async Task<Result<List<SandCaliperLink>>> GetAllWithDetailsAsync(List<CaliperEntity> list)
     {
         try
         {
             List<long> ids = [.. list.Select(l => l.Id)];
-            List<SubsCallLink> result = await _context.SubsCallLinks
+            List<SandCaliperLink> result = await _context.SandCaliperLinks
                 .AsNoTracking()
-                .Where(p => ids.Contains(p.CallId))
-                .Include(p => p.CallEntity)
-                .Include(p => p.SubsEntity)
+                .Where(p => ids.Contains(p.CaliperId))
+                .Include(p => p.CaliperEntity)
+                .Include(p => p.SandEntity)
                 .ToListAsync();
             return result;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsCallLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<SandCaliperLink>>(ex.ToString()); }
     }
-    public override async Task<Result<List<SubsCallLink>>> GetAllAsync()
+    public override async Task<Result<List<SandCaliperLink>>> GetAllAsync()
     {
         try
         {
-            List<SubsCallLink> list = await _context.SubsCallLinks
+            List<SandCaliperLink> list = await _context.SandCaliperLinks
                 .AsNoTracking()
-                .Select(s => new SubsCallLink() { Id = s.Id, SubsId = s.SubsId, CallId = s.CallId, MatchingNumber = s.MatchingNumber })
+                .Select(s => new SandCaliperLink() { Id = s.Id, SandId = s.SandId, CaliperId = s.CaliperId, MatchingNumber = s.MatchingNumber })
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsCallLink>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<SandCaliperLink>>(ex.Message); }
     }
-    public override async Task<Result<List<SubsCallLink>>> UpsertRangeAsync(List<SubsCallLink> entities)
+    public override async Task<Result<List<SandCaliperLink>>> UpsertRangeAsync(List<SandCaliperLink> entities)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<SubsCallLink>());
+            return Result.Success(new List<SandCaliperLink>());
 
-        // Deduplicate in-memory by (SubsId, CallId)
-        List<SubsCallLink> uniqueEntities = [.. entities
-            .GroupBy(e => (e.SubsId, e.CallId))
+        // Deduplicate in-memory by (SubsId, CaliperId)
+        List<SandCaliperLink> uniqueEntities = [.. entities
+            .GroupBy(e => (e.SandId, e.CaliperId))
             .Select(g => g.Last())];
 
         int batchSize = 200;
@@ -74,9 +74,9 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
             await _context.Database.ExecuteSqlRawAsync("""
                 CREATE TEMP TABLE IF NOT EXISTS temp_subs_call_links (
                     SubsId INTEGER NOT NULL,
-                    CallId INTEGER NOT NULL,
+                    CaliperId INTEGER NOT NULL,
                     MatchingNumber INTEGER NOT NULL,
-                    PRIMARY KEY (SubsId, CallId)
+                    PRIMARY KEY (SubsId, CaliperId)
                 ) WITHOUT ROWID;
             """);
 
@@ -104,8 +104,8 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "Row insert failed: SubsId={SubsId}, CallId={CallId}, MatchingNumber={MatchingNumber}",
-                            row.SubsId, row.CallId, row.MatchingNumber);
+                            "Row insert failed: SubsId={SubsId}, CaliperId={CaliperId}, MatchingNumber={MatchingNumber}",
+                            row.SandId, row.CaliperId, row.MatchingNumber);
 
                         index++;
                         batchSize = 100;
@@ -120,31 +120,31 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
 
             // ---- Phase 1: UPDATE existing rows ----
             int updated = await _context.Database.ExecuteSqlRawAsync("""
-                UPDATE SubsCallLinks
+                UPDATE SubsCaliperLinks
                 SET MatchingNumber = (
                     SELECT t.MatchingNumber
                     FROM temp_subs_call_links t
-                    WHERE t.SubsId = SubsCallLinks.SubsId
-                      AND t.CallId = SubsCallLinks.CallId
+                    WHERE t.SubsId = SubsCaliperLinks.SubsId
+                      AND t.CaliperId = SubsCaliperLinks.CaliperId
                 )
                 WHERE EXISTS (
                     SELECT 1
                     FROM temp_subs_call_links t
-                    WHERE t.SubsId = SubsCallLinks.SubsId
-                      AND t.CallId = SubsCallLinks.CallId
+                    WHERE t.SubsId = SubsCaliperLinks.SubsId
+                      AND t.CaliperId = SubsCaliperLinks.CaliperId
                 );
             """);
 
             // ---- Phase 2: INSERT missing rows ----
             int inserted = await _context.Database.ExecuteSqlRawAsync("""
-                INSERT INTO SubsCallLinks (SubsId, CallId, MatchingNumber)
-                SELECT t.SubsId, t.CallId, t.MatchingNumber
+                INSERT INTO SubsCaliperLinks (SubsId, CaliperId, MatchingNumber)
+                SELECT t.SubsId, t.CaliperId, t.MatchingNumber
                 FROM temp_subs_call_links t
                 WHERE NOT EXISTS (
                     SELECT 1
-                    FROM SubsCallLinks c
+                    FROM SubsCaliperLinks c
                     WHERE c.SubsId = t.SubsId
-                      AND c.CallId = t.CallId
+                      AND c.CaliperId = t.CaliperId
                 );
             """);
 
@@ -152,7 +152,7 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
             await transaction.CommitAsync();
 
             _logger.LogInformation(
-                "SubsCallLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "SubsCaliperLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 entities.Count, uniqueEntities.Count, stagedCount, updated, inserted, skipped);
 
             return Result.Success(uniqueEntities);
@@ -163,11 +163,11 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "CallSubsLink upsert failed");
-            return Result.Failure<List<SubsCallLink>>(ex.Message);
+            _logger.LogError(ex, "CaliperSubsLink upsert failed");
+            return Result.Failure<List<SandCaliperLink>>(ex.Message);
         }
 
-        void InsertBatch(List<SubsCallLink> batch)
+        void InsertBatch(List<SandCaliperLink> batch)
         {
             var sql = new StringBuilder();
             sql.Append("INSERT INTO temp_subs_call_links VALUES ");
@@ -175,7 +175,7 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append($"({e.SubsId}, {e.CallId}, {e.MatchingNumber})");
+                sql.Append($"({e.SandId}, {e.CaliperId}, {e.MatchingNumber})");
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");

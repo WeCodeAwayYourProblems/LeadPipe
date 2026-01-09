@@ -24,7 +24,7 @@ public sealed class MySqlSchema2Context(
             new CustomerMySqlEntityConfiguration(Settings.Schema1!));
 
         modelBuilder.ApplyConfiguration(
-            new SubMySqlEntityConfiguration(Settings.Schema1!));
+            new SandMySqlEntityConfiguration(Settings.Schema1!));
     }
 
     // BLOCK ALL WRITE OPERATIONS

@@ -8,65 +8,65 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlumbingLinkRepository> logger)
-    : PlumbingContextRepository<SubsPlumbingLink, SubsPlumbingLinkRepository>(context, logger), ISubsPlumbingLinkRepository
+public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlumbingLinkRepository> logger)
+    : PlumbingContextRepository<SandPlumbingLink, SandPlumbingLinkRepository>(context, logger), ISandPlumbingLinkRepository
 {
-    public async Task<Result<List<SubsPlumbingLink>>> GetAllWithDetailsAsync()
+    public async Task<Result<List<SandPlumbingLink>>> GetAllWithDetailsAsync()
     {
         try
         {
-            List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
+            List<SandPlumbingLink> list = await _context.SandPlumbingLinks
                 .AsNoTracking()
                 .Include(p => p.PlumbingEntity)
-                .Include(p => p.SubsEntity)
+                .Include(p => p.SandEntity)
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.ToString()); }
     }
-    public async Task<Result<List<SubsPlumbingLink>>> GetAllWithDetailsAsync(IEnumerable<PlumbingEntity> filter)
+    public async Task<Result<List<SandPlumbingLink>>> GetAllWithDetailsAsync(IEnumerable<PlumbingEntity> filter)
     {
         try
         {
             List<long> ids = [.. filter.Select(p => p.Id)];
-            List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
+            List<SandPlumbingLink> list = await _context.SandPlumbingLinks
                 .AsNoTracking()
                 .Where(e => ids.Contains(e.PlumbingId))
                 .Include(p => p.PlumbingEntity)
-                .Include(p => p.SubsEntity)
+                .Include(p => p.SandEntity)
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.ToString()); }
     }
-    public override async Task<Result<List<SubsPlumbingLink>>> GetAllAsync()
+    public override async Task<Result<List<SandPlumbingLink>>> GetAllAsync()
     {
         try
         {
-            List<SubsPlumbingLink> list = await _context.SubsPlumbingLinks
+            List<SandPlumbingLink> list = await _context.SandPlumbingLinks
                 .AsNoTracking()
-                .Select(s => new SubsPlumbingLink()
+                .Select(s => new SandPlumbingLink()
                 {
                     Id = s.Id,
-                    SubsId = s.SubsId,
+                    SandId = s.SandId,
                     PlumbingId = s.PlumbingId,
                     MatchingPhone = s.MatchingPhone
                 })
                 .ToListAsync();
             return list;
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.Message); }
     }
-    public override async Task<Result<List<SubsPlumbingLink>>> UpsertRangeAsync(List<SubsPlumbingLink> entities)
+    public override async Task<Result<List<SandPlumbingLink>>> UpsertRangeAsync(List<SandPlumbingLink> entities)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<SubsPlumbingLink>());
+            return Result.Success(new List<SandPlumbingLink>());
 
         // Deduplicate in-memory by (SubsId, PlumbingId)
-        List<SubsPlumbingLink> uniqueEntities =
+        List<SandPlumbingLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.SubsId, e.PlumbingId))
+                .GroupBy(e => (e.SandId, e.PlumbingId))
                 .Select(g => g.Last())
         ];
 
@@ -110,7 +110,7 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
                     _logger.LogWarning(
                         ex,
                         "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
-                       nameof(SubsPlumbingLink),
+                       nameof(SandPlumbingLink),
                        batchSize);
 
                     if (batchSize == minBatchSize)
@@ -118,8 +118,8 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
                         var row = batch[0];
                         _logger.LogError(
                             "{Entity} row insert failed: SubsId={SubsId}, PlumbingId={PlumbingId}, MatchingPhone={MatchingPhone}",
-                            nameof(SubsPlumbingLink),
-                            row.SubsId,
+                            nameof(SandPlumbingLink),
+                            row.SandId,
                             row.PlumbingId,
                             row.MatchingPhone);
 
@@ -169,7 +169,7 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
-                nameof(SubsPlumbingLink),
+                nameof(SandPlumbingLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
@@ -186,11 +186,11 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Entity} upsert failed",
-                nameof(SubsPlumbingLink));
-            return Result.Failure<List<SubsPlumbingLink>>(ex.Message);
+                nameof(SandPlumbingLink));
+            return Result.Failure<List<SandPlumbingLink>>(ex.Message);
         }
 
-        void InsertBatch(List<SubsPlumbingLink> batch)
+        void InsertBatch(List<SandPlumbingLink> batch)
         {
             var sql = new StringBuilder();
             sql.Append("INSERT INTO temp_subs_plumbing_links VALUES ");
@@ -198,7 +198,7 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append($"({e.SubsId}, {e.PlumbingId}, {e.MatchingPhone})");
+                sql.Append($"({e.SandId}, {e.PlumbingId}, {e.MatchingPhone})");
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");
@@ -208,16 +208,16 @@ public class SubsPlumbingLinkRepository(PlumbingContext context, ILogger<SubsPlu
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
     }
-    public async Task<Result<List<SubsPlumbingLink>>> GetAllAsync(IEnumerable<PlumbingEntity> filter)
+    public async Task<Result<List<SandPlumbingLink>>> GetAllAsync(IEnumerable<PlumbingEntity> filter)
     {
         try
         {
             List<long> ids = [.. filter.Select(p => p.Id)];
-            List<SubsPlumbingLink> set = await _set
+            List<SandPlumbingLink> set = await _set
                 .Where(e => ids.Contains(e.PlumbingId))
                 .ToListAsync();
             return Result.Success(set);
         }
-        catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.Message); }
     }
 }

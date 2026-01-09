@@ -8,16 +8,16 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class SubsRepository(PlumbingContext context, ILogger<SubsRepository> logger)
-    : PlumbingContextRepository<SubsEntity, SubsRepository>(context, logger), ISubsRepository
+public sealed class SandRepository(PlumbingContext context, ILogger<SandRepository> logger)
+    : PlumbingContextRepository<SandEntity, SandRepository>(context, logger), ISandRepository
 {
-    public override async Task<Result<List<SubsEntity>>> UpsertRangeAsync(List<SubsEntity> entities)
+    public override async Task<Result<List<SandEntity>>> UpsertRangeAsync(List<SandEntity> entities)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<SubsEntity>());
+            return Result.Success(new List<SandEntity>());
 
         // Deduplicate in-memory by Number
-        List<SubsEntity> uniqueEntities = [.. entities
+        List<SandEntity> uniqueEntities = [.. entities
             .GroupBy(e => e.PhoneNumber)
             .Select(g => g.Last())];
 
@@ -148,10 +148,10 @@ public sealed class SubsRepository(PlumbingContext context, ILogger<SubsReposito
         catch (Exception ex)
         {
             _logger.LogError(ex, "SubsEntity upsert failed");
-            return Result.Failure<List<SubsEntity>>(ex.ToString());
+            return Result.Failure<List<SandEntity>>(ex.ToString());
         }
 
-        void InsertBatch(List<SubsEntity> batch)
+        void InsertBatch(List<SandEntity> batch)
         {
             var sql = new StringBuilder();
             sql.Append("INSERT INTO temp_subs_entities VALUES ");

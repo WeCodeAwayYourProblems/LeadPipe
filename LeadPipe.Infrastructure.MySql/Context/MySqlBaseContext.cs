@@ -20,7 +20,7 @@ public abstract class MySqlBaseContext : DbContext
 #pragma warning disable IDE0079
     public DbSet<CaliperMySqlEntity> Calipers => Set<CaliperMySqlEntity>();
     public DbSet<CustomerMySqlEntity> Customers => Set<CustomerMySqlEntity>();
-    public DbSet<SubMySqlEntity> Subscriptions => Set<SubMySqlEntity>();
+    public DbSet<SandMySqlEntity> Subscriptions => Set<SandMySqlEntity>();
     public DbSet<SummaryMySqlEntity> Summaries => Set<SummaryMySqlEntity>();
     public DbSet<TranscriptionMySqlEntity> Transcriptions => Set<TranscriptionMySqlEntity>();
     public DbSet<CornMySqlEntity> Corns => Set<CornMySqlEntity>();

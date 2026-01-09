@@ -24,7 +24,7 @@ public class SandEntity : IEntity
     public int Seller3 { get; set; }
 
     // Navigation properties
-    public ICollection<SandPlumbingLink> SubsPlumbingLinks { get; set; } = [];
-    public ICollection<SandCaliperLink> SubsCaliperLinks { get; set; } = [];
-    public ICollection<SandCornLink> SubsCornLinks { get; set; } = [];
+    public ICollection<SandPlumbingLink> SandPlumbingLinks { get; set; } = [];
+    public ICollection<SandCaliperLink> SandCaliperLinks { get; set; } = [];
+    public ICollection<SandCornLink> SandCornLinks { get; set; } = [];
 }

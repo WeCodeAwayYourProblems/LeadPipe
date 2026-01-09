@@ -1,0 +1,43 @@
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
+using LeadPipe.Infrastructure.MySql.Context;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+
+namespace LeadPipe.Infrastructure.MySql.Repository;
+
+public class SandMySqlRepository(MySqlSchema1Context context) : ISandMySqlRepository
+{
+    private readonly DbSet<SandMySqlEntity> _set = context.Set<SandMySqlEntity>();
+
+    public async Task<Result<List<SandMySqlEntity>>> FindAsync(Expression<Func<SandMySqlEntity, bool>> predicate, bool includeCustomer = true)
+    {
+        try
+        {
+            IQueryable<SandMySqlEntity> query = _set.AsNoTracking();
+
+            if (includeCustomer)
+                query = query.Include(s => s.customer);
+
+            List<SandMySqlEntity> list = await query.Where(predicate).ToListAsync();
+            return Result.Success(list);
+        }
+        catch (Exception ex) { return Result.Failure<List<SandMySqlEntity>>(ex.Message); }
+    }
+
+    public async Task<Result<SandMySqlEntity>> GetByIdAsync(int id, bool includeCustomer = true)
+    {
+        IQueryable<SandMySqlEntity> query = _set.AsNoTracking();
+
+        if (includeCustomer)
+            query = query.Include(s => s.customer);
+
+        SandMySqlEntity? found = await query.SingleOrDefaultAsync(s => s.subscriptionID == id);
+
+        return found is null
+            ? Result.Failure<SandMySqlEntity>($"{nameof(SandMySqlEntity)} with id {id} was not found")
+            : Result.Success(found);
+    }
+}
+

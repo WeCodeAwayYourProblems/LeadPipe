@@ -6,9 +6,9 @@ using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
-public class SubMySqlRepositoryTests
+public class SandMySqlRepositoryTests
 {
-    private SubMySqlRepository CreateRepository()
+    private SandMySqlRepository CreateRepository()
     {
         var settings = Substitute.For<IMySqlSettings>();
         settings.Schema1.Returns("dbo");
@@ -16,10 +16,10 @@ public class SubMySqlRepositoryTests
 
         var context = new MySqlSchema1Context(
             new DbContextOptionsBuilder<MySqlSchema1Context>()
-                .UseInMemoryDatabase(nameof(SubMySqlRepositoryTests))
+                .UseInMemoryDatabase(nameof(SandMySqlRepositoryTests))
                 .Options,
             settings);
-        return new SubMySqlRepository(context);
+        return new SandMySqlRepository(context);
     }
 
     

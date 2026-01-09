@@ -9,9 +9,15 @@ internal sealed class SubsEntityToReportYeller : IEntityToReport<SubsEntity, Rep
     public ReportYeller Translate(SubsEntity sub)
     {
         long eventTime = sub.UnixDate;
+        string eventName = "purchase";
+
+        // Hash pii
+        string num1 = YellerReportHelper.HashSha256(sub.Number.ToString());
+        string num2 = YellerReportHelper.HashSha256(sub.Number2.ToString());
+
         UserData user = new()
         {
-            ph = [sub.Number.ToString(), sub.Number2.ToString()],
+            ph = [num1, num2],
         };
         CustomData custom = new()
         {
@@ -19,7 +25,15 @@ internal sealed class SubsEntityToReportYeller : IEntityToReport<SubsEntity, Rep
             value = sub.Value
         };
         string eventid = sub.Id.ToString();
-        ReportYeller result = new() { event_id = eventid, event_time = eventTime, custom_data = custom, user_data = user };
+
+        ReportYeller result = new()
+        {
+            event_id = eventid,
+            event_name = eventName,
+            event_time = eventTime,
+            custom_data = custom,
+            user_data = user
+        };
         return result;
     }
 }

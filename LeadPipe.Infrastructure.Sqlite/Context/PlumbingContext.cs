@@ -40,8 +40,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         var sub = modelBuilder.Entity<SubsEntity>()
             .ToTable("SubsEntities");
         sub.HasKey(s => s.Id);
-        sub.HasIndex(s => s.Number);
-        sub.HasIndex(s => s.Number2);
+        sub.Property(s => s.Id).ValueGeneratedNever();
+        sub.HasIndex(s => s.PhoneNumber);
+        sub.HasIndex(s => s.PhoneNumber2);
         sub.Property(s => s.Type);
 
         // PlumbingEntity
@@ -59,16 +60,17 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         var call = modelBuilder.Entity<CallEntity>()
             .ToTable("CallEntities");
         call.HasKey(c => c.Id);
+        call.Property(c => c.Id).ValueGeneratedNever();
         call.HasIndex(c => c.PhoneNumber);
         call.Property(c => c.CallDate).IsRequired();
         call.Property(c => c.UnixCallDate).IsRequired();
         call.HasIndex(c => new { c.PhoneNumber, c.CallDate }).IsUnique();
-        
+
         // CornEntity
         var corn = modelBuilder.Entity<CornEntity>()
             .ToTable("CornEntities");
         corn.HasKey(c => c.Id);
-        corn.Property(c => c.Id).ValueGeneratedOnAdd();
+        corn.Property(c => c.Id).ValueGeneratedNever();
         corn.HasIndex(c => c.PhoneNumber);
         corn.HasIndex(c => new { c.PhoneNumber, c.Source }).IsUnique();
         corn.Property(c => c.Source)

@@ -15,13 +15,13 @@ public class SubsCallLinkRepositoryTests
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SubsCallLinkRepository(context, logger);
 
         var entities = new List<SubsCallLink>
         {
-            new() { Id = 1, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Location = string.Empty, Source=string.Empty } },
-            new() { Id = 2, SubsEntity = new(), CallEntity = new(){ Note=string.Empty, Location = string.Empty, Source=string.Empty } }
+            new() { Id = 1, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note=string.Empty, Location = string.Empty, Source=string.Empty } },
+            new() { Id = 2, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note=string.Empty, Location = string.Empty, Source=string.Empty } }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -34,7 +34,7 @@ public class SubsCallLinkRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SubsCallLinkRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
@@ -47,10 +47,10 @@ public class SubsCallLinkRepositoryTests
     public async Task AddAsync_ShouldAddSubsCallLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SubsCallLinkRepository(context, logger);
 
-        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -59,7 +59,7 @@ public class SubsCallLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SubsCallLinks.Add(new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } });
+        context.SubsCallLinks.Add(new SubsCallLink { Id = 1, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } });
         await context.SaveChangesAsync();
 
         var repo = new SubsCallLinkRepository(context, logger);
@@ -73,7 +73,7 @@ public class SubsCallLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -99,12 +99,12 @@ public class SubsCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new SubsCallLink { Id = 1, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
         var repo = new SubsCallLinkRepository(context, logger);
-        var updatedSubsCallLink = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var updatedSubsCallLink = new SubsCallLink { Id = 1, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsCallLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -117,8 +117,8 @@ public class SubsCallLinkRepositoryTests
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
-        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(),logger);
-        var updatedSubsCallLink = new SubsCallLink { Id = 99, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
+        var updatedSubsCallLink = new SubsCallLink { Id = 99, SubsEntity = new() { Id = 0 }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsCallLink);
 

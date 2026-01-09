@@ -18,8 +18,8 @@ public class SubsRepositoryTests
 
         var entities = new List<SubsEntity>
         {
-            new() { Id = 1, Number = 12345, Number2 = 67890 },
-            new() { Id = 2, Number = 11111, Number2 = 22222 }
+            new() { Id = 1, PhoneNumber = 12345, PhoneNumber2 = 67890 },
+            new() { Id = 2, PhoneNumber = 11111, PhoneNumber2 = 22222 }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -63,7 +63,7 @@ public class SubsRepositoryTests
         
         var repo = new SubsRepository(context, logger);
 
-        var subs = new SubsEntity { Id = 1, Number = 12345, Number2 = 67890 };
+        var subs = new SubsEntity { Id = 1, PhoneNumber = 12345, PhoneNumber2 = 67890 };
         var result = await repo.AddAsync(subs);
 
         Assert.True(result.IsSuccess);
@@ -73,14 +73,14 @@ public class SubsRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SubsEntities.Add(new SubsEntity { Id = 1, Number = 12345 });
+        context.SubsEntities.Add(new SubsEntity { Id = 1, PhoneNumber = 12345 });
         await context.SaveChangesAsync();
 
         var repo = new SubsRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(12345, result.Value.Number);
+        Assert.Equal(12345, result.Value.PhoneNumber);
     }
 
     [Fact]
@@ -97,27 +97,27 @@ public class SubsRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var subs = new SubsEntity { Id = 1, Number = 12345 };
+        var subs = new SubsEntity { Id = 1, PhoneNumber = 12345 };
         context.SubsEntities.Add(subs);
         await context.SaveChangesAsync();
 
         var repo = new SubsRepository(context, logger);
-        var updatedSubs = new SubsEntity { Id = 1, Number = 99999, Number2 = 67890 };
+        var updatedSubs = new SubsEntity { Id = 1, PhoneNumber = 99999, PhoneNumber2 = 67890 };
 
         var result = await repo.UpdateAsync(updatedSubs);
         var reloaded = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(99999, reloaded.Value.Number);
-        Assert.Equal(67890, reloaded.Value.Number2);
+        Assert.Equal(99999, reloaded.Value.PhoneNumber);
+        Assert.Equal(67890, reloaded.Value.PhoneNumber2);
     }
 
     [Fact]
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var subs = new SubsEntity { Id = 1, Number = 12345 };
+        var subs = new SubsEntity { Id = 1, PhoneNumber = 12345 };
         context.SubsEntities.Add(subs);
         await context.SaveChangesAsync();
 
@@ -133,7 +133,7 @@ public class SubsRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new SubsRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var updatedSubs = new SubsEntity { Id = 99, Number = 11111 };
+        var updatedSubs = new SubsEntity { Id = 99, PhoneNumber = 11111 };
 
         var result = await repo.UpdateAsync(updatedSubs);
 

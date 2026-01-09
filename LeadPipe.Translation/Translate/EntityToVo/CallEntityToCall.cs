@@ -17,7 +17,17 @@ internal class CallEntityToCall : IEntityToVo<CallEntity, Call>
         string location = c.Location;
         bool billable = c.Billable;
 
-        Call result = new(Date: date, Number: number, Duration: duration, Note: note, Source: source, Location: location, Billable: billable);
+        Call result = 
+            new(
+                Id: c.Id,
+                Date: date, 
+                Number: number, 
+                Duration: duration, 
+                Note: note, 
+                Source: source, 
+                Location: location, 
+                Billable: billable
+            );
         return result;
     }
 }

@@ -10,6 +10,7 @@ internal class CallToCallEntity : IVoToEntity<Call, CallEntity>
     {
         var result = new CallEntity()
         {
+            Id = c.Id,
             PhoneNumber = c.Number.Number,
             CallDate = c.Date.UtcDateTime,
             UnixCallDate = c.Date.ToUnixTimeSeconds(),

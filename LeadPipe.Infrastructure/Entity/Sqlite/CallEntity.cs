@@ -2,7 +2,7 @@
 
 public class CallEntity : IEntity
 {
-    public long Id { get; set; }
+    public required long Id { get; set; }
     public long PhoneNumber { get; set; }
     public DateTime CallDate { get; set; }
     public long UnixCallDate { get; set; }

@@ -23,12 +23,22 @@ internal class CallMySqlEntityToCall : IEntityToVo<CallMySqlEntity, Call>
             ? null
             : string.Join(" | ", entity.summaries.Where(s => s.summary is not null).Select(s => s.summary));
         string notes = string.Join(" | ", summary, transcription);
-        
+
         string source = entity.source is string s ? s : string.Empty;
         string location = entity.location is string l ? l : string.Empty;
         bool billable = entity.sale_billable is not null && entity.sale_billable == "billable";
 
-        Call result = new(Date: date, Number: number, Duration: duration, Note: notes, Source: source, Location: location, Billable: billable);
+        Call result =
+            new(
+                Id: entity.call_id,
+                Date: date,
+                Number: number,
+                Duration: duration,
+                Note: notes,
+                Source: source,
+                Location: location,
+                Billable: billable
+            );
         return result;
     }
 }

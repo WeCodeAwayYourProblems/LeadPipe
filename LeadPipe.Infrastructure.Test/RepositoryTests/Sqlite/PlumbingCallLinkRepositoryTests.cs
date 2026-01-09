@@ -20,8 +20,8 @@ public class PlumbingCallLinkRepositoryTests
 
         var entities = new List<PlumbingCallLink>
         {
-            new() { Id = 1, PlumbingEntity = new(){ Id = 0, MetaData=string.Empty }, CallEntity = new(){Note = string.Empty, Location = string.Empty, Source= string.Empty} },
-            new() { Id = 2, PlumbingEntity = new(){ Id = 0, MetaData=string.Empty }, CallEntity = new(){Note = string.Empty, Location = string.Empty, Source= string.Empty } }
+            new() { Id = 1, PlumbingEntity = new(){ Id = 0, MetaData=string.Empty }, CallEntity = new(){ Id=0, Note = string.Empty, Location = string.Empty, Source= string.Empty} },
+            new() { Id = 2, PlumbingEntity = new(){ Id = 0, MetaData=string.Empty }, CallEntity = new(){ Id=0, Note = string.Empty, Location = string.Empty, Source= string.Empty } }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -50,7 +50,7 @@ public class PlumbingCallLinkRepositoryTests
 
         var repo = new PlumbingCallLinkRepository(context, logger);
 
-        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -59,7 +59,7 @@ public class PlumbingCallLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.PlumbingCallLinks.Add(new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } });
+        context.PlumbingCallLinks.Add(new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } });
         await context.SaveChangesAsync();
 
         var logger = LoggerFactory
@@ -77,7 +77,7 @@ public class PlumbingCallLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.PlumbingCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -105,12 +105,12 @@ public class PlumbingCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.PlumbingCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
         var repo = new PlumbingCallLinkRepository(context, logger);
-        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedPlumbingCallLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -124,7 +124,7 @@ public class PlumbingCallLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new PlumbingCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 99, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var updatedPlumbingCallLink = new PlumbingCallLink { Id = 99, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedPlumbingCallLink);
 

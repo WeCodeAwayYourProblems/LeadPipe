@@ -34,11 +34,11 @@ public static class InjectTranslation
         services.AddScoped<IDtoToVo<LibacionDto, Plumbing>, LibacionDtoToPlumbing>();
 
         // IEntityToVo
-        services.AddScoped<IEntityToVo<CallEntity, Call>, CallEntityToCall>();
-        services.AddScoped<IEntityToVo<SubsEntity, Sandwich>, SubsToSandwich>();
+        services.AddScoped<IEntityToVo<CaliperEntity, Caliper>, CaliperEntityToCaliper>();
+        services.AddScoped<IEntityToVo<SandEntity, Sandwich>, SandToSandwich>();
         services.AddScoped<IEntityToVo<PlumbingEntity, Plumbing>, PlumbingEntityToPlumbing>();
-        services.AddScoped<IEntityToVo<CallMySqlEntity, Call>, CallMySqlEntityToCall>();
-        services.AddScoped<IEntityToVo<SubMySqlEntity, Sandwich>, SubMySqlEntityToSandwich>();
+        services.AddScoped<IEntityToVo<CaliperMySqlEntity, Caliper>, CaliperMySqlEntityToCaliper>();
+        services.AddScoped<IEntityToVo<SandMySqlEntity, Sandwich>, SandMySqlEntityToSandwich>();
 
         // IVoToDto
         services.AddScoped<IVoToDto<Plumbing, LabDto>, PlumbingToLabDto>();
@@ -46,14 +46,16 @@ public static class InjectTranslation
         services.AddScoped<IVoToDto<Plumbing, YellerDto>, PlumbingToYellerDto>();
 
         // IVoToEntity
-        services.AddScoped<IVoToEntity<Call, CallEntity>, CallToCallEntity>();
+        services.AddScoped<IVoToEntity<Caliper, CaliperEntity>, CaliperToCaliperEntity>();
         services.AddScoped<IVoToEntity<Plumbing, PlumbingEntity>, PlumbingToPlumbingEntity>();
-        services.AddScoped<IVoToEntity<Sandwich, SubsEntity>, SandToSub>();
+        services.AddScoped<IVoToEntity<Sandwich, SandEntity>, SandwichToSand>();
 
         // IEntityToReport
-        services.AddScoped<IEntityToReport<SubsPlumbingLink, ReportPlumbing>, SubsPlumbingLinkToReportPlumbing>();
-        services.AddScoped<IEntityToReport<SubsEntity, ReportYeller>, SubsEntityToReportYeller>();
+        services.AddScoped<IEntityToReport<SandPlumbingLink, ReportPlumbing>, SandPlumbingLinkToReportPlumbing>();
+        services.AddScoped<IEntityToReport<SandEntity, ReportYeller>, SandEntityToReportYeller>();
         services.AddScoped<IEntityToReport<PlumbingEntity, ReportYeller>, PlumbingEntityToReportYeller>();
+        services.AddScoped<IEntityToReport<CaliperEntity, ReportYeller>, CaliperEntityToReportYeller>();
+        services.AddScoped<IEntityToReport<CornEntity, ReportYeller>, CornEntityToReportYeller>();
 
         return services;
     }

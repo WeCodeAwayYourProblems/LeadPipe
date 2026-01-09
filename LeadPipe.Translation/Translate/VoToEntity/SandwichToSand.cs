@@ -4,11 +4,11 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.VoToEntity;
 
-internal class SandToSub : IVoToEntity<Sandwich, SubsEntity>
+internal class SandwichToSand : IVoToEntity<Sandwich, SandEntity>
 {
-    public SubsEntity Translate(Sandwich s)
+    public SandEntity Translate(Sandwich s)
     {
-        var result = new SubsEntity()
+        var result = new SandEntity()
         {
             Id = s.SubscriptionId,
             CustomerId = s.CustomerId,

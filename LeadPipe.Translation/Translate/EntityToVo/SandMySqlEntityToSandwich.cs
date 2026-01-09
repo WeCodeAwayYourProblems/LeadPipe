@@ -5,14 +5,14 @@ using LeadPipe.Translation.Primitives;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
-internal sealed class SubMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntityToVo<SubMySqlEntity, Sandwich>
+internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntityToVo<SandMySqlEntity, Sandwich>
 {
     private readonly IDateTimeTranslate _dt = dt;
-    public Sandwich Translate(SubMySqlEntity entity)
+    public Sandwich Translate(SandMySqlEntity entity)
     {
-        CustomerMySqlEntity cust = entity.customer is CustomerMySqlEntity c
+        CustardMySqlEntity cust = entity.customer is CustardMySqlEntity c
             ? c
-            : new CustomerMySqlEntity()
+            : new CustardMySqlEntity()
             {
                 customerID = entity.customerID,
                 status = 0,

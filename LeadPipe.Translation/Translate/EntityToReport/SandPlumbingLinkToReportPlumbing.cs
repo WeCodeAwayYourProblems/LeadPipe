@@ -4,15 +4,15 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal class SubsPlumbingLinkToReportPlumbing : IEntityToReport<SubsPlumbingLink, ReportPlumbing>
+internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLink, ReportPlumbing>
 {
     private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
-    public ReportPlumbing Translate(SubsPlumbingLink link)
+    public ReportPlumbing Translate(SandPlumbingLink link)
     {
         if (link.PlumbingEntity is not PlumbingEntity plumb)
             throw new Exception("Plumbing entities cannot be null");
 
-        if (link.SubsEntity is not SubsEntity sub)
+        if (link.SandEntity is not SandEntity sub)
             sub = new()
             {
                 CustomerId = 0,

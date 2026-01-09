@@ -1,18 +1,17 @@
 ﻿using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
-using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class PlumbingEntityToReportYeller : IEntityToReport<PlumbingEntity, ReportYeller>
+internal sealed class CornEntityToReportYeller : IEntityToReport<CornEntity, ReportYeller>
 {
-    public ReportYeller Translate(PlumbingEntity data)
+    public ReportYeller Translate(CornEntity data)
     {
-        long eventtime = data.UnixDate;
+        long eventTime = data.UnixDate;
         string eventName = "lead";
         string num = YellerReportHelper.HashSha256(data.PhoneNumber.ToString());
-        string eventid = data.Id.ToString();
+        string eventId = data.Id.ToString();
 
         UserData user = new() { ph = [num] };
         CustomData custom = new()
@@ -23,9 +22,9 @@ internal sealed class PlumbingEntityToReportYeller : IEntityToReport<PlumbingEnt
 
         ReportYeller result = new()
         {
-            event_id = eventid,
+            event_id = eventId,
             event_name = eventName,
-            event_time = eventtime,
+            event_time = eventTime,
             custom_data = custom,
             user_data = user
         };

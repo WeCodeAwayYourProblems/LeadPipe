@@ -104,8 +104,8 @@ public class TranslatorTests
     [Fact]
     public void SubsToSandwich_LocalTimes_ShouldProduceUtcOffsetZero()
     {
-        var translator = new SubsToSandwich(_dt);
-        var entity = new SubsEntity
+        var translator = new SandToSandwich(_dt);
+        var entity = new SandEntity
         {
             Id = 0,
             Date = new DateTime(2025, 3, 9, 2, 0, 0),      // DST gap

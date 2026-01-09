@@ -5,10 +5,10 @@ using LeadPipe.Translation.Primitives;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
-internal class SubsToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SubsEntity, Sandwich>
+internal class SandToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SandEntity, Sandwich>
 {
     private readonly IDateTimeTranslate _dt = dtranslate;
-    public Sandwich Translate(SubsEntity entity)
+    public Sandwich Translate(SandEntity entity)
     {
         var result = new Sandwich
         (

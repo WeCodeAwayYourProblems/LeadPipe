@@ -4,11 +4,11 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
-internal class CallEntityToCall : IEntityToVo<CallEntity, Call>
+internal class CaliperEntityToCaliper : IEntityToVo<CaliperEntity, Caliper>
 {
-    public Call Translate(CallEntity c)
+    public Caliper Translate(CaliperEntity c)
     {
-        var utc = DateTime.SpecifyKind(c.CallDate, DateTimeKind.Utc);
+        var utc = DateTime.SpecifyKind(c.CaliperDate, DateTimeKind.Utc);
         DateTimeOffset date = new(utc, TimeSpan.Zero);
         PhoneNumber number = new(c.PhoneNumber);
         TimeSpan duration = TimeSpan.FromSeconds(c.Duration);
@@ -17,7 +17,7 @@ internal class CallEntityToCall : IEntityToVo<CallEntity, Call>
         string location = c.Location;
         bool billable = c.Billable;
 
-        Call result = 
+        Caliper result = 
             new(
                 Id: c.Id,
                 Date: date, 

@@ -4,9 +4,9 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
-internal class CallMySqlEntityToCall : IEntityToVo<CallMySqlEntity, Call>
+internal class CaliperMySqlEntityToCaliper : IEntityToVo<CaliperMySqlEntity, Caliper>
 {
-    public Call Translate(CallMySqlEntity entity)
+    public Caliper Translate(CaliperMySqlEntity entity)
     {
         DateTime d = DateTime.SpecifyKind(entity.called_at_utc, DateTimeKind.Utc);
         DateTimeOffset date = new(d, TimeSpan.Zero);
@@ -28,7 +28,7 @@ internal class CallMySqlEntityToCall : IEntityToVo<CallMySqlEntity, Call>
         string location = entity.location is string l ? l : string.Empty;
         bool billable = entity.sale_billable is not null && entity.sale_billable == "billable";
 
-        Call result =
+        Caliper result =
             new(
                 Id: entity.call_id,
                 Date: date,

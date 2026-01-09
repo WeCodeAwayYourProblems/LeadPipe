@@ -4,9 +4,9 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class SubsEntityToReportYeller : IEntityToReport<SubsEntity, ReportYeller>
+internal sealed class SandEntityToReportYeller : IEntityToReport<SandEntity, ReportYeller>
 {
-    public ReportYeller Translate(SubsEntity sub)
+    public ReportYeller Translate(SandEntity sub)
     {
         long eventTime = sub.UnixDate;
         string eventName = "purchase";

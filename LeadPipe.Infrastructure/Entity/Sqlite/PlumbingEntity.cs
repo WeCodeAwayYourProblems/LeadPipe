@@ -12,7 +12,7 @@ public class PlumbingEntity : ISourceEntity
     public Source Source { get; set; }
     public required string MetaData { get; set; }
 
-    // Navigation properties
+    public ICollection<CustardPlumbingLink> CustardPlumbingLinks { get; set; } = [];
     public ICollection<SandPlumbingLink> SandPlumbingLinks { get; set; } = [];
     public ICollection<PlumbingCaliperLink> PlumbingCaliperLinks { get; set; } = [];
     public ICollection<CornPlumbingLink> CornPlumbingLinks { get; set; } = [];

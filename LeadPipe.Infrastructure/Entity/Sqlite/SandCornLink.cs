@@ -1,5 +1,9 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
+/// <summary>
+/// Denormalized link for fast Sand-based access.
+/// Canonical relationship is Sand -> Custard -> X.
+/// </summary>
 public class SandCornLink : IEntity
 {
     public long Id { get; set; }

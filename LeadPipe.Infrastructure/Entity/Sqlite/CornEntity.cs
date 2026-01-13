@@ -12,6 +12,7 @@ public class CornEntity : ISourceEntity
     public required string MetaData { get; set; }
     public required Source Source { get; set; }
 
+    public ICollection<CustardCornLink> CustardCornLinks { get; set; } = [];
     public ICollection<SandCornLink> SandCornLinks { get; set; } = [];
     public ICollection<CornCaliperLink> CornCaliperLinks { get; set; } = [];
     public ICollection<CornPlumbingLink> CornPlumbingLinks { get; set; } = [];

@@ -80,7 +80,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                         var row = batch[0];
                         _logger.LogError(
                             "Row insert failed: Number={Number}, CustomerId={CustomerId}",
-                            row.PhoneNumber, row.CustomerId);
+                            row.PhoneNumber, row.CustardId);
 
                         index++;
                         batchSize = 25;

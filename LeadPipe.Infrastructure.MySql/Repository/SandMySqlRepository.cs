@@ -11,13 +11,13 @@ public class SandMySqlRepository(MySqlSchema1Context context) : ISandMySqlReposi
 {
     private readonly DbSet<SandMySqlEntity> _set = context.Set<SandMySqlEntity>();
 
-    public async Task<Result<List<SandMySqlEntity>>> FindAsync(Expression<Func<SandMySqlEntity, bool>> predicate, bool includeCustomer = true)
+    public async Task<Result<List<SandMySqlEntity>>> FindAsync(Expression<Func<SandMySqlEntity, bool>> predicate, bool includeDetails = true)
     {
         try
         {
             IQueryable<SandMySqlEntity> query = _set.AsNoTracking();
 
-            if (includeCustomer)
+            if (includeDetails)
                 query = query.Include(s => s.customer);
 
             List<SandMySqlEntity> list = await query.Where(predicate).ToListAsync();
@@ -26,11 +26,11 @@ public class SandMySqlRepository(MySqlSchema1Context context) : ISandMySqlReposi
         catch (Exception ex) { return Result.Failure<List<SandMySqlEntity>>(ex.Message); }
     }
 
-    public async Task<Result<SandMySqlEntity>> GetByIdAsync(int id, bool includeCustomer = true)
+    public async Task<Result<SandMySqlEntity>> GetByIdAsync(int id, bool includeDetails = true)
     {
         IQueryable<SandMySqlEntity> query = _set.AsNoTracking();
 
-        if (includeCustomer)
+        if (includeDetails)
             query = query.Include(s => s.customer);
 
         SandMySqlEntity? found = await query.SingleOrDefaultAsync(s => s.subscriptionID == id);

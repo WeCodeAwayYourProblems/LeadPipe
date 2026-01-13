@@ -45,7 +45,7 @@ public sealed class SubsCaliperLinkRepository(PlumbingContext context, ILogger<S
         {
             List<SandCaliperLink> list = await _context.SandCaliperLinks
                 .AsNoTracking()
-                .Select(s => new SandCaliperLink() { Id = s.Id, SandId = s.SandId, CaliperId = s.CaliperId, MatchingNumber = s.MatchingNumber })
+                .Select(s => new SandCaliperLink() { Id = s.Id, SandId = s.SandId, CaliperId = s.CaliperId, MatchingPhone = s.MatchingPhone })
                 .ToListAsync();
             return list;
         }
@@ -105,7 +105,7 @@ public sealed class SubsCaliperLinkRepository(PlumbingContext context, ILogger<S
                         var row = batch[0];
                         _logger.LogError(
                             "Row insert failed: SubsId={SubsId}, CaliperId={CaliperId}, MatchingNumber={MatchingNumber}",
-                            row.SandId, row.CaliperId, row.MatchingNumber);
+                            row.SandId, row.CaliperId, row.MatchingPhone);
 
                         index++;
                         batchSize = 100;
@@ -175,7 +175,7 @@ public sealed class SubsCaliperLinkRepository(PlumbingContext context, ILogger<S
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append($"({e.SandId}, {e.CaliperId}, {e.MatchingNumber})");
+                sql.Append($"({e.SandId}, {e.CaliperId}, {e.MatchingPhone})");
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");

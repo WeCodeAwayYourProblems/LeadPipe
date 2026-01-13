@@ -164,7 +164,7 @@ internal class PlumbingAssociationService(
                     SandEntity = sandById[s.Id],
                     CaliperId = caliper.Id,
                     CaliperEntity = caliper,
-                    MatchingNumber = number
+                    MatchingPhone = number
                 });
             }
         }

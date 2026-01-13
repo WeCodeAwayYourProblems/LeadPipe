@@ -10,21 +10,29 @@ internal class SandToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SandE
     private readonly IDateTimeTranslate _dt = dtranslate;
     public Sandwich Translate(SandEntity entity)
     {
-        var result = new Sandwich
+        if (entity.CustardEntity is null)
+            throw new ArgumentException($"Navigation property {nameof(entity.CustardEntity)} cannot be null.");
+
+        CustardEntity ce = entity.CustardEntity;
+        Custard custard = new(
+                Id: ce.Id,
+                Status: ce.Active,
+                Phone1: new PhoneNumber(ce.PhoneNumber),
+                Phone2: new PhoneNumber(ce.PhoneNumber2),
+                Date: ce.Date,
+                DateCancelled: ce.CancelDate
+            );
+        Sandwich result = new
         (
-            SubscriptionId: entity.Id,
-            CustomerId: entity.CustomerId,
+            SandId: entity.Id,
+            CustardId: entity.CustardId,
+            Custard: custard,
             Date: _dt.Convert(entity.Date, ETimeZone.Pacific),
-            SubDate: _dt.Convert(entity.SubDate, ETimeZone.Pacific),
-            Number: new(entity.PhoneNumber),
-            Number2: new(entity.PhoneNumber2),
-            CancelDate: _dt.Convert(entity.CancelDate, ETimeZone.Pacific),
-            SubCancelDate: _dt.Convert(entity.SubCancelDate, ETimeZone.Pacific),
+            DateCancelled: _dt.Convert(entity.CancelDate, ETimeZone.Pacific),
             Active: entity.Active,
-            SubActive: entity.SubActive,
             Complete: entity.Complete,
             Type: entity.Type,
-            Value: (decimal)entity.Value,
+            Value: entity.Value,
             Seller: entity.Seller,
             Seller2: entity.Seller2,
             Seller3: entity.Seller3

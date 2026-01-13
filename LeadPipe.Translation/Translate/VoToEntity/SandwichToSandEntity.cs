@@ -1,0 +1,28 @@
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Translate;
+
+namespace LeadPipe.Translation.Translate.VoToEntity;
+
+internal class SandwichToSandEntity : IVoToEntity<Sandwich, SandEntity>
+{
+    public SandEntity Translate(Sandwich s)
+    {
+        return new SandEntity()
+        {
+            Id = s.SandId,
+            CustardId = s.CustardId,
+            Date = s.Date.UtcDateTime,
+            UnixDate = s.Date.ToUnixTimeSeconds(),
+            CancelDate = s.DateCancelled.UtcDateTime,
+            UnixCancelDate = s.DateCancelled.ToUnixTimeSeconds(),
+            Active = s.Active,
+            Complete = s.Complete,
+            Type = s.Type,
+            Value = s.Value,
+            Seller = s.Seller,
+            Seller2 = s.Seller2,
+            Seller3 = s.Seller3
+        };
+    }
+}

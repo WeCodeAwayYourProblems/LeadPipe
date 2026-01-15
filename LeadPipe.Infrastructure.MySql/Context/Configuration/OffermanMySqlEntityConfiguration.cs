@@ -5,22 +5,21 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeadPipe.Infrastructure.MySql.Context.Configuration;
 
-internal sealed class SandMySqlEntityConfiguration(IMySqlSettings settings)
-    : IEntityTypeConfiguration<SandMySqlEntity>
+internal sealed class OffermanMySqlEntityConfiguration(IMySqlSettings settings)
+    : IEntityTypeConfiguration<OffermanMySqlEntity>
 {
     private readonly IMySqlSettings _settings = settings;
 
-    public void Configure(EntityTypeBuilder<SandMySqlEntity> entity)
+    public void Configure(EntityTypeBuilder<OffermanMySqlEntity> entity)
     {
-        entity.ToTable(_settings.SandTableName!, schema: _settings.Schema1!);
+        entity.ToTable("office", schema: _settings.Schema1!);
 
-        entity.HasKey(x => x.subscriptionID);
+        entity.HasKey(x => x.officeID);
 
-        entity.HasOne(sand => sand.offerman)
-            .WithMany(offerman => offerman.SandEntities)
+        entity.HasMany(offerman => offerman.SandEntities)
+            .WithOne(sand => sand.offerman)
             .HasForeignKey(sand => sand.officeID)
             .HasPrincipalKey(offerman => offerman.officeID)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }
-

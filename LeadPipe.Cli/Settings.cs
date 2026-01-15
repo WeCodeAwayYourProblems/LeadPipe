@@ -39,6 +39,8 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? Schema2 { get; set; }
     public string? Schema3 { get; set; }
     public string? CornTableName { get; set; }
+    public string? SandTableName { get; set; }
+    public string? CustardTableName { get; set; }
     
     // Yeller 
     public string? YellerName { get; set; }

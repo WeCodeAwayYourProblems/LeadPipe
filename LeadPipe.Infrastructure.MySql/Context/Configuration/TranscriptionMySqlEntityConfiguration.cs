@@ -1,17 +1,18 @@
 ﻿using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeadPipe.Infrastructure.MySql.Context.Configuration;
 
-internal sealed class TranscriptionMySqlEntityConfiguration(string schema)
+internal sealed class TranscriptionMySqlEntityConfiguration(IMySqlSettings settings)
         : IEntityTypeConfiguration<TranscriptionMySqlEntity>
 {
-    private readonly string _schema = schema;
+    private readonly IMySqlSettings _settings = settings;
 
     public void Configure(EntityTypeBuilder<TranscriptionMySqlEntity> entity)
     {
-        entity.ToTable("transcriptions", schema: _schema);
+        entity.ToTable("transcriptions", schema: _settings.Schema2!);
         entity.HasKey(x => x.call_id);
     }
 }

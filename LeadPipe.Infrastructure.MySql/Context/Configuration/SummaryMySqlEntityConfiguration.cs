@@ -1,17 +1,18 @@
 ﻿using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeadPipe.Infrastructure.MySql.Context.Configuration;
 
-internal sealed class SummaryMySqlEntityConfiguration(string schema)
+internal sealed class SummaryMySqlEntityConfiguration(IMySqlSettings settings)
         : IEntityTypeConfiguration<SummaryMySqlEntity>
 {
-    private readonly string _schema = schema;
+    private readonly IMySqlSettings _settings = settings;
 
     public void Configure(EntityTypeBuilder<SummaryMySqlEntity> entity)
     {
-        entity.ToTable("call_summary", schema: _schema);
+        entity.ToTable("call_summary", schema: _settings.Schema2!);
         entity.HasKey(x => x.call_id);
     }
 }

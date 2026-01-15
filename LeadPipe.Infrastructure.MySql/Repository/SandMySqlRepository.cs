@@ -18,7 +18,9 @@ public class SandMySqlRepository(MySqlSchema1Context context) : ISandMySqlReposi
             IQueryable<SandMySqlEntity> query = _set.AsNoTracking();
 
             if (includeDetails)
-                query = query.Include(s => s.customer);
+                query = query
+                    .Include(s => s.customer)
+                    .Include(s => s.offerman);
 
             List<SandMySqlEntity> list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
@@ -31,7 +33,9 @@ public class SandMySqlRepository(MySqlSchema1Context context) : ISandMySqlReposi
         IQueryable<SandMySqlEntity> query = _set.AsNoTracking();
 
         if (includeDetails)
-            query = query.Include(s => s.customer);
+            query = query
+                .Include(s => s.customer)
+                .Include(s => s.offerman);
 
         SandMySqlEntity? found = await query.SingleOrDefaultAsync(s => s.subscriptionID == id);
 

@@ -1,4 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.MySql.Context.Configuration;
 using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,7 @@ public abstract class MySqlBaseContext : DbContext
     public DbSet<CaliperMySqlEntity> Calipers => Set<CaliperMySqlEntity>();
     public DbSet<CustardMySqlEntity> Custards => Set<CustardMySqlEntity>();
     public DbSet<SandMySqlEntity> Subscriptions => Set<SandMySqlEntity>();
+    public DbSet<OffermanMySqlEntity> Offermans => Set<OffermanMySqlEntity>();
     public DbSet<SummaryMySqlEntity> Summaries => Set<SummaryMySqlEntity>();
     public DbSet<TranscriptionMySqlEntity> Transcriptions => Set<TranscriptionMySqlEntity>();
     public DbSet<CornMySqlEntity> Corns => Set<CornMySqlEntity>();
@@ -28,15 +30,25 @@ public abstract class MySqlBaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        ApplyConfigurations(modelBuilder);
+        modelBuilder.ApplyConfiguration(new CornMySqlEntityConfiguration(Settings));
+        modelBuilder.ApplyConfiguration(new CustardMySqlEntityConfiguration(Settings));
+        modelBuilder.ApplyConfiguration(new SandMySqlEntityConfiguration(Settings));
+        modelBuilder.ApplyConfiguration(new OffermanMySqlEntityConfiguration(Settings));
+        modelBuilder.ApplyConfiguration(new CaliperMySqlEntityConfiguration(Settings));
+        modelBuilder.ApplyConfiguration(new SummaryMySqlEntityConfiguration(Settings));
+        modelBuilder.ApplyConfiguration(new TranscriptionMySqlEntityConfiguration(Settings));
     }
 
-    protected abstract void ApplyConfigurations(ModelBuilder modelBuilder);
-
-    // Read-only enforcement
+    // BLOCK ALL WRITE OPERATIONS
     public override int SaveChanges() =>
-        throw new InvalidOperationException("MySQL database is read-only.");
+        throw new InvalidOperationException("SaveChanges is disabled. MySQL database is read-only.");
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess) =>
+        throw new InvalidOperationException("SaveChanges is disabled. MySQL database is read-only.");
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
-        throw new InvalidOperationException("MySQL database is read-only.");
+        throw new InvalidOperationException("SaveChangesAsync is disabled. MySQL database is read-only.");
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("SaveChangesAsync is disabled. MySQL database is read-only.");
 }

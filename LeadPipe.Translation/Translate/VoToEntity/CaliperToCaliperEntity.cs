@@ -12,7 +12,7 @@ internal class CaliperToCaliperEntity : IVoToEntity<Caliper, CaliperEntity>
         {
             Id = c.Id,
             PhoneNumber = c.Number.Number,
-            CaliperDate = c.Date.UtcDateTime,
+            Date = c.Date.UtcDateTime,
             UnixDate = c.Date.ToUnixTimeSeconds(),
             Note = c.Note,
             Source = c.Source,

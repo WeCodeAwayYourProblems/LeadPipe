@@ -4,7 +4,7 @@ public class CaliperEntity : IEntity
 {
     public required long Id { get; set; }
     public long PhoneNumber { get; set; }
-    public DateTime CaliperDate { get; set; }
+    public DateTime Date { get; set; }
     public long UnixDate { get; set; }
     public required string Note { get; set; }
     public required string Source { get; set; }

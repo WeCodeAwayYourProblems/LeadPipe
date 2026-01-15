@@ -28,7 +28,7 @@ public sealed class CaliperMySqlDataSource(
         if (callsResult.IsFailure || callsResult.Value.Count == 0)
             return await LoadAsync();
 
-        DateOnly mostRecent = DateOnly.FromDateTime(callsResult.Value.Max(m => m.CaliperDate));
+        DateOnly mostRecent = DateOnly.FromDateTime(callsResult.Value.Max(m => m.Date));
         DateTime mostRecentDate = new DateTime(mostRecent, new TimeOnly(0)) - TimeSpan.FromDays(7); 
         Result<List<CaliperMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= mostRecentDate, includeDetails: true);
         return found;

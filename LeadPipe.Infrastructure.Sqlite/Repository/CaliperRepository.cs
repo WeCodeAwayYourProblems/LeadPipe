@@ -8,48 +8,67 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRepository> logger)
-    : PlumbingContextRepository<CaliperEntity, CaliperRepository>(context, logger), ICaliperRepository
+public sealed class CaliperRepository
+    (
+        PlumbingContext context,
+        ILogger<CaliperRepository> logger
+    ) : PlumbingContextRepository<CaliperEntity, CaliperRepository>(context, logger), ICaliperRepository
 {
-    public override async Task<Result<List<CaliperEntity>>> UpsertRangeAsync(List<CaliperEntity> entities)
+    protected override IQueryable<CaliperEntity> WithIncludes(IQueryable<CaliperEntity> q)
+    {
+        return q
+            .Include(c => c.CustardCaliperLinks)
+            .Include(c => c.SandCaliperLinks)
+            .Include(c => c.PlumbingCaliperLinks)
+            .Include(c => c.CornCaliperLinks);
+    }
+
+    public override async Task<Result<List<CaliperEntity>>> UpsertRangeAsync(
+        List<CaliperEntity> entities,
+        CancellationToken ct = default)
     {
         if (entities.Count == 0)
             return Result.Success(new List<CaliperEntity>());
 
-        // Deduplicate
+        AssertNotString<CaliperEntity>(nameof(CaliperEntity.PhoneNumber));
+        AssertNotString<CaliperEntity>(nameof(CaliperEntity.Date));
+        AssertNotString<CaliperEntity>(nameof(CaliperEntity.UnixDate));
+        AssertNotString<CaliperEntity>(nameof(CaliperEntity.Duration));
+
+        // Deduplicate in-memory
         List<CaliperEntity> uniqueEntities =
         [
             .. entities
-            .GroupBy(e => (e.PhoneNumber, e.CaliperDate))
-            .Select(g => g.Last())
+                .GroupBy(e => (e.PhoneNumber, e.Date))
+                .Select(g => g.Last())
         ];
 
         int batchSize = 200;
         const int minBatchSize = 1;
+        int stagedCount = 0;
+        int skipped = 0;
+        const string tempTable = "temp_caliper";
 
         try
         {
             await using var transaction =
-                await _context.Database.BeginTransactionAsync();
+                await _context.Database.BeginTransactionAsync(ct);
 
-            // Temp table (connection-scoped)
-            await _context.Database.ExecuteSqlRawAsync("""
-            CREATE TEMP TABLE IF NOT EXISTS temp_calls (
-                PhoneNumber INTEGER NOT NULL,
-                CaliperDate TEXT NOT NULL,
-                UnixCaliperDate INTEGER NOT NULL,
-                Note TEXT,
-                Source TEXT,
-                Location TEXT,
-                Duration INTEGER,
-                Billable INTEGER,
-                PRIMARY KEY (PhoneNumber, CaliperDate)
-            ) WITHOUT ROWID;
-        """);
+            await _context.Database.ExecuteSqlRawAsync($"""
+                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(CaliperEntity.PhoneNumber)} INTEGER NOT NULL,
+                    {nameof(CaliperEntity.Date)} TEXT NOT NULL,
+                    {nameof(CaliperEntity.UnixDate)} INTEGER NOT NULL,
+                    {nameof(CaliperEntity.Note)} TEXT,
+                    {nameof(CaliperEntity.Source)} TEXT,
+                    {nameof(CaliperEntity.Location)} TEXT,
+                    {nameof(CaliperEntity.Duration)} INTEGER,
+                    {nameof(CaliperEntity.Billable)} INTEGER,
+                    PRIMARY KEY ({nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)})
+                ) WITHOUT ROWID;
+            """, ct);
 
             int index = 0;
-            int stagedCount = 0;
-            int skipped = 0;
 
             while (index < uniqueEntities.Count)
             {
@@ -62,7 +81,6 @@ public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRe
                     stagedCount += batch.Count;
                     index += take;
 
-                    // Gradually scale back up after success
                     if (batchSize < 200)
                         batchSize = Math.Min(batchSize * 2, 200);
                 }
@@ -76,19 +94,8 @@ public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRe
 
                     if (batchSize == minBatchSize)
                     {
-                        var row = batch[0];
-
-                        _logger.LogError(
-                            "{Entity} Row insert failed: Phone={Phone}, CaliperDate={CaliperDate}, Note={Note}, Source={Source}, Location={Location}",
-                            nameof(CaliperEntity),
-                            row.PhoneNumber,
-                            row.CaliperDate,
-                            row.Note,
-                            row.Source,
-                            row.Location);
-
-                        index++;
                         skipped++;
+                        index++;
                         batchSize = 100;
                     }
                     else
@@ -98,78 +105,45 @@ public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRe
                 }
             }
 
-            // ---- Phase 1: UPDATE existing rows ----
-            int updated = await _context.Database.ExecuteSqlRawAsync("""
-            UPDATE CaliperEntities
-            SET
-                UnixCaliperDate = (
-                    SELECT t.UnixCaliperDate
-                    FROM temp_calls t
-                    WHERE t.PhoneNumber = CaliperEntities.PhoneNumber
-                      AND t.CaliperDate = CaliperEntities.CaliperDate
-                ),
-                Note = (
-                    SELECT t.Note
-                    FROM temp_calls t
-                    WHERE t.PhoneNumber = CaliperEntities.PhoneNumber
-                      AND t.CaliperDate = CaliperEntities.CaliperDate
-                ),
-                Source = (
-                    SELECT t.Source
-                    FROM temp_calls t
-                    WHERE t.PhoneNumber = CaliperEntities.PhoneNumber
-                      AND t.CaliperDate = CaliperEntities.CaliperDate
-                ),
-                Location = (
-                    SELECT t.Location
-                    FROM temp_calls t
-                    WHERE t.PhoneNumber = CaliperEntities.PhoneNumber
-                      AND t.CaliperDate = CaliperEntities.CaliperDate
-                ),
-                Duration = (
-                    SELECT t.Duration
-                    FROM temp_calls t
-                    WHERE t.PhoneNumber = CaliperEntities.PhoneNumber
-                      AND t.CaliperDate = CaliperEntities.CaliperDate
-                ),
-                Billable = (
-                    SELECT t.Billable
-                    FROM temp_calls t
-                    WHERE t.PhoneNumber = CaliperEntities.PhoneNumber
-                      AND t.CaliperDate = CaliperEntities.CaliperDate
-                )
-            WHERE EXISTS (
-                SELECT 1
-                FROM temp_calls t
-                WHERE t.PhoneNumber = CaliperEntities.PhoneNumber
-                  AND t.CaliperDate = CaliperEntities.CaliperDate
-            );
-        """);
+            int updated = await _context.Database.ExecuteSqlRawAsync($"""
+                UPDATE {TableNames.CaliperEntitiesName}
+                SET
+                    {nameof(CaliperEntity.UnixDate)} = t.{nameof(CaliperEntity.UnixDate)},
+                    {nameof(CaliperEntity.Note)} = t.{nameof(CaliperEntity.Note)},
+                    {nameof(CaliperEntity.Source)} = t.{nameof(CaliperEntity.Source)},
+                    {nameof(CaliperEntity.Location)} = t.{nameof(CaliperEntity.Location)},
+                    {nameof(CaliperEntity.Duration)} = t.{nameof(CaliperEntity.Duration)},
+                    {nameof(CaliperEntity.Billable)} = t.{nameof(CaliperEntity.Billable)}
+                FROM {tempTable} t
+                WHERE t.{nameof(CaliperEntity.PhoneNumber)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.PhoneNumber)}
+                  AND t.{nameof(CaliperEntity.Date)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Date)};
+            """, ct);
 
-            // ---- Phase 2: INSERT missing rows ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync("""
-            INSERT INTO CaliperEntities
-                (PhoneNumber, CaliperDate, UnixCaliperDate, Note, Source, Location, Duration, Billable)
-            SELECT
-                t.PhoneNumber,
-                t.CaliperDate,
-                t.UnixCaliperDate,
-                t.Note,
-                t.Source,
-                t.Location,
-                t.Duration,
-                t.Billable
-            FROM temp_calls t
-            WHERE NOT EXISTS (
-                SELECT 1
-                FROM CaliperEntities c
-                WHERE c.PhoneNumber = t.PhoneNumber
-                  AND c.CaliperDate = t.CaliperDate
-            );
-        """);
+            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.CaliperEntitiesName}
+                    ({nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)}, {nameof(CaliperEntity.UnixDate)}, {nameof(CaliperEntity.Note)}, {nameof(CaliperEntity.Source)}, {nameof(CaliperEntity.Location)}, {nameof(CaliperEntity.Duration)}, {nameof(CaliperEntity.Billable)})
+                SELECT
+                    t.{nameof(CaliperEntity.PhoneNumber)},
+                    t.{nameof(CaliperEntity.Date)},
+                    t.{nameof(CaliperEntity.UnixDate)},
+                    t.{nameof(CaliperEntity.Note)},
+                    t.{nameof(CaliperEntity.Source)},
+                    t.{nameof(CaliperEntity.Location)},
+                    t.{nameof(CaliperEntity.Duration)},
+                    t.{nameof(CaliperEntity.Billable)}
+                FROM {tempTable} t
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM {TableNames.CaliperEntitiesName} c
+                    WHERE c.{nameof(CaliperEntity.PhoneNumber)} = t.{nameof(CaliperEntity.PhoneNumber)}
+                      AND c.{nameof(CaliperEntity.Date)} = t.{nameof(CaliperEntity.Date)}
+                );
+            """, ct);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_calls;");
-            await transaction.CommitAsync();
+            await _context.Database.ExecuteSqlRawAsync(
+                $"DELETE FROM {tempTable};", ct);
+
+            await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
@@ -189,15 +163,16 @@ public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRe
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "CaliperEntity upsert failed");
+            _logger.LogError(ex, "{Entity} upsert failed", nameof(CaliperEntity));
             return Result.Failure<List<CaliperEntity>>(ex.ToString());
         }
 
-        // ---- Local helper ----
+        // --------------------
+        // Local helper
+        // --------------------
         void InsertBatch(List<CaliperEntity> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append("INSERT INTO temp_calls VALUES ");
+            var sql = new StringBuilder($"INSERT INTO {tempTable} VALUES ");
 
             for (int i = 0; i < batch.Count; i++)
             {
@@ -206,7 +181,7 @@ public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRe
                 sql.Append($"""
                 (
                     {e.PhoneNumber},
-                    '{e.CaliperDate:yyyy-MM-dd HH:mm:ss}',
+                    '{e.Date:yyyy-MM-dd HH:mm:ss}',
                     {e.UnixDate},
                     '{Clean(e.Note)}',
                     '{Clean(e.Source)}',
@@ -214,7 +189,7 @@ public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRe
                     {e.Duration},
                     {(e.Billable ? 1 : 0)}
                 )
-            """);
+                """);
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");
@@ -223,17 +198,5 @@ public sealed class CaliperRepository(PlumbingContext context, ILogger<CaliperRe
             sql.Append(';');
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
-    }
-
-    private static string Clean(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-            return string.Empty;
-
-        // SQLite cannot handle embedded nulls
-        value = value.Replace("\0", string.Empty);
-
-        // Escape single quotes for raw SQL
-        return value.Replace("'", "''");
     }
 }

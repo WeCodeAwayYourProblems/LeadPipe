@@ -4,6 +4,7 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
@@ -11,58 +12,18 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlumbingLinkRepository> logger)
     : PlumbingContextRepository<SandPlumbingLink, SandPlumbingLinkRepository>(context, logger), ISandPlumbingLinkRepository
 {
-    public override async Task<Result<List<SandPlumbingLink>>> GetAllWithDetailsAsync()
+    protected override IQueryable<SandPlumbingLink> WithIncludes(IQueryable<SandPlumbingLink> q)
     {
-        try
-        {
-            List<SandPlumbingLink> list = await _context.SandPlumbingLinks
-                .AsNoTracking()
-                .Include(p => p.PlumbingEntity)
-                .Include(p => p.SandEntity)
-                .ToListAsync();
-            return list;
-        }
-        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.ToString()); }
+        return q
+            .Include(c => c.SandEntity)
+            .Include(c => c.PlumbingEntity);
     }
-    public async Task<Result<List<SandPlumbingLink>>> GetAllWithDetailsAsync(IEnumerable<PlumbingEntity> filter)
-    {
-        try
-        {
-            List<long> ids = [.. filter.Select(p => p.Id)];
-            List<SandPlumbingLink> list = await _context.SandPlumbingLinks
-                .AsNoTracking()
-                .Where(e => ids.Contains(e.PlumbingId))
-                .Include(p => p.PlumbingEntity)
-                .Include(p => p.SandEntity)
-                .ToListAsync();
-            return list;
-        }
-        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.ToString()); }
-    }
-    public override async Task<Result<List<SandPlumbingLink>>> GetAllAsync()
-    {
-        try
-        {
-            List<SandPlumbingLink> list = await _context.SandPlumbingLinks
-                .AsNoTracking()
-                .Select(s => new SandPlumbingLink()
-                {
-                    Id = s.Id,
-                    SandId = s.SandId,
-                    PlumbingId = s.PlumbingId,
-                    MatchingPhone = s.MatchingPhone
-                })
-                .ToListAsync();
-            return list;
-        }
-        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.Message); }
-    }
-    public override async Task<Result<List<SandPlumbingLink>>> UpsertRangeAsync(List<SandPlumbingLink> entities)
+    public override async Task<Result<List<SandPlumbingLink>>> UpsertRangeAsync(List<SandPlumbingLink> entities, CancellationToken ct = default)
     {
         if (entities.Count == 0)
             return Result.Success(new List<SandPlumbingLink>());
 
-        // Deduplicate in-memory by (SubsId, PlumbingId)
+        // Deduplicate in-memory
         List<SandPlumbingLink> uniqueEntities =
         [
             .. entities
@@ -74,20 +35,21 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
         const int minBatchSize = 1;
         int stagedCount = 0;
         int skipped = 0;
+        const string tempTable = "temp_sand_plumbing_links";
 
         try
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             // Temp table for staging
-            await _context.Database.ExecuteSqlRawAsync("""
-                CREATE TEMP TABLE IF NOT EXISTS temp_subs_plumbing_links (
-                    SubsId INTEGER NOT NULL,
-                    PlumbingId INTEGER NOT NULL,
-                    MatchingPhone INTEGER NOT NULL,
-                    PRIMARY KEY (SubsId, PlumbingId)
+            await _context.Database.ExecuteSqlRawAsync($"""
+                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(SandPlumbingLink.SandId)} INTEGER NOT NULL,
+                    {nameof(SandPlumbingLink.PlumbingId)} INTEGER NOT NULL,
+                    {nameof(SandPlumbingLink.MatchingPhone)} INTEGER NOT NULL,
+                    PRIMARY KEY ({nameof(SandPlumbingLink.SandId)}, {nameof(SandPlumbingLink.PlumbingId)})
                 ) WITHOUT ROWID;
-            """);
+            """, cancellationToken: ct);
 
             int index = 0;
 
@@ -117,7 +79,7 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "{Entity} row insert failed: SubsId={SubsId}, PlumbingId={PlumbingId}, MatchingPhone={MatchingPhone}",
+                            "{Entity} row insert failed: SandId={SandId}, PlumbingId={PlumbingId}, MatchingPhone={MatchingPhone}",
                             nameof(SandPlumbingLink),
                             row.SandId,
                             row.PlumbingId,
@@ -135,37 +97,37 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
             }
 
             // ---- Phase 1: UPDATE existing rows ----
-            int updated = await _context.Database.ExecuteSqlRawAsync("""
-                UPDATE SubsPlumbingLinks
+            int updated = await _context.Database.ExecuteSqlRawAsync($"""
+                UPDATE {TableNames.SandPlumbingLinksName}
                 SET MatchingPhone = (
-                    SELECT t.MatchingPhone
-                    FROM temp_subs_plumbing_links t
-                    WHERE t.SubsId = SubsPlumbingLinks.SubsId
-                      AND t.PlumbingId = SubsPlumbingLinks.PlumbingId
+                    SELECT t.{nameof(SandPlumbingLink.MatchingPhone)}
+                    FROM {tempTable} t
+                    WHERE t.{nameof(SandPlumbingLink.SandId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.SandId)}
+                      AND t.{nameof(SandPlumbingLink.PlumbingId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.PlumbingId)}
                 )
                 WHERE EXISTS (
                     SELECT 1
-                    FROM temp_subs_plumbing_links t
-                    WHERE t.SubsId = SubsPlumbingLinks.SubsId
-                      AND t.PlumbingId = SubsPlumbingLinks.PlumbingId
+                    FROM {tempTable} t
+                    WHERE t.{nameof(SandPlumbingLink.SandId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.SandId)}
+                      AND t.{nameof(SandPlumbingLink.PlumbingId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.PlumbingId)}
                 );
-            """);
+            """, cancellationToken: ct);
 
             // ---- Phase 2: INSERT missing rows ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync("""
-                INSERT INTO SubsPlumbingLinks (SubsId, PlumbingId, MatchingPhone)
-                SELECT t.SubsId, t.PlumbingId, t.MatchingPhone
-                FROM temp_subs_plumbing_links t
+            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.SandPlumbingLinksName} ({nameof(SandPlumbingLink.SandId)}, {nameof(SandPlumbingLink.PlumbingId)}, {nameof(SandPlumbingLink.MatchingPhone)})
+                SELECT t.{nameof(SandPlumbingLink.SandId)}, t.{nameof(SandPlumbingLink.PlumbingId)}, t.{nameof(SandPlumbingLink.MatchingPhone)}
+                FROM {tempTable} t
                 WHERE NOT EXISTS (
                     SELECT 1
-                    FROM SubsPlumbingLinks s
-                    WHERE s.SubsId = t.SubsId
-                      AND s.PlumbingId = t.PlumbingId
+                    FROM {TableNames.SandPlumbingLinksName} s
+                    WHERE s.{nameof(SandPlumbingLink.SandId)} = t.{nameof(SandPlumbingLink.SandId)}
+                      AND s.{nameof(SandPlumbingLink.PlumbingId)} = t.{nameof(SandPlumbingLink.PlumbingId)}
                 );
-            """);
+            """, cancellationToken: ct);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_subs_plumbing_links;");
-            await transaction.CommitAsync();
+            await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
+            await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
@@ -193,7 +155,11 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
         void InsertBatch(List<SandPlumbingLink> batch)
         {
             var sql = new StringBuilder();
-            sql.Append("INSERT INTO temp_subs_plumbing_links VALUES ");
+            sql.Append($"INSERT INTO {tempTable} VALUES ");
+
+            AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.SandId));
+            AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.PlumbingId));
+            AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.MatchingPhone));
 
             for (int i = 0; i < batch.Count; i++)
             {
@@ -208,4 +174,5 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
     }
+
 }

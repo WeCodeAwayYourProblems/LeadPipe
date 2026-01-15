@@ -12,70 +12,24 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingRepository> logger)
     : PlumbingContextRepository<PlumbingEntity, PlumbingRepository>(context, logger), IPlumbingRepository
 {
-    public async Task<Result<List<PlumbingEntity>>> GetAllAsync(Source source)
+    protected override IQueryable<PlumbingEntity> WithIncludes(IQueryable<PlumbingEntity> q)
     {
-        try
-        {
-            List<PlumbingEntity> plumbing = await _set
-                .Where(p => p.Source == source)
-                .ToListAsync();
-            return Result.Success(plumbing);
-        }
-        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>(ex.ToString()); }
-    }
-    public override async Task<Result<List<PlumbingEntity>>> AddRangeAsync(List<PlumbingEntity> entities)
-    {
-        if (entities == null || entities.Count == 0)
-            return Result.Failure<List<PlumbingEntity>>("No entities provided.");
-
-        try
-        {
-            // Sort entities
-            List<PlumbingEntity> sortedEntities = [.. entities.OrderBy(e => e.Date)];
-
-            // Deduplicate input entities
-            HashSet<(long, Source)> seenKeys = [];
-            List<PlumbingEntity> uniqueEntities = [];
-            uniqueEntities.AddRange(
-                from e in sortedEntities
-                let key = (e.PhoneNumber, e.Source)
-                where seenKeys.Add(key) // This will be true only for the first key, so no duplicates are added
-                select e);
-
-            // Extract numbers from unique set
-            HashSet<long> phoneNumbers = [.. uniqueEntities.Select(e => e.PhoneNumber)];
-
-            // Query based on unique phone numbers
-            var existing = await _set
-                .Where(p => phoneNumbers.Contains(p.PhoneNumber))
-                .Select(p => new { p.PhoneNumber, p.Source })
-                .ToListAsync();
-
-            // Now finish the composite match in memory
-            HashSet<(long PhoneNumber, Source Source)> existingSet = [.. existing.Select(x => (x.PhoneNumber, x.Source))];
-
-            List<PlumbingEntity> toInsert = [.. uniqueEntities.Where(e => !existingSet.Contains((e.PhoneNumber, e.Source)))];
-
-            if (toInsert.Count == 0)
-                return Result.Success(new List<PlumbingEntity>());
-
-            await _set.AddRangeAsync(toInsert);
-            await _context.SaveChangesAsync();
-
-            _logger.LogDebug(
-                "Plumbing bulk insert: {Inserted}/{Total}",
-                toInsert.Count,
-                entities.Count);
-
-            return Result.Success(toInsert);
-        }
-        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>($"Failed to save Plumbing entities: {ex}"); }
+        return q
+            .Include(c => c.CustardPlumbingLinks)
+            .Include(c => c.SandPlumbingLinks)
+            .Include(c => c.PlumbingCaliperLinks)
+            .Include(c => c.CornPlumbingLinks);
     }
 
-    public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(List<PlumbingEntity> entities)
+    public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(List<PlumbingEntity> entities, CancellationToken ct = default)
     {
         if (entities == null || entities.Count == 0)
             return Result.Success(new List<PlumbingEntity>());
+
+        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.PhoneNumber));
+        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.Date));
+        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.UnixDate));
+        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.Source));
 
         // Deduplicate in-memory by (PhoneNumber, Source)
         List<PlumbingEntity> uniqueEntities =
@@ -89,23 +43,24 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
         const int minBatchSize = 1;
         int skipped = 0;
         int stagedCount = 0;
+        const string tempTable = "temp_plumbings";
 
         try
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             // Temp table for staging
-            await _context.Database.ExecuteSqlRawAsync("""
-                CREATE TEMP TABLE IF NOT EXISTS temp_plumbings (
-                    PhoneNumber INTEGER NOT NULL,
-                    Date TEXT NOT NULL,
-                    UnixDate INTEGER NOT NULL,
-                    Contents TEXT,
-                    Source TEXT NOT NULL,
-                    MetaData TEXT NOT NULL,
-                    PRIMARY KEY (PhoneNumber, Source)
+            await _context.Database.ExecuteSqlRawAsync($"""
+                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(PlumbingEntity.PhoneNumber)} INTEGER NOT NULL,
+                    {nameof(PlumbingEntity.Date)} TEXT NOT NULL,
+                    {nameof(PlumbingEntity.UnixDate)} INTEGER NOT NULL,
+                    {nameof(PlumbingEntity.Contents)} TEXT,
+                    {nameof(PlumbingEntity.Source)} TEXT NOT NULL,
+                    {nameof(PlumbingEntity.MetaData)} TEXT NOT NULL,
+                    PRIMARY KEY ({nameof(PlumbingEntity.PhoneNumber)}, {nameof(PlumbingEntity.Source)})
                 ) WITHOUT ROWID;
-            """);
+            """, cancellationToken: ct);
 
             int index = 0;
 
@@ -156,62 +111,62 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             }
 
             // ---- Phase 1: UPDATE existing rows ----
-            int updated = await _context.Database.ExecuteSqlRawAsync("""
-                UPDATE PlumbingEntities
+            int updated = await _context.Database.ExecuteSqlRawAsync($"""
+                UPDATE {TableNames.PlumbingEntitiesName}
                 SET
-                    Date = (
-                        SELECT t.Date 
-                        FROM temp_plumbings t 
-                        WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
-                            AND t.Source = PlumbingEntities.Source
+                    {nameof(PlumbingEntity.Date)} = (
+                        SELECT t.{nameof(PlumbingEntity.Date)} 
+                        FROM {tempTable} t 
+                        WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} 
+                            AND t.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
                     ),
-                    UnixDate = (
-                        SELECT t.UnixDate 
-                        FROM temp_plumbings t 
-                        WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
-                            AND t.Source = PlumbingEntities.Source
+                    {nameof(PlumbingEntity.UnixDate)} = (
+                        SELECT t.{nameof(PlumbingEntity.UnixDate)} 
+                        FROM {tempTable} t 
+                        WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} 
+                            AND t.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
                     ),
                     Contents = (
                         SELECT t.Contents 
-                        FROM temp_plumbings t 
-                        WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
-                            AND t.Source = PlumbingEntities.Source
+                        FROM {tempTable} t 
+                        WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} 
+                            AND t.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
                     ),
                     MetaData = (
                     SELECT t.MetaData 
-                    FROM temp_plumbings t 
-                    WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
-                        AND t.Source = PlumbingEntities.Source)
+                    FROM {tempTable} t 
+                    WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} 
+                        AND t.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)})
                 WHERE EXISTS (
                     SELECT 1 
-                    FROM temp_plumbings t 
-                    WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
-                        AND t.Source = PlumbingEntities.Source
+                    FROM {tempTable} t 
+                    WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} 
+                        AND t.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
                 );
-            """);
+            """, cancellationToken: ct);
 
             // ---- Phase 2: INSERT missing rows ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync("""
-                INSERT INTO PlumbingEntities
-                    (PhoneNumber, Date, UnixDate, Contents, Source, MetaData)
+            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.PlumbingEntitiesName}
+                    ({nameof(PlumbingEntity.PhoneNumber)}, {nameof(PlumbingEntity.Date)}, {nameof(PlumbingEntity.UnixDate)}, {nameof(PlumbingEntity.Contents)}, {nameof(PlumbingEntity.Source)}, {nameof(PlumbingEntity.MetaData)})
                 SELECT
-                    t.PhoneNumber,
-                    t.Date,
-                    t.UnixDate,
-                    t.Contents,
-                    t.Source,
-                    t.MetaData
-                FROM temp_plumbings t
+                    t.{nameof(PlumbingEntity.PhoneNumber)},
+                    t.{nameof(PlumbingEntity.Date)},
+                    t.{nameof(PlumbingEntity.UnixDate)},
+                    t.{nameof(PlumbingEntity.Contents)},
+                    t.{nameof(PlumbingEntity.Source)},
+                    t.{nameof(PlumbingEntity.MetaData)}
+                FROM {tempTable} t
                 WHERE NOT EXISTS (
                     SELECT 1 
-                    FROM PlumbingEntities c 
-                    WHERE c.PhoneNumber = t.PhoneNumber 
-                        AND c.Source = t.Source
+                    FROM {TableNames.PlumbingEntitiesName} c 
+                    WHERE c.{nameof(PlumbingEntity.PhoneNumber)} = t.{nameof(PlumbingEntity.PhoneNumber)} 
+                        AND c.{nameof(PlumbingEntity.Source)} = t.{nameof(PlumbingEntity.Source)}
                 );
-            """);
+            """, cancellationToken: ct);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_plumbings;");
-            await transaction.CommitAsync();
+            await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
+            await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
@@ -239,7 +194,7 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
         void InsertBatch(List<PlumbingEntity> batch)
         {
             var sql = new StringBuilder();
-            sql.Append("INSERT INTO temp_plumbings VALUES ");
+            sql.Append($"INSERT INTO {tempTable} VALUES ");
 
             for (int i = 0; i < batch.Count; i++)
             {
@@ -262,14 +217,5 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             sql.Append(';');
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
-    }
-
-    private static string Clean(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-            return string.Empty;
-
-        value = value.Replace("\0", string.Empty);
-        return value.Replace("'", "''");
     }
 }

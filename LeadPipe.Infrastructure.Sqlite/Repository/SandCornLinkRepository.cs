@@ -4,82 +4,31 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class SandCornLinkRepository(
+public sealed class SandCornLinkRepository(
     PlumbingContext context,
     ILogger<SandCornLinkRepository> logger)
-    : PlumbingContextRepository<SandCornLink, SandCornLinkRepository>(context, logger),
+        : PlumbingContextRepository<SandCornLink, SandCornLinkRepository>(context, logger),
       ISandCornLinkRepository
 {
-    public override async Task<Result<List<SandCornLink>>> GetAllWithDetailsAsync()
+    protected override IQueryable<SandCornLink> WithIncludes(IQueryable<SandCornLink> q)
     {
-        try
-        {
-            List<SandCornLink> list = await _context.SandCornLinks
-                .AsNoTracking()
-                .Include(p => p.CornEntity)
-                .Include(p => p.SandEntity)
-                .ToListAsync();
-
-            return list;
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<SandCornLink>>(ex.ToString());
-        }
+        return q.Include(x => x.CornEntity)
+                .Include(x => x.SandEntity);
     }
 
-    public async Task<Result<List<SandCornLink>>> GetAllWithDetailsAsync(IEnumerable<CornEntity> filter)
-    {
-        try
-        {
-            List<long> ids = [.. filter.Select(p => p.Id)];
-
-            List<SandCornLink> list = await _context.SandCornLinks
-                .AsNoTracking()
-                .Where(e => ids.Contains(e.CornId))
-                .Include(p => p.CornEntity)
-                .Include(p => p.SandEntity)
-                .ToListAsync();
-
-            return list;
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<SandCornLink>>(ex.ToString());
-        }
-    }
-
-    public override async Task<Result<List<SandCornLink>>> GetAllAsync()
-    {
-        try
-        {
-            List<SandCornLink> list = await _context.SandCornLinks
-                .AsNoTracking()
-                .Select(s => new SandCornLink
-                {
-                    Id = s.Id,
-                    SandId = s.SandId,
-                    CornId = s.CornId,
-                    MatchingPhone = s.MatchingPhone
-                })
-                .ToListAsync();
-
-            return list;
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<SandCornLink>>(ex.ToString());
-        }
-    }
-
-    public override async Task<Result<List<SandCornLink>>> UpsertRangeAsync(List<SandCornLink> entities)
+    public override async Task<Result<List<SandCornLink>>> UpsertRangeAsync(List<SandCornLink> entities, CancellationToken ct = default)
     {
         if (entities.Count == 0)
             return Result.Success(new List<SandCornLink>());
+
+        AssertNotString<SandCornLink>(nameof(SandCornLink.SandId));
+        AssertNotString<SandCornLink>(nameof(SandCornLink.CornId));
+        AssertNotString<SandCornLink>(nameof(SandCornLink.MatchingPhone));
 
         // Deduplicate in-memory by (SubsId, CornId)
         List<SandCornLink> uniqueEntities =
@@ -93,19 +42,20 @@ public class SandCornLinkRepository(
         const int minBatchSize = 1;
         int stagedCount = 0;
         int skipped = 0;
+        const string tempTable = "temp_sand_corn_links";
 
         try
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
-            await _context.Database.ExecuteSqlRawAsync("""
-                CREATE TEMP TABLE IF NOT EXISTS temp_subs_corn_links (
-                    SubsId INTEGER NOT NULL,
-                    CornId INTEGER NOT NULL,
-                    MatchingPhone INTEGER NOT NULL,
-                    PRIMARY KEY (SubsId, CornId)
+            await _context.Database.ExecuteSqlRawAsync($"""
+                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(SandCornLink.SandId)} INTEGER NOT NULL,
+                    {nameof(SandCornLink.CornId)} INTEGER NOT NULL,
+                    {nameof(SandCornLink.MatchingPhone)} INTEGER NOT NULL,
+                    PRIMARY KEY ({nameof(SandCornLink.SandId)}, {nameof(SandCornLink.CornId)})
                 ) WITHOUT ROWID;
-            """);
+            """, ct);
 
             int index = 0;
 
@@ -135,7 +85,7 @@ public class SandCornLinkRepository(
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "{Entity} row insert failed: SubsId={SubsId}, CornId={CornId}, MatchingPhone={MatchingPhone}",
+                            "{Entity} row insert failed: SandId={SandId}, CornId={CornId}, MatchingPhone={MatchingPhone}",
                             nameof(SandCornLink),
                             row.SandId,
                             row.CornId,
@@ -153,37 +103,37 @@ public class SandCornLinkRepository(
             }
 
             // Update existing rows
-            int updated = await _context.Database.ExecuteSqlRawAsync("""
-                UPDATE SubsCornLinks
-                SET MatchingPhone = (
-                    SELECT t.MatchingPhone
-                    FROM temp_subs_corn_links t
-                    WHERE t.SubsId = SubsCornLinks.SubsId
-                      AND t.CornId = SubsCornLinks.CornId
+            int updated = await _context.Database.ExecuteSqlRawAsync($"""
+                UPDATE {TableNames.SandCornLinksName}
+                SET {nameof(SandCornLink.MatchingPhone)} = (
+                    SELECT t.{nameof(SandCornLink.MatchingPhone)}
+                    FROM {tempTable} t
+                    WHERE t.{nameof(SandCornLink.SandId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.SandId)}
+                      AND t.{nameof(SandCornLink.CornId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.CornId)}
                 )
                 WHERE EXISTS (
                     SELECT 1
-                    FROM temp_subs_corn_links t
-                    WHERE t.SubsId = SubsCornLinks.SubsId
-                      AND t.CornId = SubsCornLinks.CornId
+                    FROM {tempTable} t
+                    WHERE t.{nameof(SandCornLink.SandId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.SandId)}
+                      AND t.{nameof(SandCornLink.CornId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.CornId)}
                 );
-            """);
+            """, cancellationToken: ct);
 
             // Insert missing rows
-            int inserted = await _context.Database.ExecuteSqlRawAsync("""
-                INSERT INTO SubsCornLinks (SubsId, CornId, MatchingPhone)
-                SELECT t.SubsId, t.CornId, t.MatchingPhone
-                FROM temp_subs_corn_links t
+            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.SandCornLinksName} ({nameof(SandCornLink.SandId)}, {nameof(SandCornLink.CornId)}, {nameof(SandCornLink.MatchingPhone)})
+                SELECT t.{nameof(SandCornLink.SandId)}, t.{nameof(SandCornLink.CornId)}, t.{nameof(SandCornLink.MatchingPhone)}
+                FROM {tempTable} t
                 WHERE NOT EXISTS (
                     SELECT 1
-                    FROM SubsCornLinks s
-                    WHERE s.SubsId = t.SubsId
-                      AND s.CornId = t.CornId
+                    FROM {TableNames.SandCornLinksName} s
+                    WHERE s.{nameof(SandCornLink.SandId)} = t.{nameof(SandCornLink.SandId)}
+                      AND s.{nameof(SandCornLink.CornId)} = t.{nameof(SandCornLink.CornId)}
                 );
-            """);
+            """, cancellationToken: ct);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_subs_corn_links;");
-            await transaction.CommitAsync();
+            await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
+            await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
@@ -211,7 +161,7 @@ public class SandCornLinkRepository(
         void InsertBatch(List<SandCornLink> batch)
         {
             var sql = new StringBuilder();
-            sql.Append("INSERT INTO temp_subs_corn_links VALUES ");
+            sql.Append($"INSERT INTO {tempTable} VALUES ");
 
             for (int i = 0; i < batch.Count; i++)
             {
@@ -224,24 +174,6 @@ public class SandCornLinkRepository(
 
             sql.Append(';');
             _context.Database.ExecuteSqlRaw(sql.ToString());
-        }
-    }
-
-    public async Task<Result<List<SandCornLink>>> GetAllAsync(IEnumerable<CornEntity> filter)
-    {
-        try
-        {
-            List<long> ids = [.. filter.Select(p => p.Id)];
-
-            List<SandCornLink> set = await _set
-                .Where(e => ids.Contains(e.CornId))
-                .ToListAsync();
-
-            return Result.Success(set);
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<List<SandCornLink>>(ex.Message);
         }
     }
 }

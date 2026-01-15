@@ -11,48 +11,59 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public sealed class CornRepository(
     PlumbingContext context,
     ILogger<CornRepository> logger)
-    : PlumbingContextRepository<CornEntity, CornRepository>(context, logger),
-      ICornRepository
+    : PlumbingContextRepository<CornEntity, CornRepository>(context, logger), ICornRepository
 {
+    protected override IQueryable<CornEntity> WithIncludes(IQueryable<CornEntity> q)
+    {
+        return q
+            .Include(c => c.CustardCornLinks)
+            .Include(c => c.SandCornLinks)
+            .Include(c => c.CornCaliperLinks)
+            .Include(c => c.CornPlumbingLinks);
+    }
     public override async Task<Result<List<CornEntity>>> UpsertRangeAsync(
-        List<CornEntity> entities)
+        List<CornEntity> entities,
+        CancellationToken ct = default)
     {
         if (entities.Count == 0)
             return Result.Success(new List<CornEntity>());
 
-        // Deduplicate
+        AssertNotString<CornEntity>(nameof(CornEntity.PhoneNumber));
+        AssertNotString<CornEntity>(nameof(CornEntity.Date));
+        AssertNotString<CornEntity>(nameof(CornEntity.UnixDate));
+
+        // Deduplication
         List<CornEntity> uniqueEntities =
         [
             .. entities
-                .OrderByDescending(e => e.Date)
-                .GroupBy(e => (e.PhoneNumber, e.Source))
+                .GroupBy(e => (e.PhoneNumber, e.Date))
                 .Select(g => g.Last())
         ];
 
         int batchSize = 200;
         const int minBatchSize = 1;
+        int stagedCount = 0;
+        int skipped = 0;
+        const string tempTable = "temp_corn";
 
         try
         {
             await using var transaction =
-                await _context.Database.BeginTransactionAsync();
+                await _context.Database.BeginTransactionAsync(ct);
 
-            // Temp table (connection-scoped)
-            await _context.Database.ExecuteSqlRawAsync("""
-                CREATE TEMP TABLE IF NOT EXISTS temp_corn (
-                    PhoneNumber TEXT NOT NULL,
-                    Date TEXT NOT NULL,
-                    UnixDate INTEGER NOT NULL,
-                    Payload TEXT NOT NULL,
-                    MetaData TEXT NOT NULL,
-                    Source TEXT NOT NULL,
-                    PRIMARY KEY (PhoneNumber, Date)
+            await _context.Database.ExecuteSqlRawAsync($"""
+                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(CornEntity.PhoneNumber)} INTEGER NOT NULL,
+                    {nameof(CornEntity.Date)} TEXT NOT NULL,
+                    {nameof(CornEntity.UnixDate)} INTEGER NOT NULL,
+                    {nameof(CornEntity.Payload)} TEXT NOT NULL,
+                    {nameof(CornEntity.MetaData)} TEXT NOT NULL,
+                    {nameof(CornEntity.Source)} TEXT NOT NULL,
+                    PRIMARY KEY ({nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)})
                 ) WITHOUT ROWID;
-            """);
+            """, ct);
 
             int index = 0;
-            int stagedCount = 0;
-            int skipped = 0;
 
             while (index < uniqueEntities.Count)
             {
@@ -78,16 +89,8 @@ public sealed class CornRepository(
 
                     if (batchSize == minBatchSize)
                     {
-                        var row = batch[0];
-
-                        _logger.LogError(
-                            "{Entity} row insert failed: Phone={Phone}, Source={Source}",
-                            nameof(CornEntity),
-                            row.PhoneNumber,
-                            row.Source);
-
-                        index++;
                         skipped++;
+                        index++;
                         batchSize = 100;
                     }
                     else
@@ -97,64 +100,41 @@ public sealed class CornRepository(
                 }
             }
 
-            // ---- Phase 1: UPDATE existing rows ----
-            int updated = await _context.Database.ExecuteSqlRawAsync("""
-                UPDATE CornEntities
+            int updated = await _context.Database.ExecuteSqlRawAsync($"""
+                UPDATE {TableNames.CornEntitiesName}
                 SET
-                    MetaData = (
-                        SELECT t.MetaData
-                        FROM temp_corn t
-                        WHERE t.PhoneNumber = CornEntities.PhoneNumber
-                          AND t.Source = CornEntities.Source
-                    ),
-                    Payload = (
-                        SELECT t.Payload
-                        FROM temp_corn t
-                        WHERE t.PhoneNumber = CornEntities.PhoneNumber
-                          AND t.Source = CornEntities.Source
-                    ),
-                    Date = (
-                        SELECT t.Date
-                        FROM temp_corn t
-                        WHERE t.PhoneNumber = CornEntities.PhoneNumber
-                          AND t.Source = CornEntities.Source
-                    ),
-                    UnixDate = (
-                        SELECT t.UnixDate
-                        FROM temp_corn t
-                        WHERE t.PhoneNumber = CornEntities.PhoneNumber
-                          AND t.Source = CornEntities.Source
-                    )
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM temp_corn t
-                    WHERE t.PhoneNumber = CornEntities.PhoneNumber
-                      AND t.Source = CornEntities.Source
-                );
-            """);
+                    {nameof(CornEntity.UnixDate)} = t.{nameof(CornEntity.UnixDate)},
+                    {nameof(CornEntity.Payload)} = t.{nameof(CornEntity.Payload)},
+                    {nameof(CornEntity.MetaData)} = t.{nameof(CornEntity.MetaData)},
+                    {nameof(CornEntity.Source)} = t.{nameof(CornEntity.Source)}
+                FROM {tempTable} t
+                WHERE t.{nameof(CornEntity.PhoneNumber)} = {TableNames.CornEntitiesName}.{nameof(CornEntity.PhoneNumber)}
+                  AND t.Date = {TableNames.CornEntitiesName}.Date;
+            """, ct);
 
-            // ---- Phase 2: INSERT missing rows ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync("""
-                INSERT INTO CornEntities
-                    (PhoneNumber, Date, UnixDate, Payload, MetaData, Source)
+            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.CornEntitiesName}
+                    ({nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)}, {nameof(CornEntity.UnixDate)}, {nameof(CornEntity.Payload)}, {nameof(CornEntity.MetaData)}, {nameof(CornEntity.Source)})
                 SELECT
-                    t.PhoneNumber,
-                    t.Date,
-                    t.UnixDate
-                    t.Payload,
-                    t.MetaData,
-                    t.Source,
-                FROM temp_corn t
+                    t.{nameof(CornEntity.PhoneNumber)},
+                    t.{nameof(CornEntity.Date)},
+                    t.{nameof(CornEntity.UnixDate)},
+                    t.{nameof(CornEntity.Payload)},
+                    t.{nameof(CornEntity.MetaData)},
+                    t.{nameof(CornEntity.Source)}
+                FROM {tempTable} t
                 WHERE NOT EXISTS (
                     SELECT 1
-                    FROM CornEntities c
-                    WHERE c.PhoneNumber = t.PhoneNumber
-                      AND c.Source = t.Source
+                    FROM {TableNames.CornEntitiesName} c
+                    WHERE c.{nameof(CornEntity.PhoneNumber)} = t.{nameof(CornEntity.PhoneNumber)}
+                      AND c.{nameof(CornEntity.Date)} = t.{nameof(CornEntity.Date)}
                 );
-            """);
+            """, ct);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_corn;");
-            await transaction.CommitAsync();
+            await _context.Database.ExecuteSqlRawAsync(
+                $"DELETE FROM {tempTable};", ct);
+
+            await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
@@ -174,16 +154,16 @@ public sealed class CornRepository(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", 
-                nameof(CornEntity));
+            _logger.LogError(ex, "{Entity} upsert failed", nameof(CornEntity));
             return Result.Failure<List<CornEntity>>(ex.ToString());
         }
 
-        // ---- Local helper ----
+        // --------------------
+        // Local helper
+        // --------------------
         void InsertBatch(List<CornEntity> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append("INSERT INTO temp_corn VALUES ");
+            var sql = new StringBuilder($"INSERT INTO {tempTable} VALUES ");
 
             for (int i = 0; i < batch.Count; i++)
             {
@@ -191,12 +171,12 @@ public sealed class CornRepository(
 
                 sql.Append($"""
                 (
-                    '{e.PhoneNumber}',
+                    {e.PhoneNumber},
                     '{e.Date:yyyy-MM-dd HH:mm:ss}',
                     {e.UnixDate},
                     '{Clean(e.Payload)}',
                     '{Clean(e.MetaData)}',
-                    '{e.Source}'
+                    '{Clean(e.Source)}'
                 )
                 """);
 
@@ -209,12 +189,4 @@ public sealed class CornRepository(
         }
     }
 
-    private static string Clean(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-            return string.Empty;
-
-        value = value.Replace("\0", string.Empty);
-        return value.Replace("'", "''");
-    }
 }

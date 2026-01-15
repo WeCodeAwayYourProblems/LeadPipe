@@ -39,7 +39,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // Sync State Entity
         var sync = modelBuilder.Entity<SyncStateEntity>()
-            .ToTable("SyncState");
+            .ToTable(TableNames.SyncStateName);
         sync.HasKey(x => x.Id);
         sync.HasIndex(x => x.Id)
             .IsUnique();
@@ -47,17 +47,17 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // CaliperEntity
         var caliper = modelBuilder.Entity<CaliperEntity>()
-            .ToTable("CaliperEntities");
+            .ToTable(TableNames.CaliperEntitiesName);
         caliper.HasKey(c => c.Id);
         caliper.Property(c => c.Id).ValueGeneratedNever(); // External id
         caliper.HasIndex(c => c.PhoneNumber);
-        caliper.Property(c => c.CaliperDate).IsRequired();
+        caliper.Property(c => c.Date).IsRequired();
         caliper.Property(c => c.UnixDate).IsRequired();
-        caliper.HasIndex(c => new { c.PhoneNumber, c.CaliperDate }).IsUnique();
+        caliper.HasIndex(c => new { c.PhoneNumber, c.Date }).IsUnique();
 
         // CornEntity
         var corn = modelBuilder.Entity<CornEntity>()
-            .ToTable("CornEntities");
+            .ToTable(TableNames.CornEntitiesName);
         corn.HasKey(c => c.Id);
         corn.Property(c => c.Id).ValueGeneratedNever(); // External id
         corn.HasIndex(c => c.PhoneNumber);
@@ -76,7 +76,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // PlumbingEntity
         var plumb = modelBuilder.Entity<PlumbingEntity>()
-            .ToTable("PlumbingEntities");
+            .ToTable(TableNames.PlumbingEntitiesName);
         plumb.HasKey(p => p.Id);
         plumb.Property(p => p.Id).ValueGeneratedOnAdd();
         plumb.HasIndex(p => p.PhoneNumber);
@@ -87,7 +87,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // Custard Entity
         var custard = modelBuilder.Entity<CustardEntity>();
-        custard.ToTable("CustardEntities", t =>
+        custard.ToTable(TableNames.CustardEntitiesName, t =>
         {
             t.HasCheckConstraint(
                 "CK_Custard_PhoneNumber2_NotZero",
@@ -105,7 +105,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // SandEntity
         var sub = modelBuilder.Entity<SandEntity>()
-            .ToTable("SandEntities");
+            .ToTable(TableNames.SandEntitiesName);
         sub.HasOne(s => s.CustardEntity)
             .WithMany(c => c.SandEntities)
             .HasForeignKey(s => s.CustardId)
@@ -122,7 +122,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         #region PlumbingCaliperLinks, CornCaliperLinks, CornPlumbingLinks
         // PlumbingCaliperLink
         var plumbCaliper = modelBuilder.Entity<PlumbingCaliperLink>()
-            .ToTable("PlumbingCaliperLinks");
+            .ToTable(TableNames.PlumbingCaliperLinksName);
         plumbCaliper.HasKey(pc => pc.Id);
         plumbCaliper.Property(pc => pc.Id).ValueGeneratedOnAdd();
         plumbCaliper.HasIndex(pc => pc.PlumbingId);
@@ -139,7 +139,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // CornCaliperLink
         var cornCaliper = modelBuilder.Entity<CornCaliperLink>()
-            .ToTable("CornCaliperLinks");
+            .ToTable(TableNames.CornCaliperLinksName);
         cornCaliper.HasKey(l => l.Id);
         cornCaliper.Property(l => l.Id).ValueGeneratedOnAdd();
         cornCaliper.HasIndex(l => l.CornId);
@@ -158,7 +158,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // CornPlumbingLink
         var cornPlumb = modelBuilder.Entity<CornPlumbingLink>()
-            .ToTable("CornPlumbingLinks");
+            .ToTable(TableNames.CornPlumbingLinksName);
         cornPlumb.HasKey(l => l.Id);
         cornPlumb.Property(l => l.Id).ValueGeneratedOnAdd();
         cornPlumb.HasIndex(l => l.CornId);
@@ -179,7 +179,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         #region CUSTARD Links
         // Custard Caliper Links
         var custardCaliper = modelBuilder.Entity<CustardCaliperLink>();
-        custardCaliper.ToTable("CustardCaliperLinks", t =>
+        custardCaliper.ToTable(TableNames.CustardCaliperLinksName, t =>
         {
             t.HasCheckConstraint(
                 "CK_CustardCaliper_MatchingPhone",
@@ -205,7 +205,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // Custard Corn Links
         var custardCorn = modelBuilder.Entity<CustardCornLink>();
-        custardCorn.ToTable("CustardCornLinks", t =>
+        custardCorn.ToTable(TableNames.CustardCornLinksName, t =>
         {
             t.HasCheckConstraint(
                 "CK_CustardCorn_MatchingPhone",
@@ -231,7 +231,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // Custard Plumbing Links
         var custardPlumbing = modelBuilder.Entity<CustardPlumbingLink>();
-        custardPlumbing.ToTable("CustardPlumbingLinks", t =>
+        custardPlumbing.ToTable(TableNames.CustardPlumbingLinksName, t =>
         {
             t.HasCheckConstraint(
                 "CK_CustardPlumbing_MatchingPhone",
@@ -259,7 +259,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         #region SAND links
         // SandCaliperLink
         var sandCaliper = modelBuilder.Entity<SandCaliperLink>()
-            .ToTable("SandCaliperLinks");
+            .ToTable(TableNames.SandCaliperLinksName);
         sandCaliper.HasKey(sc => sc.Id);
         sandCaliper.Property(sc => sc.Id).ValueGeneratedOnAdd();
         sandCaliper.HasIndex(sc => sc.SandId);
@@ -277,7 +277,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // SandCornLink
         var sandCorn = modelBuilder.Entity<SandCornLink>()
-            .ToTable("SandCornLinks");
+            .ToTable(TableNames.SandCornLinksName);
         sandCorn.HasKey(l => l.Id);
         sandCorn.Property(l => l.Id).ValueGeneratedOnAdd();
         sandCorn.HasIndex(l => l.SandId);
@@ -296,7 +296,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // SandPlumbingLink
         var spLink = modelBuilder.Entity<SandPlumbingLink>()
-            .ToTable("SandPlumbingLinks");
+            .ToTable(TableNames.SandPlumbingLinksName);
         spLink.HasKey(l => l.Id);
         spLink.Property(l => l.Id).ValueGeneratedOnAdd();
         spLink.HasIndex(l => l.SandId);

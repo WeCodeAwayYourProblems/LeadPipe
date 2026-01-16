@@ -1,11 +1,14 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Translation.Translate.EntityToVo;
+using NSubstitute;
 
-namespace LeadPipe.Translation.Test.Corn;
+namespace LeadPipe.Translation.Test.CornTests;
 
 public sealed class CornMySqlEntityToCornFormulaTests
 {
+    private readonly IInfrastructureSettings _settings = Substitute.For<IInfrastructureSettings>();
     private static CornMySqlEntity CreateEntity(string? phone = "5551239999")
         => new()
         {
@@ -22,7 +25,7 @@ public sealed class CornMySqlEntityToCornFormulaTests
     public void Translate_ShouldProduceUtcDateOffsetZero()
     {
         var entity = CreateEntity();
-        var translator = new CornMySqlEntityToCornFormula();
+        var translator = new CornMySqlEntityToCornFormula(_settings);
 
         var vo = translator.Translate(entity);
 
@@ -37,7 +40,7 @@ public sealed class CornMySqlEntityToCornFormulaTests
     public void Translate_ShouldMapPhoneCorrectly()
     {
         var entity = CreateEntity();
-        var translator = new CornMySqlEntityToCornFormula();
+        var translator = new CornMySqlEntityToCornFormula(_settings);
 
         var vo = translator.Translate(entity);
 
@@ -48,7 +51,7 @@ public sealed class CornMySqlEntityToCornFormulaTests
     public void Translate_InvalidPhone_ShouldFallbackToDefault()
     {
         var entity = CreateEntity(phone: "not a phone");
-        var translator = new CornMySqlEntityToCornFormula();
+        var translator = new CornMySqlEntityToCornFormula(_settings);
 
         var vo = translator.Translate(entity);
 
@@ -59,7 +62,7 @@ public sealed class CornMySqlEntityToCornFormulaTests
     public void Translate_ShouldBuildPayloadAndMetadataCorrectly()
     {
         var entity = CreateEntity();
-        var translator = new CornMySqlEntityToCornFormula();
+        var translator = new CornMySqlEntityToCornFormula(_settings);
 
         var vo = translator.Translate(entity);
 
@@ -72,7 +75,7 @@ public sealed class CornMySqlEntityToCornFormulaTests
     public void Translate_ShouldRemainIdempotent_AtScale()
     {
         var entity = CreateEntity();
-        var translator = new CornMySqlEntityToCornFormula();
+        var translator = new CornMySqlEntityToCornFormula(_settings);
 
         CornFormula current = translator.Translate(entity);
 

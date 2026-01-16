@@ -10,7 +10,7 @@ using System.Text;
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
 public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlumbingLinkRepository> logger)
-    : PlumbingContextRepository<SandPlumbingLink, SandPlumbingLinkRepository>(context, logger), ISandPlumbingLinkRepository
+    : PlumbingContextRepository<SandPlumbingLink, SandPlumbingLinkRepository>(context, logger), IRepository<SandPlumbingLink>
 {
     protected override IQueryable<SandPlumbingLink> WithIncludes(IQueryable<SandPlumbingLink> q)
     {

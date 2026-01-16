@@ -2,29 +2,36 @@
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
 using LeadPipe.Translation.Translate.VoToEntity;
+using NSubstitute;
 
 namespace LeadPipe.Translation.Test;
 
 public class TranslatorBackAndForthRoundTripTests
 {
     private readonly IDateTimeTranslate _dt = Substitute.For<IDateTimeTranslate>();
+    private readonly IInfrastructureSettings _settings = Substitute.For<IInfrastructureSettings>();
 
     // Utility for repeated round-trip
-    private TVo RoundTrip<TEntity, TVo>(
-        TEntity entity,
-        IEntityToVo<TEntity, TVo> toVo,
-        IVoToEntity<TVo, TEntity> toEntity,
+    private static TVo RoundTrip<TEntity1, TEntity2, TVo>(
+        TEntity1 e1,
+        IEntityToVo<TEntity1, TVo> e1ToVo,
+        IVoToEntity<TVo, TEntity2> voToE2,
+        IEntityToVo<TEntity2, TVo> e2ToVo,
+        IVoToEntity<TVo, TEntity1> voToE1,
         int iterations = 1_000
     )
     {
-        TVo vo = toVo.Translate(entity);
+        TVo vo = e1ToVo.Translate(e1);
         for (int i = 0; i < iterations; i++)
         {
-            entity = toEntity.Translate(vo);
-            vo = toVo.Translate(entity);
+            vo = e1ToVo.Translate(e1);
+            TEntity2? e2 = voToE2.Translate(vo);
+            vo = e2ToVo.Translate(e2);
+            e1 = voToE1.Translate(vo);
         }
         return vo;
     }
@@ -32,11 +39,11 @@ public class TranslatorBackAndForthRoundTripTests
     [Fact]
     public void CaliperEntity_To_Caliper_RoundTrip_ShouldRemainConsistent()
     {
-        var entity = new CaliperEntity
+        var e1 = new CaliperEntity
         {
             Id = 1,
             PhoneNumber = 5551234567,
-            CaliperDate = new DateTime(2025, 6, 1, 12, 0, 0),
+            Date = new DateTime(2025, 6, 1, 12, 0, 0),
             Duration = 123,
             Note = "Note",
             Source = "Source",
@@ -44,22 +51,24 @@ public class TranslatorBackAndForthRoundTripTests
             Billable = true
         };
 
-        var toVo = new CaliperEntityToCaliper();
-        var toEntity = new CaliperToCaliperEntity();
+        IEntityToVo<CaliperEntity, Caliper> e1ToVo = new CaliperEntityToCaliper();
+        IEntityToVo<CaliperMySqlEntity, Caliper> e2ToVo = new CaliperMySqlEntityToCaliper();
+        IVoToEntity<Caliper, CaliperMySqlEntity> voToE2 = new CaliperToCaliperMySqlEntity();
+        IVoToEntity<Caliper, CaliperEntity> voToE1 = new CaliperToCaliperEntity();
 
-        Caliper vo = RoundTrip(entity, toVo, toEntity, 1_000_000);
+        Caliper vo = RoundTrip(e1, e1ToVo, voToE2, e2ToVo, voToE1, 1_000_000);
 
-        Assert.Equal(entity.Id, vo.Id);
-        Assert.Equal(entity.PhoneNumber, vo.Number.Number);
-        Assert.Equal(TimeSpan.FromSeconds(entity.Duration), vo.Duration);
-        Assert.Equal(entity.Note, vo.Note);
+        Assert.Equal(e1.Id, vo.Id);
+        Assert.Equal(e1.PhoneNumber, vo.Number.Number);
+        Assert.Equal(TimeSpan.FromSeconds(e1.Duration), vo.Duration);
+        Assert.Equal(e1.Note, vo.Note);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
     }
 
     [Fact]
     public void CaliperMySqlEntity_To_Caliper_RoundTrip_ShouldRemainConsistent()
     {
-        var entity = new CaliperMySqlEntity
+        var e1 = new CaliperMySqlEntity
         {
             call_id = 1,
             contact_number_clean = "5551234567",
@@ -68,18 +77,20 @@ public class TranslatorBackAndForthRoundTripTests
             sale_billable = "billable",
             source = "Source",
             location = "Location",
-            transcriptions = new List<Transcription> { new() { transcription = "Hello" } },
-            summaries = new List<Summary> { new() { summary = "Summary" } }
+            transcriptions = new List<TranscriptionMySqlEntity> { new() { transcription = "Hello" } },
+            summaries = new List<SummaryMySqlEntity> { new() { summary = "Summary" } }
         };
 
-        var toVo = new CaliperMySqlEntityToCaliper();
-        var toEntity = new CaliperToCaliperMySqlEntity();
+        IEntityToVo<CaliperMySqlEntity, Caliper> e1ToVo = new CaliperMySqlEntityToCaliper();
+        IEntityToVo<CaliperEntity, Caliper> e2ToVo = new CaliperEntityToCaliper();
+        IVoToEntity<Caliper, CaliperMySqlEntity> voToE1 = new CaliperToCaliperMySqlEntity();
+        IVoToEntity<Caliper, CaliperEntity> voToE2 = new CaliperToCaliperEntity();
 
-        Caliper vo = RoundTrip(entity, toVo, toEntity, 1_000_000);
+        Caliper vo = RoundTrip(e1, e1ToVo, voToE2, e2ToVo, voToE1, 1_000_000);
 
-        Assert.Equal(entity.call_id, vo.Id);
+        Assert.Equal(e1.call_id, vo.Id);
         Assert.Equal(5551234567, vo.Number.Number);
-        Assert.Equal(TimeSpan.FromSeconds(entity.duration), vo.Duration);
+        Assert.Equal(TimeSpan.FromSeconds((double)e1.duration), vo.Duration);
         Assert.Equal("Summary | Hello", vo.Note);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
     }
@@ -87,7 +98,7 @@ public class TranslatorBackAndForthRoundTripTests
     [Fact]
     public void CornMySqlEntity_To_CornFormula_RoundTrip_ShouldRemainConsistent()
     {
-        var entity = new CornMySqlEntity
+        var e1 = new CornMySqlEntity
         {
             id = 1,
             phoneNumber = "5551002000",
@@ -98,12 +109,14 @@ public class TranslatorBackAndForthRoundTripTests
             source = "Source"
         };
 
-        var toVo = new CornMySqlEntityToCornFormula();
-        var toEntity = new CornFormulaToCornEntity();
+        IEntityToVo<CornMySqlEntity, CornFormula> e1ToVo = new CornMySqlEntityToCornFormula(_settings);
+        IEntityToVo<CornEntity, CornFormula> e2ToVo = new CornEntityToCornFormula();
+        IVoToEntity<CornFormula, CornMySqlEntity> voToE1 = new CornFormulaToCornMySqlEntity();
+        IVoToEntity<CornFormula, CornEntity> voToE2 = new CornFormulaToCornEntity();
 
-        CornFormula vo = RoundTrip(entity, toVo, toEntity, 500_000);
+        CornFormula vo = RoundTrip(e1, e1ToVo, voToE2, e2ToVo, voToE1, 1_000_000);
 
-        Assert.Equal(entity.id, vo.Id);
+        Assert.Equal(e1.id, vo.Id);
         Assert.Equal(5551002000, vo.PhoneNumber.Number);
         Assert.Equal("Payload", vo.PayLoad);
         Assert.Equal("Form: FormX | Referring: http://ref.url", vo.MetaData);
@@ -113,7 +126,7 @@ public class TranslatorBackAndForthRoundTripTests
     [Fact]
     public void CustardMySqlEntity_To_Custard_RoundTrip_ShouldRemainConsistent()
     {
-        var entity = new CustardMySqlEntity
+        var e1 = new CustardMySqlEntity
         {
             customerID = 10,
             phone1 = "5551002000",
@@ -123,13 +136,15 @@ public class TranslatorBackAndForthRoundTripTests
             dateCancelled = new DateTime(2025, 12, 31, 23, 59, 59)
         };
 
-        var toVo = new CustardMySqlEntityToCustard();
-        var toEntity = new CustardToCustardEntity();
+        IEntityToVo<CustardMySqlEntity, Custard> e1ToVo = new CustardMySqlEntityToCustard(_dt);
+        IEntityToVo<CustardEntity, Custard> e2ToVo = new CustardEntityToCustard();
+        IVoToEntity<Custard, CustardMySqlEntity> voToE1 = new CustardToCustardMySqlEntity();
+        IVoToEntity<Custard, CustardEntity> voToE2 = new CustardToCustardEntity();
 
-        Custard vo = RoundTrip(entity, toVo, toEntity, 500_000);
+        Custard vo = RoundTrip(e1, e1ToVo, voToE2, e2ToVo, voToE1, 1_000_000);
 
-        Assert.Equal(entity.customerID, vo.Id);
-        Assert.Equal(true, vo.Status);
+        Assert.Equal(e1.customerID, vo.Id);
+        Assert.True(vo.Status);
         Assert.Equal(5551002000, vo.Phone1.Number);
         Assert.Equal(5551003000, vo.Phone2.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
@@ -162,7 +177,8 @@ public class TranslatorBackAndForthRoundTripTests
             Value: 199.99m,
             Seller: 2,
             Seller2: 3,
-            Seller3: 4
+            Seller3: 4,
+            Offerman: "0"
         );
 
         var toEntity = new SandwichToSandEntity();

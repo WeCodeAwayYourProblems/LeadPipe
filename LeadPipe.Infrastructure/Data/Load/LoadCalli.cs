@@ -7,6 +7,6 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 namespace LeadPipe.Infrastructure.Data.Load;
 
 [SourceKey(Domain.ValueObjects.Source.Calli)]
-public sealed class LoadCalli(IPlumbingRepository repo, IEntityToVo<PlumbingEntity, Plumbing> eToVo) :
+public sealed class LoadCalli(IRepository<PlumbingEntity> repo, IEntityToVo<PlumbingEntity, Plumbing> eToVo) :
     LoadData<Plumbing, PlumbingEntity>(repo, eToVo, Domain.ValueObjects.Source.Calli)
 { }

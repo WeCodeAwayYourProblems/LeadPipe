@@ -16,7 +16,7 @@ public sealed class CaliperEntityToCaliperTests
         {
             Id = 42,
             PhoneNumber = phone,
-            CaliperDate = date,
+            Date = date,
             Duration = durationSeconds,
             Note = "Test note",
             Source = "Test source",

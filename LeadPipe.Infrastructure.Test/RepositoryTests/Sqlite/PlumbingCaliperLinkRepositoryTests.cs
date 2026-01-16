@@ -24,7 +24,7 @@ public class PlumbingCaliperLinkRepositoryTests
             new() { Id = 2, PlumbingEntity = new(){ Id = 0, MetaData=string.Empty }, CaliperEntity = new(){ Id=0, Note = string.Empty, Location = string.Empty, Source= string.Empty } }
         };
 
-        var result = await repo.AddRangeAsync(entities);
+        var result = await repo.UpsertRangeAsync(entities);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, context.PlumbingCaliperLinks.Count());
@@ -37,10 +37,10 @@ public class PlumbingCaliperLinkRepositoryTests
 
         var repo = new PlumbingCaliperLinkRepository(context, logger);
 
-        var result = await repo.AddRangeAsync([]);
+        var result = await repo.UpsertRangeAsync([]);
 
         Assert.False(result.IsSuccess);
-        Assert.Contains("No plumbing entities", result.Error);
+        Assert.Contains("No entities added", result.Error);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class PlumbingCaliperLinkRepositoryTests
         var repo = new PlumbingCaliperLinkRepository(context, logger);
 
         var plumbing = new PlumbingCaliperLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
-        Result result = await repo.AddAsync(plumbing);
+        Result result = await repo.UpsertRangeAsync([plumbing]);
 
         Assert.True(result.IsSuccess);
     }
@@ -67,27 +67,10 @@ public class PlumbingCaliperLinkRepositoryTests
             .CreateLogger<PlumbingCaliperLinkRepository>();
 
         var repo = new PlumbingCaliperLinkRepository(context, logger);
-        var result = await repo.GetByIdAsync(1);
+        var result = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.Value.Id);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldRemoveEntity()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingCaliperLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
-        context.PlumbingCaliperLinks.Add(plumbing);
-        await context.SaveChangesAsync();
-
-
-        var repo = new PlumbingCaliperLinkRepository(context, logger);
-        var result = await repo.DeleteAsync(1);
-        var reloaded = await repo.GetByIdAsync(1);
-
-        Assert.True(result.IsSuccess);
-        Assert.True(reloaded.IsFailure);
+        Assert.Equal(1, result.Value[0].Id);
     }
 
     [Fact]
@@ -95,7 +78,7 @@ public class PlumbingCaliperLinkRepositoryTests
     {
 
         var repo = new PlumbingCaliperLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.GetByIdAsync(99);
+        var result = await repo.FindAsync(l => l.Id == 99);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("not found", result.Error);
@@ -112,12 +95,12 @@ public class PlumbingCaliperLinkRepositoryTests
         var repo = new PlumbingCaliperLinkRepository(context, logger);
         var updatedPlumbingCaliperLink = new PlumbingCaliperLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
-        var result = await repo.UpdateAsync(updatedPlumbingCaliperLink);
-        var reloaded = await repo.GetByIdAsync(1);
+        var result = await repo.UpsertRangeAsync([updatedPlumbingCaliperLink]);
+        var reloaded = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(1, reloaded.Value.Id);
+        Assert.Equal(1, reloaded.Value[0].Id);
     }
 
     [Fact]
@@ -126,18 +109,9 @@ public class PlumbingCaliperLinkRepositoryTests
         var repo = new PlumbingCaliperLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedPlumbingCaliperLink = new PlumbingCaliperLink { Id = 99, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
-        var result = await repo.UpdateAsync(updatedPlumbingCaliperLink);
+        var result = await repo.UpsertRangeAsync([updatedPlumbingCaliperLink]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
-    {
-        var repo = new PlumbingCaliperLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.DeleteAsync(99);
-
-        Assert.True(result.IsSuccess);
     }
 }

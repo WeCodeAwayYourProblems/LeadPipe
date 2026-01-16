@@ -1,15 +1,48 @@
-﻿namespace LeadPipe.Translation.Primitives;
+﻿using System.Runtime.InteropServices;
+
+namespace LeadPipe.Translation.Primitives;
 
 internal class DateTimeTranslate : IDateTimeTranslate
 {
     // Cache TimeZoneInfo objects for efficiency
-    private static readonly Dictionary<ETimeZone, TimeZoneInfo> TimeZones = new()
+    private static readonly Lazy<Dictionary<ETimeZone, TimeZoneInfo>> TimeZones =
+        new(() => new Dictionary<ETimeZone, TimeZoneInfo>
+        {
+            [ETimeZone.Pacific] = FindTimeZone(
+                windowsId: "Pacific Standard Time",
+                ianaId: "America/Los_Angeles"),
+
+            [ETimeZone.Mountain] = FindTimeZone(
+                windowsId: "Mountain Standard Time",
+                ianaId: "America/Denver"),
+
+            [ETimeZone.Central] = FindTimeZone(
+                windowsId: "Central Standard Time",
+                ianaId: "America/Chicago"),
+
+            [ETimeZone.Eastern] = FindTimeZone(
+                windowsId: "Eastern Standard Time",
+                ianaId: "America/New_York"),
+        });
+
+    private static TimeZoneInfo FindTimeZone(string windowsId, string ianaId)
     {
-        [ETimeZone.Pacific] = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"),
-        [ETimeZone.Mountain] = TimeZoneInfo.FindSystemTimeZoneById("Mountain Standard Time"),
-        [ETimeZone.Central] = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time"),
-        [ETimeZone.Eastern] = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time")
-    };
+        try
+        {
+            // Prefer OS-native ID
+            return TimeZoneInfo.FindSystemTimeZoneById(
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? windowsId
+                    : ianaId);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            // Fallback to the other ID if OS detection is wrong / container mismatch
+            try { return TimeZoneInfo.FindSystemTimeZoneById(windowsId); }
+            catch { return TimeZoneInfo.FindSystemTimeZoneById(ianaId); }
+        }
+    }
+
 
     #region Public
 
@@ -27,7 +60,8 @@ internal class DateTimeTranslate : IDateTimeTranslate
         }
 
         // 2) Lookup timezone (fallback to UTC)
-        if (!TimeZones.TryGetValue(zone, out var tz))
+        Dictionary<ETimeZone, TimeZoneInfo> zoneDict = TimeZones.Value;
+        if (!zoneDict.TryGetValue(zone, out var tz))
             tz = TimeZoneInfo.Utc;
 
         // 3) Treat the incoming DateTime as a local time in the specified tz.

@@ -1,27 +1,28 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
 namespace LeadPipe.Infrastructure.Service;
 
 internal class PlumbingAssociationService(
-    IPlumbingRepository plumbingRepo,
-    ISandRepository sandRepo,
-    ICaliperRepository caliperRepo,
-    ISandPlumbingLinkRepository linkRepo,
-    ISandCaliperLinkRepository sandCaliperRepo,
-    IPlumbingCaliperLinkRepository plumbingCaliperRepo
+    IRepository<PlumbingEntity> plumbingRepo,
+    IRepository<SandEntity> sandRepo,
+    IRepository<CaliperEntity> caliperRepo,
+    IRepository<SandPlumbingLink> linkRepo,
+    IRepository<SandCaliperLink> sandCaliperRepo,
+    IRepository<PlumbingCaliperLink> plumbingCaliperRepo
     ) : IPlumbingAssociationService
 {
     #region Private
-    private readonly IPlumbingRepository _plumbingRepo = plumbingRepo;
-    private readonly ISandRepository _sandRepo = sandRepo;
-    private readonly ICaliperRepository _caliperRepo = caliperRepo;
+    private readonly IRepository<PlumbingEntity> _plumbingRepo = plumbingRepo;
+    private readonly IRepository<SandEntity> _sandRepo = sandRepo;
+    private readonly IRepository<CaliperEntity> _caliperRepo = caliperRepo;
 
-    private readonly ISandPlumbingLinkRepository _sandPlumbingRepo = linkRepo;
-    private readonly ISandCaliperLinkRepository _sandCaliperRepo = sandCaliperRepo;
-    private readonly IPlumbingCaliperLinkRepository _plumbingCaliperRepo = plumbingCaliperRepo;
+    private readonly IRepository<SandPlumbingLink> _sandPlumbingRepo = linkRepo;
+    private readonly IRepository<SandCaliperLink> _sandCaliperRepo = sandCaliperRepo;
+    private readonly IRepository<PlumbingCaliperLink> _plumbingCaliperRepo = plumbingCaliperRepo;
 
     #endregion
 

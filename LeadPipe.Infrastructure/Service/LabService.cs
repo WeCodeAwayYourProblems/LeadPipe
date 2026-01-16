@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;
@@ -17,7 +18,7 @@ internal class LabService : ILabService
     private readonly ILogger<LabService> _logger;
     private readonly IDtoToVo<LabDto, Plumbing> _dtoToVo;
     private readonly ILabSettings _settings;
-    private readonly IPlumbingRepository _plumbingRepo;
+    private readonly IRepository<PlumbingEntity> _plumbingRepo;
     private readonly SemaphoreSlim _throttle;
 
     public LabService(
@@ -25,7 +26,7 @@ internal class LabService : ILabService
         ILabSettings settings,
         ILogger<LabService> logger,
         IDtoToVo<LabDto, Plumbing> dtoToVo,
-        IPlumbingRepository plumbingRepo)
+        IRepository<PlumbingEntity> plumbingRepo)
     {
         _client = httpClientFactory.CreateClient(settings.LabName!);
         _logger = logger;
@@ -39,7 +40,7 @@ internal class LabService : ILabService
     public async Task<Result<List<Plumbing>>> UpdateDataAsync(int errorLimit = 5)
     {
         // Retrieve persisted plumbing entities
-        var existingResult = await _plumbingRepo.GetAllAsync(source: Source.Lab);
+        var existingResult = await _plumbingRepo.FindAsync(p => p.Source == Source.Lab);
         if (existingResult.IsFailure)
         {
             _logger.LogError("Failed to retrieve existing Plumbings: {Error}", existingResult.Error);

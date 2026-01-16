@@ -26,7 +26,7 @@ public class SandPlumbLinkRepositoryTests
                 SandId = 2, SandEntity = _sandy, PlumbingId = 2, MatchingPhone = 67890, PlumbingEntity = _plumb }
         };
 
-        var result = await repo.AddRangeAsync(links);
+        var result = await repo.UpsertRangeAsync(links);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, context.SandPlumbingLinks.Count());
@@ -39,7 +39,7 @@ public class SandPlumbLinkRepositoryTests
 
         var repo = new SandPlumbingLinkRepository(context, logger);
 
-        var result = await repo.AddRangeAsync([]);
+        var result = await repo.UpsertRangeAsync([]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("No link entities", result.Error);
@@ -52,7 +52,7 @@ public class SandPlumbLinkRepositoryTests
 
         var repo = new SandPlumbingLinkRepository(context, logger);
 
-        var result = await repo.AddRangeAsync([]);
+        var result = await repo.UpsertRangeAsync([]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("No link entities", result.Error);
@@ -66,7 +66,7 @@ public class SandPlumbLinkRepositoryTests
         var repo = new SandPlumbingLinkRepository(context, logger);
 
         var link = new SandPlumbingLink { SandId = 1, SandEntity = _sandy, PlumbingId = 1, MatchingPhone = 12345, PlumbingEntity = _plumb };
-        var result = await repo.AddAsync(link);
+        var result = await repo.UpsertRangeAsync([link]);
 
         Assert.True(result.IsSuccess);
     }
@@ -79,17 +79,17 @@ public class SandPlumbLinkRepositoryTests
         await context.SaveChangesAsync();
 
         var repo = new SandPlumbingLinkRepository(context, logger);
-        var result = await repo.GetByIdAsync(1);
+        var result = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(12345, result.Value.MatchingPhone);
+        Assert.Equal(12345, result.Value[0].MatchingPhone);
     }
 
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
         var repo = new SandPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.GetByIdAsync(99);
+        var result = await repo.FindAsync(l => l.Id == 99);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("not found", result.Error);
@@ -106,12 +106,12 @@ public class SandPlumbLinkRepositoryTests
         var repo = new SandPlumbingLinkRepository(context, logger);
         var updatedLink = new SandPlumbingLink { SandId = 1, SandEntity = _sandy, PlumbingId = 1, MatchingPhone = 67890, PlumbingEntity = _plumb };
 
-        var result = await repo.UpdateAsync(updatedLink);
-        var reloaded = await repo.GetByIdAsync(1);
+        var result = await repo.UpsertRangeAsync([updatedLink]);
+        var reloaded = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(67890, reloaded.Value.MatchingPhone);
+        Assert.Equal(67890, reloaded.Value[0].MatchingPhone);
     }
 
     [Fact]
@@ -124,34 +124,9 @@ public class SandPlumbLinkRepositoryTests
         var repo = new SandPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedLink = new SandPlumbingLink { SandId = 99, SandEntity = _sandy, PlumbingId = 99, MatchingPhone = 11111, PlumbingEntity = _plumb };
 
-        var result = await repo.UpdateAsync(updatedLink);
+        var result = await repo.UpsertRangeAsync([updatedLink]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldRemoveLink()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-        var link = new SandPlumbingLink { SandId = 1, SandEntity = _sandy, PlumbingId = 1, MatchingPhone = 12345, PlumbingEntity = _plumb };
-        context.SandPlumbingLinks.Add(link);
-        await context.SaveChangesAsync();
-
-        var repo = new SandPlumbingLinkRepository(context, logger);
-        var result = await repo.DeleteAsync(1);
-        var reloaded = await repo.GetByIdAsync(1);
-
-        Assert.True(result.IsSuccess);
-        Assert.True(reloaded.IsFailure);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
-    {
-        var repo = new SandPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.DeleteAsync(99);
-
-        Assert.True(result.IsSuccess);
     }
 }

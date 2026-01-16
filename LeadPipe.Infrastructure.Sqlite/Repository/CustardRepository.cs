@@ -12,7 +12,7 @@ public sealed class CustardRepository
     (
         PlumbingContext context,
         ILogger<CustardRepository> logger
-    ) : PlumbingContextRepository<CustardEntity, CustardRepository>(context, logger), ICustardRepository
+    ) : PlumbingContextRepository<CustardEntity, CustardRepository>(context, logger), IRepository<CustardEntity>
 {
     protected override IQueryable<CustardEntity> WithIncludes(IQueryable<CustardEntity> q)
     {

@@ -1,11 +1,15 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
+using LeadPipe.Translation.Translate.VoToEntity;
+using System.Text;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
-internal sealed class CornMySqlEntityToCornFormula : IEntityToVo<CornMySqlEntity, CornFormula>
+internal sealed class CornMySqlEntityToCornFormula(IInfrastructureSettings settings) : IEntityToVo<CornMySqlEntity, CornFormula>
 {
+    private readonly string[] _sources = settings.CornSources ?? [];
     public CornFormula Translate(CornMySqlEntity entity)
     {
         // Date
@@ -19,8 +23,18 @@ internal sealed class CornMySqlEntityToCornFormula : IEntityToVo<CornMySqlEntity
 
         // Data
         string payload = entity.comments ?? string.Empty;
-        string metadata = $"Form: {entity.form ?? "None"} | Referring: {entity.referringURL ?? "None"}";
-        string source = entity.source ?? string.Empty;
+        string form = entity.form ?? "None";
+        string referring = entity.referringURL ?? "None";
+        string metadata = $"{CornMySqlEntityTranslationHelper.FormValue}{form}{CornMySqlEntityTranslationHelper.Delimiter}{CornMySqlEntityTranslationHelper.ReferringValue}{referring}";
+        
+        // Find sources
+        StringBuilder source = new();
+        foreach (var s in _sources)
+            if (form.Contains(s) || referring.Contains(s))
+            {
+                source.Append(s);
+                source.Append(" | ");
+            }
 
         CornFormula result = new(
             Id: entity.id,
@@ -28,7 +42,7 @@ internal sealed class CornMySqlEntityToCornFormula : IEntityToVo<CornMySqlEntity
             Date: date,
             PayLoad: payload,
             MetaData: metadata,
-            Source: source
+            Source: source.ToString()
         );
 
         return result;

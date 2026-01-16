@@ -23,7 +23,7 @@ public class PlumbingRepositoryTests
             new() { Id = 2, PhoneNumber = 67890, MetaData = string.Empty  }
         };
 
-        var result = await repo.AddRangeAsync(entities);
+        var result = await repo.UpsertRangeAsync(entities);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, context.PlumbingEntities.Count());
@@ -35,10 +35,10 @@ public class PlumbingRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new PlumbingRepository(context, logger);
 
-        var result = await repo.AddRangeAsync([]);
+        var result = await repo.UpsertRangeAsync([]);
 
         Assert.False(result.IsSuccess);
-        Assert.Contains("No plumbing entities", result.Error);
+        Assert.Contains("No entities", result.Error);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class PlumbingRepositoryTests
         var repo = new PlumbingRepository(context, logger);
 
         var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
-        Result result = await repo.AddAsync(plumbing);
+        Result result = await repo.UpsertRangeAsync([plumbing]);
 
         Assert.True(result.IsSuccess);
     }
@@ -60,33 +60,17 @@ public class PlumbingRepositoryTests
         await context.SaveChangesAsync();
 
         var repo = new PlumbingRepository(context, logger);
-        var result = await repo.GetByIdAsync(1);
+        var result = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(12345, result.Value.PhoneNumber);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldRemoveEntity()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, MetaData = string.Empty };
-        context.PlumbingEntities.Add(plumbing);
-        await context.SaveChangesAsync();
-
-        var repo = new PlumbingRepository(context, logger);
-        var result = await repo.DeleteAsync(1);
-        var reloaded = await repo.GetByIdAsync(1);
-
-        Assert.True(result.IsSuccess);
-        Assert.True(reloaded.IsFailure);
+        Assert.Equal(12345, result.Value[0].PhoneNumber);
     }
 
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
         var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.GetByIdAsync(99);
+        var result = await repo.FindAsync(l => l.Id == 99);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("not found", result.Error);
@@ -103,12 +87,12 @@ public class PlumbingRepositoryTests
         var repo = new PlumbingRepository(context, logger);
         var updatedPlumbing = new PlumbingEntity { Id = 1, PhoneNumber = 99999, MetaData = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedPlumbing);
-        var reloaded = await repo.GetByIdAsync(1);
+        var result = await repo.UpsertRangeAsync([updatedPlumbing]);
+        var reloaded = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(99999, reloaded.Value.PhoneNumber);
+        Assert.Equal(99999, reloaded.Value[0].PhoneNumber);
     }
 
     [Fact]
@@ -117,19 +101,10 @@ public class PlumbingRepositoryTests
         var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedPlumbing = new PlumbingEntity { Id = 99, PhoneNumber = 11111, MetaData = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedPlumbing);
+        var result = await repo.UpsertRangeAsync([updatedPlumbing]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
-    {
-        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.DeleteAsync(99);
-
-        Assert.True(result.IsSuccess);
     }
 
     [Fact]
@@ -139,7 +114,7 @@ public class PlumbingRepositoryTests
         var repo = new PlumbingRepository(context, logger);
 
         var entity = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
-        await repo.AddAsync(entity);
+        await repo.UpsertRangeAsync([entity]);
 
         // Attempt to add the same entity again
         var duplicates = new List<PlumbingEntity>
@@ -147,7 +122,7 @@ public class PlumbingRepositoryTests
             new() { Id=0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty  }
         };
 
-        var result = await repo.AddRangeAsync(duplicates);
+        var result = await repo.UpsertRangeAsync(duplicates);
 
         Assert.True(result.IsSuccess);
         // No new rows should be added
@@ -163,7 +138,7 @@ public class PlumbingRepositoryTests
 
         // Existing entity in database
         var existing = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
-        await repo.AddAsync(existing);
+        await repo.UpsertRangeAsync([existing]);
 
         // New batch contains one existing + one new
         var batch = new List<PlumbingEntity>
@@ -172,7 +147,7 @@ public class PlumbingRepositoryTests
             new() { Id=0,PhoneNumber = 67890, Source = Source.Test, MetaData = string.Empty  }  // new
         };
 
-        var result = await repo.AddRangeAsync(batch);
+        var result = await repo.UpsertRangeAsync(batch);
 
         Assert.True(result.IsSuccess);
         // Total rows in DB = 2
@@ -189,12 +164,12 @@ public class PlumbingRepositoryTests
         var repo = new PlumbingRepository(context, logger);
 
         var entity = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
-        await repo.AddAsync(entity);
+        await repo.UpsertRangeAsync([entity]);
 
         // Same phone number but different source -> should be added
         var newEntity = new PlumbingEntity { Id = 0, PhoneNumber = 12345, Source = Source.Test2, MetaData = string.Empty };
 
-        var result = await repo.AddRangeAsync([newEntity]);
+        var result = await repo.UpsertRangeAsync([newEntity]);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, context.PlumbingEntities.Count());

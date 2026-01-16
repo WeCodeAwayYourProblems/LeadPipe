@@ -36,6 +36,13 @@ internal static class ConfigureCommandLine
 
         configuration.GetSection("LeafToken").Bind(settings.LeafToken);
 
+        // Add CornSourcs
+        if (settings.CornSources is null || settings.CornSources.Length == 0)
+            throw new InvalidOperationException(
+                $"{nameof(settings.CornSources)} must be configured with at least one entry.");
+
+        settings.YellerCornSource = settings.CornSources[0];
+
         // register once
         services.AddSingleton(settings);
 

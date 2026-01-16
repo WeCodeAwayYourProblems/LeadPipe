@@ -19,7 +19,7 @@ public class LeafClientService : ILeafService
         IDtoToVo<LeafDto, Plumbing> dtoTranslate,
         IJsonRwService json,
         IHttpClientFactory factory,
-        IPlumbingRepository repo,
+        IRepository<PlumbingEntity> repo,
         IFileService file,
         ILogger<LeafClientService> logger)
     {
@@ -39,7 +39,7 @@ public class LeafClientService : ILeafService
     private readonly IDtoToVo<LeafDto, Plumbing> _dto;
     private readonly IJsonRwService _json;
     private readonly IHttpClientFactory _factory;
-    private readonly IPlumbingRepository _repo;
+    private readonly IRepository<PlumbingEntity> _repo;
     private readonly IFileService _file;
     private readonly HttpClient _client;
     private readonly SemaphoreSlim _throttle;
@@ -77,7 +77,7 @@ public class LeafClientService : ILeafService
     /// </summary>
     public async Task<Result<List<Plumbing>>> RefreshAsync(int errorLimit = 5)
     {
-        Result<List<PlumbingEntity>> plumbingEntities = await _repo.GetAllAsync(source: Source.Leaf);
+        Result<List<PlumbingEntity>> plumbingEntities = await _repo.FindAsync(p => p.Source == Source.Leaf);
 
         if (plumbingEntities.IsFailure)
         {

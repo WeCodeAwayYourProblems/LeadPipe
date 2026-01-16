@@ -25,7 +25,7 @@ public class SandPlumbingLinkRepositoryTests
             new() { Id = 2, SandEntity = _sandy, PlumbingEntity = _plumb }
         };
 
-        var result = await repo.AddRangeAsync(entities);
+        var result = await repo.UpsertRangeAsync(entities);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, context.SandPlumbingLinks.Count());
@@ -38,10 +38,10 @@ public class SandPlumbingLinkRepositoryTests
 
         var repo = new SandPlumbingLinkRepository(context, logger);
 
-        var result = await repo.AddRangeAsync([]);
+        var result = await repo.UpsertRangeAsync([]);
 
         Assert.False(result.IsSuccess);
-        Assert.Contains("No plumbing entities", result.Error);
+        Assert.Contains("No entities", result.Error);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class SandPlumbingLinkRepositoryTests
         var repo = new SandPlumbingLinkRepository(context, logger);
 
         var plumbing = new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb };
-        Result result = await repo.AddAsync(plumbing);
+        Result result = await repo.UpsertRangeAsync([plumbing]);
 
         Assert.True(result.IsSuccess);
     }
@@ -64,33 +64,17 @@ public class SandPlumbingLinkRepositoryTests
         await context.SaveChangesAsync();
 
         var repo = new SandPlumbingLinkRepository(context, logger);
-        var result = await repo.GetByIdAsync(1);
+        var result = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(1, result.Value.Id);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldRemoveEntity()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb };
-        context.SandPlumbingLinks.Add(plumbing);
-        await context.SaveChangesAsync();
-
-        var repo = new SandPlumbingLinkRepository(context, logger);
-        var result = await repo.DeleteAsync(1);
-        var reloaded = await repo.GetByIdAsync(1);
-
-        Assert.True(result.IsSuccess);
-        Assert.True(reloaded.IsFailure);
+        Assert.Equal(1, result.Value[0].Id);
     }
 
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
         var repo = new SandPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.GetByIdAsync(99);
+        var result = await repo.FindAsync(l => l.Id == 99);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("not found", result.Error);
@@ -107,12 +91,12 @@ public class SandPlumbingLinkRepositoryTests
         var repo = new SandPlumbingLinkRepository(context, logger);
         var updatedSubsPlumbingLink = new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb };
 
-        var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
-        var reloaded = await repo.GetByIdAsync(1);
+        var result = await repo.UpsertRangeAsync([updatedSubsPlumbingLink]);
+        var reloaded = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(1, reloaded.Value.Id);
+        Assert.Equal(1, reloaded.Value[0].Id);
     }
 
     [Fact]
@@ -121,18 +105,9 @@ public class SandPlumbingLinkRepositoryTests
         var repo = new SandPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedSubsPlumbingLink = new SandPlumbingLink { Id = 99, SandEntity = _sandy, PlumbingEntity = _plumb };
 
-        var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
+        var result = await repo.UpsertRangeAsync([updatedSubsPlumbingLink]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
-    {
-        var repo = new SandPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.DeleteAsync(99);
-
-        Assert.True(result.IsSuccess);
     }
 }

@@ -14,9 +14,9 @@ public class PersistenceTests
     [Fact]
     public async Task PlumbingPersistence_SaveAsync_ReturnsSuccess()
     {
-        var repo = Substitute.For<IPlumbingRepository>();
+        var repo = Substitute.For<IRepository<PlumbingEntity>>();
         var entity = new PlumbingEntity() { Id = 0, MetaData = string.Empty };
-        repo.AddRangeAsync(Arg.Any<List<PlumbingEntity>>())
+        repo.UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<PlumbingEntity> { entity })));
 
         var persistence = new PlumbingPersistence(repo);
@@ -24,14 +24,14 @@ public class PersistenceTests
         var result = await persistence.SaveAsync(new List<PlumbingEntity> { entity });
 
         Assert.True(result.IsSuccess);
-        await repo.Received(1).AddRangeAsync(Arg.Any<List<PlumbingEntity>>());
+        await repo.Received(1).UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>());
     }
 
     [Fact]
     public async Task PlumbingPersistence_SaveAsync_ReturnsFailure()
     {
-        var repo = Substitute.For<IPlumbingRepository>();
-        repo.AddRangeAsync(Arg.Any<List<PlumbingEntity>>())
+        var repo = Substitute.For<IRepository<PlumbingEntity>>();
+        repo.UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Failure<List<PlumbingEntity>>("error")));
 
         var persistence = new PlumbingPersistence(repo);
@@ -40,7 +40,7 @@ public class PersistenceTests
 
         Assert.True(result.IsFailure);
         Assert.Equal("error", result.Error);
-        await repo.Received(1).AddRangeAsync(Arg.Any<List<PlumbingEntity>>());
+        await repo.Received(1).UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>());
     }
 
     #endregion
@@ -50,9 +50,9 @@ public class PersistenceTests
     [Fact]
     public async Task CaliperEntityPersistence_SaveAsync_ReturnsSuccess()
     {
-        var repo = Substitute.For<ICaliperRepository>();
+        var repo = Substitute.For<IRepository<CaliperEntity>>();
         var entity = new CaliperEntity() { Id = 0, Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}" };
-        repo.AddRangeAsync(Arg.Any<List<CaliperEntity>>())
+        repo.UpsertRangeAsync(Arg.Any<List<CaliperEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<CaliperEntity> { entity })));
 
         var persistence = new CaliperEntityPersistence(repo);
@@ -60,14 +60,14 @@ public class PersistenceTests
         var result = await persistence.SaveAsync(new List<CaliperEntity> { entity });
 
         Assert.True(result.IsSuccess);
-        await repo.Received(1).AddRangeAsync(Arg.Any<List<CaliperEntity>>());
+        await repo.Received(1).UpsertRangeAsync(Arg.Any<List<CaliperEntity>>());
     }
 
     [Fact]
     public async Task CaliperEntityPersistence_SaveAsync_ReturnsFailure()
     {
-        var repo = Substitute.For<ICaliperRepository>();
-        repo.AddRangeAsync(Arg.Any<List<CaliperEntity>>())
+        var repo = Substitute.For<IRepository<CaliperEntity>>();
+        repo.UpsertRangeAsync(Arg.Any<List<CaliperEntity>>())
             .Returns(Task.FromResult(Result.Failure<List<CaliperEntity>>("error")));
 
         var persistence = new CaliperEntityPersistence(repo);
@@ -76,7 +76,7 @@ public class PersistenceTests
 
         Assert.True(result.IsFailure);
         Assert.Equal("error", result.Error);
-        await repo.Received(1).AddRangeAsync(Arg.Any<List<CaliperEntity>>());
+        await repo.Received(1).UpsertRangeAsync(Arg.Any<List<CaliperEntity>>());
     }
 
     #endregion

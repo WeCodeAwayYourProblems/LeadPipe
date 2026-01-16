@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+﻿using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using LeadPipe.Infrastructure.Sqlite.Repository;
@@ -15,7 +16,7 @@ public static class InjectInfrastructureSqlite
     {
         if (string.IsNullOrWhiteSpace(settings.PlumbingConnectionString))
             throw new InvalidOperationException(
-                "PlumbingConnectionString is not configured.");
+                $"{nameof(settings.PlumbingConnectionString)} is not configured.");
 
         services.AddDbContext<PlumbingContext>((sp, options) =>
         {
@@ -31,14 +32,14 @@ public static class InjectInfrastructureSqlite
                 .EnableSensitiveDataLogging();
         });
 
-        services.AddScoped<ICaliperRepository, CaliperRepository>();
-        services.AddScoped<ICornRepository, CornRepository>();
-        services.AddScoped<IPlumbingCaliperLinkRepository, PlumbingCaliperLinkRepository>();
-        services.AddScoped<IPlumbingRepository, PlumbingRepository>();
-        services.AddScoped<ISandCaliperLinkRepository, SubsCaliperLinkRepository>();
-        services.AddScoped<ISandCornLinkRepository, SandCornLinkRepository>();
-        services.AddScoped<ISandPlumbingLinkRepository, SandPlumbingLinkRepository>();
-        services.AddScoped<ISandRepository, SandRepository>();
+        services.AddScoped<IRepository<CaliperEntity>, CaliperRepository>();
+        services.AddScoped<IRepository<CornEntity>, CornRepository>();
+        services.AddScoped<IRepository<PlumbingCaliperLink>, PlumbingCaliperLinkRepository>();
+        services.AddScoped<IRepository<PlumbingEntity>, PlumbingRepository>();
+        services.AddScoped<IRepository<SandCaliperLink>, SubsCaliperLinkRepository>();
+        services.AddScoped<IRepository<SandCornLink>, SandCornLinkRepository>();
+        services.AddScoped<IRepository<SandPlumbingLink>, SandPlumbingLinkRepository>();
+        services.AddScoped<IRepository<SandEntity>, SandRepository>();
         services.AddScoped<ISyncStateRepository, SyncStateRepository>();
 
         return services;

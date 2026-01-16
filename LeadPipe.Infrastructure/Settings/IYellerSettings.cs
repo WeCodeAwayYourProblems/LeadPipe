@@ -19,4 +19,5 @@ public interface IYellerSettings
     string? YellerClientReporterLoc { get; set; }
     string[]? YellerBellerId { get; set; }
     string? YellerSalt { get; set; }
+    string? YellerCornSource { get; set; }
 }

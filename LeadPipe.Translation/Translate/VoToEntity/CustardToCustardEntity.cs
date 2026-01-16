@@ -4,7 +4,7 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.VoToEntity;
 
-internal class CustardToCustardEntity : IVoToEntity<Custard, CustardEntity>
+internal sealed class CustardToCustardEntity : IVoToEntity<Custard, CustardEntity>
 {
     public CustardEntity Translate(Custard s)
     {

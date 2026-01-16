@@ -2,6 +2,7 @@
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
 using LeadPipe.Translation.Translate.VoToEntity;
@@ -12,6 +13,7 @@ namespace LeadPipe.Translation.Test;
 public class TranslatorBackAndForthFullTests
 {
     private readonly IDateTimeTranslate _dt = Substitute.For<IDateTimeTranslate>();
+    private readonly IInfrastructureSettings _settings = Substitute.For<IInfrastructureSettings>();
 
     private static TVo RoundTrip<TEntity1, TEntity2, TVo>(
         TEntity1 entity,
@@ -46,7 +48,7 @@ public class TranslatorBackAndForthFullTests
         {
             Id = 1,
             PhoneNumber = 5551234567,
-            CaliperDate = new DateTime(2025, 6, 1, 12, 0, 0),
+            Date = new DateTime(2025, 6, 1, 12, 0, 0),
             Duration = 120,
             Note = "Note",
             Source = "Source",
@@ -119,7 +121,7 @@ public class TranslatorBackAndForthFullTests
             source = "Source"
         };
 
-        IEntityToVo<CornMySqlEntity, CornFormula> toVo = new CornMySqlEntityToCornFormula();
+        IEntityToVo<CornMySqlEntity, CornFormula> toVo = new CornMySqlEntityToCornFormula(_settings);
         IEntityToVo<CornEntity, CornFormula> toVo2 = new CornEntityToCornFormula();
         IVoToEntity<CornFormula, CornEntity> toEntity = new CornFormulaToCornEntity();
 

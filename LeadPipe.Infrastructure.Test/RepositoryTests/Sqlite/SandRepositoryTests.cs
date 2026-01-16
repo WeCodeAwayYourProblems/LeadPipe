@@ -23,7 +23,7 @@ public class SandRepositoryTests
             new() { Id = 2, CustardId = 0, Offerman = string.Empty }
         };
 
-        var result = await repo.AddRangeAsync(entities);
+        var result = await repo.UpsertRangeAsync(entities);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, context.SandEntities.Count());
@@ -36,7 +36,7 @@ public class SandRepositoryTests
 
         var repo = new SandRepository(context, logger);
 
-        var result = await repo.AddRangeAsync([]);
+        var result = await repo.UpsertRangeAsync([]);
 
         Assert.True(result.IsFailure);
         Assert.Contains("No entities", result.Error);
@@ -50,7 +50,7 @@ public class SandRepositoryTests
         var repo = new SandRepository(context, logger);
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        var result = await repo.AddRangeAsync(null);
+        var result = await repo.UpsertRangeAsync(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         Assert.True(result.IsFailure);
@@ -65,7 +65,7 @@ public class SandRepositoryTests
         var repo = new SandRepository(context, logger);
 
         var subs = new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty };
-        var result = await repo.AddAsync(subs);
+        var result = await repo.UpsertRangeAsync([subs]);
 
         Assert.True(result.IsSuccess);
     }
@@ -78,7 +78,7 @@ public class SandRepositoryTests
         await context.SaveChangesAsync();
 
         var repo = new SandRepository(context, logger);
-        var result = await repo.GetByIdAsync(1);
+        var result = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
     }
@@ -87,7 +87,7 @@ public class SandRepositoryTests
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
         var repo = new SandRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.GetByIdAsync(99);
+        var result = await repo.FindAsync(l => l.Id == 99);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("not found", result.Error);
@@ -104,27 +104,11 @@ public class SandRepositoryTests
         var repo = new SandRepository(context, logger);
         var updatedSubs = new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedSubs);
-        var reloaded = await repo.GetByIdAsync(1);
+        var result = await repo.UpsertRangeAsync([updatedSubs]);
+        var reloaded = await repo.FindAsync(l => l.Id == 1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldRemoveEntity()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-        var subs = new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty };
-        context.SandEntities.Add(subs);
-        await context.SaveChangesAsync();
-
-        var repo = new SandRepository(context, logger);
-        var result = await repo.DeleteAsync(1);
-        var reloaded = await repo.GetByIdAsync(1);
-
-        Assert.True(result.IsSuccess);
-        Assert.True(reloaded.IsFailure);
     }
 
     [Fact]
@@ -133,18 +117,9 @@ public class SandRepositoryTests
         var repo = new SandRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedSubs = new SandEntity { Id = 99, CustardId = 0, Offerman = string.Empty };
 
-        var result = await repo.UpdateAsync(updatedSubs);
+        var result = await repo.UpsertRangeAsync([updatedSubs]);
 
         Assert.False(result.IsSuccess);
         Assert.Contains("does not exist", result.Error);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
-    {
-        var repo = new SandRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.DeleteAsync(99);
-
-        Assert.True(result.IsSuccess); // Deleting non-existent entity should still succeed
     }
 }

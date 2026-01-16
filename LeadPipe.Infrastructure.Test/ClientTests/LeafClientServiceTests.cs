@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;
@@ -18,7 +19,7 @@ public class LeafClientServiceTests
     private readonly IDtoToVo<LeafDto, Plumbing> _dto = Substitute.For<IDtoToVo<LeafDto, Plumbing>>();
     private readonly IJsonRwService _json = Substitute.For<IJsonRwService>();
     private readonly IHttpClientFactory _factory = Substitute.For<IHttpClientFactory>();
-    private readonly IPlumbingRepository _repo = Substitute.For<IPlumbingRepository>();
+    private readonly IRepository<PlumbingEntity> _repo = Substitute.For<IRepository<PlumbingEntity>>();
     private readonly IFileService _file = Substitute.For<IFileService>();
     private readonly ILogger<LeafClientService> _logger = Substitute.For<ILogger<LeafClientService>>();
 

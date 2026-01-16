@@ -12,7 +12,7 @@ public sealed class PlumbingCaliperLinkRepository
     (
         PlumbingContext context,
         ILogger<PlumbingCaliperLinkRepository> logger
-    ) : PlumbingContextRepository<PlumbingCaliperLink, PlumbingCaliperLinkRepository>(context, logger), IPlumbingCaliperLinkRepository
+    ) : PlumbingContextRepository<PlumbingCaliperLink, PlumbingCaliperLinkRepository>(context, logger), IRepository<PlumbingCaliperLink>
 {
     protected override IQueryable<PlumbingCaliperLink> WithIncludes(IQueryable<PlumbingCaliperLink> q)
     {
@@ -23,7 +23,7 @@ public sealed class PlumbingCaliperLinkRepository
     public override async Task<Result<List<PlumbingCaliperLink>>> UpsertRangeAsync(List<PlumbingCaliperLink> entities, CancellationToken ct = default)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<PlumbingCaliperLink>());
+            return Result.Failure<List<PlumbingCaliperLink>>("No entities added");
 
         AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.PlumbingId));
         AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.CaliperId));

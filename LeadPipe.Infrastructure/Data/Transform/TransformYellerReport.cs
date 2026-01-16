@@ -10,11 +10,11 @@ using LeadPipe.Infrastructure.Settings;
 namespace LeadPipe.Infrastructure.Data.Transform;
 
 internal sealed class TransformYellerReport(
-    ISandPlumbingLinkRepository spRepo,
-    ISandCaliperLinkRepository sandCaliperRepo,
-    ICaliperRepository caliperRepo,
-    ICornRepository cornRepo,
-    ISandCornLinkRepository cornLinksRepo,
+    IRepository<SandPlumbingLink> spRepo,
+    IRepository<SandCaliperLink> sandCaliperRepo,
+    IRepository<CaliperEntity> caliperRepo,
+    IRepository<CornEntity> cornRepo,
+    IRepository<SandCornLink> cornLinksRepo,
     IVoToEntity<Plumbing, PlumbingEntity> toEntity,
     IEntityToReport<SandEntity, ReportYeller> subsToR,
     IEntityToReport<PlumbingEntity, ReportYeller> plumbToR,
@@ -23,11 +23,11 @@ internal sealed class TransformYellerReport(
     IYellerSettings settings
     ) : ITransform<Plumbing, ReportYeller>
 {
-    private readonly ISandPlumbingLinkRepository _sandPlumbRepo = spRepo;
-    private readonly ISandCaliperLinkRepository _sandCaliperRepo = sandCaliperRepo;
-    private readonly ICaliperRepository _caliperRepo = caliperRepo;
-    private readonly ICornRepository _cornRepo = cornRepo;
-    private readonly ISandCornLinkRepository _cornLinksRepo = cornLinksRepo;
+    private readonly IRepository<SandPlumbingLink> _sandPlumbRepo = spRepo;
+    private readonly IRepository<SandCaliperLink> _sandCaliperRepo = sandCaliperRepo;
+    private readonly IRepository<CaliperEntity> _caliperRepo = caliperRepo;
+    private readonly IRepository<CornEntity> _cornRepo = cornRepo;
+    private readonly IRepository<SandCornLink> _cornLinksRepo = cornLinksRepo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
     private readonly IEntityToReport<SandEntity, ReportYeller> _subsToR = subsToR;
     private readonly IEntityToReport<PlumbingEntity, ReportYeller> _plumbToR = plumbToR;
@@ -45,7 +45,8 @@ internal sealed class TransformYellerReport(
         List<PlumbingEntity> plumbs = [.. data.Select(_voToEntity.Translate)];
 
         // Get links to subs for reporting
-        Result<List<SandPlumbingLink>> links = await _sandPlumbRepo.GetAllWithDetailsAsync(plumbs);
+        var plumbingIds = plumbs.Select(p => p.Id);
+        Result<List<SandPlumbingLink>> links = await _sandPlumbRepo.FindWithDetailsAsync(l => plumbingIds.Contains(l.PlumbingId));
         if (links.IsFailure)
             return Result.Failure<List<ReportYeller>>(links.Error);
         List<SandPlumbingLink> subPlumbLinks = links.Value;
@@ -73,7 +74,8 @@ internal sealed class TransformYellerReport(
         List<CaliperEntity> calipers = calipersResult.Value;
 
         // Get Caliper links
-        Result<List<SandCaliperLink>> caliperLinksResult = await _sandCaliperRepo.GetAllWithDetailsAsync(calipers);
+        var idsCaliper = calipers.Select(c => c.Id);
+        Result<List<SandCaliperLink>> caliperLinksResult = await _sandCaliperRepo.FindWithDetailsAsync(l => idsCaliper.Contains(l.CaliperId));
         if (caliperLinksResult.IsFailure)
             return Result.Failure<List<ReportYeller>>(caliperLinksResult.Error);
         List<SandCaliperLink> caliperLinks = caliperLinksResult.Value;
@@ -95,16 +97,17 @@ internal sealed class TransformYellerReport(
         // *************************************
 
         // Get Corn for reporting
-        Result<List<CornEntity>> cornResult = await _cornRepo.FindAsync(c => c.Source == Domain.ValueObjects.Source.Yeller);
+        Result<List<CornEntity>> cornResult = await _cornRepo.FindAsync(c => c.Source == _settings.YellerCornSource);
         if (cornResult.IsFailure)
             return Result.Failure<List<ReportYeller>>(cornResult.Error);
-        List <CornEntity> corn = cornResult.Value;
+        List<CornEntity> corn = cornResult.Value;
 
         // Corn Links
-        Result<List<SandCornLink>> cornLinksResult = await _cornLinksRepo.GetAllWithDetailsAsync(corn);
+        var idsCorn = corn.Select(c => c.Id);
+        Result<List<SandCornLink>> cornLinksResult = await _cornLinksRepo.FindWithDetailsAsync(c => idsCorn.Contains(c.CornId));
         if (cornLinksResult.IsFailure)
             return Result.Failure<List<ReportYeller>>(cornLinksResult.Error);
-        List <SandCornLink> cornLinks = cornLinksResult.Value;
+        List<SandCornLink> cornLinks = cornLinksResult.Value;
 
         // Generate corn report
         // Hashset for easy lookup

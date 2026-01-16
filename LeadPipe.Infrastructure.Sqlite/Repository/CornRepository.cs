@@ -11,7 +11,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public sealed class CornRepository(
     PlumbingContext context,
     ILogger<CornRepository> logger)
-    : PlumbingContextRepository<CornEntity, CornRepository>(context, logger), ICornRepository
+    : PlumbingContextRepository<CornEntity, CornRepository>(context, logger), IRepository<CornEntity>
 {
     protected override IQueryable<CornEntity> WithIncludes(IQueryable<CornEntity> q)
     {

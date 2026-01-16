@@ -20,4 +20,5 @@ public interface IInfrastructureSettings :
 
     string? PanReportLoc { get; set; }
     string? PanSourceLoc { get; set; }
+    string[]? CornSources { get; set; }
 }

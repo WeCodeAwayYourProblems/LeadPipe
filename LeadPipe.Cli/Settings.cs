@@ -61,6 +61,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string[]? YellerBellerId { get; set; }
     public string? YellerSalt { get; set; }
     public string? YellerCornSource { get; set; }
+    public string? YellerReportEndpoint { get; set; }
 
 
     // Data

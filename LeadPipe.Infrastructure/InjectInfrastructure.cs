@@ -154,17 +154,29 @@ public static class InjectInfrastructure
         });
 
         // Add Yeller Client
-        if (string.IsNullOrWhiteSpace(settings.YellerName))
-            throw new Exception($"{nameof(settings.YellerName)} cannot be null");
+        if (string.IsNullOrWhiteSpace(settings.YellerGetterName))
+            throw new Exception($"{nameof(settings.YellerGetterName)} cannot be null");
         if (string.IsNullOrWhiteSpace(settings.YellerBase))
             throw new Exception($"{nameof(settings.YellerBase)} cannot be null");
         if (settings.YellerToken is null)
             throw new Exception($"{nameof(settings.YellerToken)} cannot be null");
-        services.AddHttpClient(settings.YellerName, c =>
+        services.AddHttpClient(settings.YellerGetterName, c =>
         {
             c.BaseAddress = new Uri(settings.YellerBase);
             c.DefaultRequestHeaders.Add("Accept", "application/json");
             c.DefaultRequestHeaders.Authorization = new(settings.YellerToken.Token_type, settings.YellerToken.Access_token);
+        });
+
+        // Add Second Yeller Client
+        if (string.IsNullOrWhiteSpace(settings.YellerReporterName))
+            throw new Exception($"{nameof(settings.YellerReporterName)} cannot be null");
+        if (string.IsNullOrWhiteSpace(settings.YellerSecret))
+            throw new Exception($"{nameof(settings.YellerSecret)} cannot be null");
+        services.AddHttpClient(settings.YellerReporterName, c =>
+        {
+            c.BaseAddress = new Uri(settings.YellerBase);
+            c.DefaultRequestHeaders.Add("Accept", "application/json");
+            c.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(settings.YellerToken.Token_type, settings.YellerSecret);
         });
 
         #endregion

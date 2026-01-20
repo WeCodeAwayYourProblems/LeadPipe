@@ -10,11 +10,7 @@ using LeadPipe.Infrastructure.Settings;
 namespace LeadPipe.Infrastructure.Data.Transform;
 
 internal sealed class TransformYellerReport(
-    IRepository<SandPlumbingLink> spRepo,
-    IRepository<SandCaliperLink> sandCaliperRepo,
-    IRepository<CaliperEntity> caliperRepo,
-    IRepository<CornEntity> cornRepo,
-    IRepository<SandCornLink> cornLinksRepo,
+    IRepositoryFactory factory,
     IVoToEntity<Plumbing, PlumbingEntity> toEntity,
     IEntityToReport<SandEntity, ReportYeller> subsToR,
     IEntityToReport<PlumbingEntity, ReportYeller> plumbToR,
@@ -23,16 +19,19 @@ internal sealed class TransformYellerReport(
     IYellerSettings settings
     ) : ITransform<Plumbing, ReportYeller>
 {
-    private readonly IRepository<SandPlumbingLink> _sandPlumbRepo = spRepo;
-    private readonly IRepository<SandCaliperLink> _sandCaliperRepo = sandCaliperRepo;
-    private readonly IRepository<CaliperEntity> _caliperRepo = caliperRepo;
-    private readonly IRepository<CornEntity> _cornRepo = cornRepo;
-    private readonly IRepository<SandCornLink> _cornLinksRepo = cornLinksRepo;
+    private readonly IRepository<SandPlumbingLink> _sandPlumbRepo = factory.GetRepository<SandPlumbingLink>();
+    private readonly IRepository<SandCaliperLink> _sandCaliperRepo = factory.GetRepository<SandCaliperLink>();
+    private readonly IRepository<CaliperEntity> _caliperRepo = factory.GetRepository<CaliperEntity>();
+    private readonly IRepository<CornEntity> _cornRepo = factory.GetRepository<CornEntity>();
+    private readonly IRepository<SandCornLink> _cornLinksRepo = factory.GetRepository<SandCornLink>();
+
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
+    
     private readonly IEntityToReport<SandEntity, ReportYeller> _subsToR = subsToR;
     private readonly IEntityToReport<PlumbingEntity, ReportYeller> _plumbToR = plumbToR;
     private readonly IEntityToReport<CaliperEntity, ReportYeller> _caliperToR = caliperToR;
     private readonly IEntityToReport<CornEntity, ReportYeller> _cornToR = cornToR;
+    
     private readonly IYellerSettings _settings = settings;
 
     public async Task<Result<List<ReportYeller>>> TransformAsync(List<Plumbing> data)

@@ -50,23 +50,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadPipe.Infrastructure.MyS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadPipe.Infrastructure.Sqlite", "LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj", "{FD5120D2-1804-49BD-B87A-C9462D683799}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{813F9A55-248C-4C7B-8223-0F14A8FE73F3}"
-	ProjectSection(SolutionItems) = preProject
-		..\Automate\ForceUpdateRepos.bat = ..\Automate\ForceUpdateRepos.bat
-		..\Automate\GitMerge.bat = ..\Automate\GitMerge.bat
-		..\Automate\LeafExclusion.bat = ..\Automate\LeafExclusion.bat
-		..\Automate\LeafRepo Manual.bat = ..\Automate\LeafRepo Manual.bat
-		..\Automate\LeafRepo.bat = ..\Automate\LeafRepo.bat
-		..\Automate\Lotus.bat = ..\Automate\Lotus.bat
-		..\Automate\MasterTask.bat = ..\Automate\MasterTask.bat
-		..\Automate\OpenFiles.bat = ..\Automate\OpenFiles.bat
-		..\Automate\Queries.bat = ..\Automate\Queries.bat
-		..\Automate\ReleaseBuild.bat = ..\Automate\ReleaseBuild.bat
-		..\Automate\ReportGeneration.bat = ..\Automate\ReportGeneration.bat
-		..\Automate\SaveAndCloseExcel.ps1 = ..\Automate\SaveAndCloseExcel.ps1
-		..\Automate\test.bat = ..\Automate\test.bat
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

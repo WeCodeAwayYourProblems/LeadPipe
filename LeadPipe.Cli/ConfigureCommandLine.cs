@@ -17,17 +17,22 @@ internal static class ConfigureCommandLine
         configuration.Bind(settings);
 
         // ConnectionStrings
-        settings.PlumbingConnectionString =
-            configuration.GetConnectionString("Plumbing");
+        string? password = configuration["DbPassword"];
+        settings.PlumbingConnectionString = configuration
+            .GetConnectionString("Plumbing")!
+            .Replace("{DbPassword}", password);
 
-        settings.Schema1ConnectionString =
-            configuration.GetConnectionString("Schema1");
+        settings.Schema1ConnectionString = configuration
+            .GetConnectionString("Schema1")!
+            .Replace("{DbPassword}", password);
 
-        settings.Schema2ConnectionString =
-            configuration.GetConnectionString("Schema2");
+        settings.Schema2ConnectionString = configuration
+            .GetConnectionString("Schema2")!
+            .Replace("{DbPassword}", password);
 
-        settings.Schema3ConnectionString =
-            configuration.GetConnectionString("Schema3");
+        settings.Schema3ConnectionString = configuration
+            .GetConnectionString("Schema3")!
+            .Replace("{DbPassword}", password);
 
         // Tokens
         configuration.GetSection("LabToken").Bind(settings.LabToken);

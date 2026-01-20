@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Application.Service;
 
-public interface IPlumbingAssociationService
+public interface IEntityAssociationService
 {
-    Task<Result> SaveLinksAsync();
+    Task<Result> AssociateAsync();
 }

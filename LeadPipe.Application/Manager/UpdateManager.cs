@@ -13,13 +13,13 @@ public sealed class UpdateManager(
     IUpdateSourceFactory update,
     IUpdateService<Caliper> call,
     IUpdateService<Sandwich> sandwich,
-    IPlumbingAssociationService plumb
+    IEntityAssociationService plumb
     ) : IUpdateManager
 {
     private readonly IUpdateSourceFactory _update = update;
     private readonly IUpdateService<Caliper> _call = call;
     private readonly IUpdateService<Sandwich> _sandwich = sandwich;
-    private readonly IPlumbingAssociationService _plumb = plumb;
+    private readonly IEntityAssociationService _plumb = plumb;
     
     public async Task<Result> Manage(Source source, bool refresh)
     {
@@ -39,7 +39,7 @@ public sealed class UpdateManager(
             return plumbingSaved;
 
         // Associate
-        Result associated = await _plumb.SaveLinksAsync();
+        Result associated = await _plumb.AssociateAsync();
         if (associated.IsFailure)
             return associated;
 
@@ -75,7 +75,7 @@ public sealed class UpdateManager(
             return combined;
 
         // Associate
-        Result associated = await _plumb.SaveLinksAsync();
+        Result associated = await _plumb.AssociateAsync();
 
         return associated;
     }

@@ -44,7 +44,8 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string[]? CornSources { get; set; }
     
     // Yeller 
-    public string? YellerName { get; set; }
+    public string? YellerGetterName { get; set; }
+    public string? YellerReporterName { get; set; }
     public string? YellerSecret { get; set; }
     public Token? YellerToken { get; set; }
     public string? YellerBase { get; set; }

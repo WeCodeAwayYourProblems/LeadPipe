@@ -115,7 +115,7 @@ public static class InjectInfrastructure
         services.AddScoped<IJsonRwService, JsonRwService>();
         services.AddScoped<ILabService, LabService>();
         services.AddScoped<ILeafService, LeafClientService>();
-        services.AddScoped<IPlumbingAssociationService, PlumbingAssociationService>();
+        services.AddScoped<IEntityAssociationService, EntityAssociationService>();
         services.AddScoped<IYellerService, YellerClientService>();
 
         #endregion

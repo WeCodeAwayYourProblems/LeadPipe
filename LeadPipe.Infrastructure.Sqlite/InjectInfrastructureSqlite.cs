@@ -19,9 +19,21 @@ public static class InjectInfrastructureSqlite
             throw new InvalidOperationException(
                 $"{nameof(settings.PlumbingConnectionString)} is not configured.");
 
-        bool useInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase");
-        bool sensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging");
-        LogLevel efLogLevel = config.GetValue("Ef:LogLevel", LogLevel.Information);
+        bool globalUseInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase");
+        bool globalSensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging");
+        LogLevel globalLogLevel = config.GetValue("Ef:LogLevel", LogLevel.Information);
+
+        bool useInMemory = config.GetValue(
+        "Ef:Sqlite:UseInMemoryConnection",
+            globalUseInMemory);
+
+        bool sensitiveLogging = config.GetValue(
+            "Ef:Sqlite:SensitiveLogging",
+            globalSensitiveLogging);
+
+        LogLevel efLogLevel = config.GetValue(
+            "Ef:Sqlite:LogLevel",
+            globalLogLevel);
 
         services.AddSingleton<SqlitePragmaInterceptor>();
         if (useInMemory)

@@ -21,6 +21,8 @@ public static class InjectInfrastructureSqlite
 
         bool useInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase");
         bool sensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging");
+        LogLevel efLogLevel = config.GetValue("Ef:LogLevel", LogLevel.Information);
+
         services.AddSingleton<SqlitePragmaInterceptor>();
         if (useInMemory)
         {
@@ -39,7 +41,7 @@ public static class InjectInfrastructureSqlite
 
             options
                 .AddInterceptors(provider.GetRequiredService<SqlitePragmaInterceptor>())
-                .LogTo(Console.WriteLine, LogLevel.Information);
+                .LogTo(Console.WriteLine, efLogLevel);
 
             if (useInMemory)
             {

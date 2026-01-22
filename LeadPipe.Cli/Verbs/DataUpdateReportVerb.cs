@@ -48,8 +48,8 @@ internal class DataUpdateReportVerb : IVerbAsync
             Console.WriteLine(result.Error);
 
         int code = result.IsSuccess ? 0 : 1;
-        Environment.ExitCode = code;
-        return Environment.ExitCode;
+        Environment.ExitCode = code; // Setting the exit code here helps for cli usage
+        return code;
     }
 
     #endregion

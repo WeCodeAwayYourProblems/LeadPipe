@@ -36,12 +36,9 @@ internal abstract class ValueObjectUpdateService<TEntity, TVo>(
     public async Task<Result<List<TVo>>> UpdateDataAsync()
     {
         Result<List<TEntity>> refresh = await _source.RefreshAsync();
-        if (refresh.IsFailure)
-            return Result.Failure<List<TVo>>(refresh.Error);
 
-        List<TVo> translate = [.. refresh.Value.Select(_eToVo.Translate)];
         Result<List<TVo>> result = refresh.IsSuccess
-            ? Result.Success(translate)
+            ? Result.Success(refresh.Value.Select(_eToVo.Translate).ToList())
             : Result.Failure<List<TVo>>(refresh.Error);
         return result;
     }

@@ -8,8 +8,8 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class SubsCaliperLinkRepository(PlumbingContext context, ILogger<SubsCaliperLinkRepository> logger)
-    : PlumbingContextRepository<SandCaliperLink, SubsCaliperLinkRepository>(context, logger), IRepository<SandCaliperLink>
+public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<SandCaliperLinkRepository> logger)
+    : PlumbingContextRepository<SandCaliperLink, SandCaliperLinkRepository>(context, logger), IRepository<SandCaliperLink>
 {
     protected override IQueryable<SandCaliperLink> WithIncludes(IQueryable<SandCaliperLink> q)
     {

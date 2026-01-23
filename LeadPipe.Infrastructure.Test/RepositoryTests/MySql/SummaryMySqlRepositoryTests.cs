@@ -1,26 +1,54 @@
-﻿using LeadPipe.Infrastructure.MySql.Context;
+﻿using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.MySql.Context;
 using LeadPipe.Infrastructure.MySql.Repository;
-using LeadPipe.Infrastructure.MySql.Settings;
-using Microsoft.EntityFrameworkCore;
-using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
 public class SummaryMySqlRepositoryTests
 {
-    private SummaryMySqlRepository CreateRepository()
+    private static SummaryMySqlRepository CreateRepo(out MySqlSchema2Context context)
     {
-        var settings = Substitute.For<IMySqlSettings>();
-        settings.Schema1.Returns("dbo");
-        settings.Schema2.Returns("dbo");
-
-        var context = new MySqlSchema2Context(
-            new DbContextOptionsBuilder<MySqlSchema2Context>()
-                .UseInMemoryDatabase(nameof(SummaryMySqlRepositoryTests))
-                .Options,
-            settings);
+        context = DbContextTestFactory.CreateTestContext<MySqlSchema2Context>(
+            nameof(SummaryMySqlRepositoryTests));
         return new SummaryMySqlRepository(context);
     }
 
-    
+    [Fact]
+    public async Task GetByIdAsync_Returns_Entity_When_Found()
+    {
+        var repo = CreateRepo(out var ctx);
+
+        var entity = new SummaryMySqlEntity { call_id = 1 };
+        ctx.Add(entity);
+        await ctx.SaveChangesAsync();
+
+        var result = await repo.GetByIdAsync(1);
+
+        ResultAssertions.ShouldBeSuccess(result);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_Returns_Failure_When_Not_Found()
+    {
+        var repo = CreateRepo(out _);
+        var result = await repo.GetByIdAsync(999);
+        ResultAssertions.ShouldBeFailure(result);
+    }
+
+    [Fact]
+    public async Task FindAsync_Returns_Filtered_List()
+    {
+        var repo = CreateRepo(out var ctx);
+
+        ctx.AddRange(
+            new SummaryMySqlEntity { call_id = 1 },
+            new SummaryMySqlEntity { call_id = 2 }
+        );
+        await ctx.SaveChangesAsync();
+
+        var result = await repo.FindAsync(c => c.call_id == 2);
+
+        ResultAssertions.ShouldBeSuccess(result);
+        Assert.Single(result.Value!);
+    }
 }

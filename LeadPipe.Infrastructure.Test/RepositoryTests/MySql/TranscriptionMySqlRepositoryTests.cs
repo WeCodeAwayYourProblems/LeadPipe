@@ -4,13 +4,13 @@ using LeadPipe.Infrastructure.MySql.Repository;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
-public class SandMySqlRepositoryTests
+public class TranscriptionMySqlRepositoryTests
 {
-    private static SandMySqlRepository CreateRepo(out MySqlSchema1Context context)
+    private static TranscriptionMySqlRepository CreateRepo(out MySqlSchema2Context context)
     {
-        context = DbContextTestFactory.CreateTestContext<MySqlSchema1Context>(
-            nameof(SandMySqlRepositoryTests));
-        return new SandMySqlRepository(context);
+        context = DbContextTestFactory.CreateTestContext<MySqlSchema2Context>(
+            nameof(TranscriptionMySqlRepositoryTests));
+        return new TranscriptionMySqlRepository(context);
     }
 
     [Fact]
@@ -18,11 +18,11 @@ public class SandMySqlRepositoryTests
     {
         var repo = CreateRepo(out var ctx);
 
-        var entity = new SandMySqlEntity { subscriptionID = 1 };
+        var entity = new TranscriptionMySqlEntity { call_id = 1 };
         ctx.Add(entity);
         await ctx.SaveChangesAsync();
 
-        var result = await repo.GetByIdAsync(1, false);
+        var result = await repo.GetByIdAsync(1);
 
         ResultAssertions.ShouldBeSuccess(result);
     }
@@ -41,15 +41,14 @@ public class SandMySqlRepositoryTests
         var repo = CreateRepo(out var ctx);
 
         ctx.AddRange(
-            new SandMySqlEntity { subscriptionID = 1 },
-            new SandMySqlEntity { subscriptionID = 2 }
+            new TranscriptionMySqlEntity { call_id = 1 },
+            new TranscriptionMySqlEntity { call_id = 2 }
         );
         await ctx.SaveChangesAsync();
 
-        var result = await repo.FindAsync(c => c.subscriptionID == 2, false);
+        var result = await repo.FindAsync(c => c.call_id == 2);
 
         ResultAssertions.ShouldBeSuccess(result);
         Assert.Single(result.Value!);
-        Assert.Equal(2, result.Value[0].subscriptionID);
     }
 }

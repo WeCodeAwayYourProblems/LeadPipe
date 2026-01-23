@@ -6,17 +6,17 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
 public class TranscriptionMySqlRepositoryTests
 {
-    private static TranscriptionMySqlRepository CreateRepo(out MySqlSchema2Context context)
+    private static TranscriptionMySqlRepository CreateRepo(out MySqlSchema2Context context, string name)
     {
         context = DbContextTestFactory.CreateTestContext<MySqlSchema2Context>(
-            nameof(TranscriptionMySqlRepositoryTests));
+            nameof(TranscriptionMySqlRepositoryTests) + name);
         return new TranscriptionMySqlRepository(context);
     }
 
     [Fact]
     public async Task GetByIdAsync_Returns_Entity_When_Found()
     {
-        var repo = CreateRepo(out var ctx);
+        var repo = CreateRepo(out var ctx, nameof(GetByIdAsync_Returns_Entity_When_Found));
 
         var entity = new TranscriptionMySqlEntity { call_id = 1 };
         ctx.Add(entity);
@@ -30,7 +30,7 @@ public class TranscriptionMySqlRepositoryTests
     [Fact]
     public async Task GetByIdAsync_Returns_Failure_When_Not_Found()
     {
-        var repo = CreateRepo(out _);
+        var repo = CreateRepo(out _, nameof(GetByIdAsync_Returns_Failure_When_Not_Found));
         var result = await repo.GetByIdAsync(999);
         ResultAssertions.ShouldBeFailure(result);
     }
@@ -38,7 +38,7 @@ public class TranscriptionMySqlRepositoryTests
     [Fact]
     public async Task FindAsync_Returns_Filtered_List()
     {
-        var repo = CreateRepo(out var ctx);
+        var repo = CreateRepo(out var ctx, nameof(FindAsync_Returns_Filtered_List));
 
         ctx.AddRange(
             new TranscriptionMySqlEntity { call_id = 1 },

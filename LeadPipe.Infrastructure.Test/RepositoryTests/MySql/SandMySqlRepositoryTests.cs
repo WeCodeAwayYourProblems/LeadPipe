@@ -6,17 +6,17 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
 public class SandMySqlRepositoryTests
 {
-    private static SandMySqlRepository CreateRepo(out MySqlSchema1Context context)
+    private static SandMySqlRepository CreateRepo(out MySqlSchema1Context context, string name)
     {
         context = DbContextTestFactory.CreateTestContext<MySqlSchema1Context>(
-            nameof(SandMySqlRepositoryTests));
+            nameof(SandMySqlRepositoryTests) + name);
         return new SandMySqlRepository(context);
     }
 
     [Fact]
     public async Task GetByIdAsync_Returns_Entity_When_Found()
     {
-        var repo = CreateRepo(out var ctx);
+        var repo = CreateRepo(out var ctx, nameof(GetByIdAsync_Returns_Entity_When_Found));
 
         var entity = new SandMySqlEntity { subscriptionID = 1 };
         ctx.Add(entity);
@@ -30,7 +30,7 @@ public class SandMySqlRepositoryTests
     [Fact]
     public async Task GetByIdAsync_Returns_Failure_When_Not_Found()
     {
-        var repo = CreateRepo(out _);
+        var repo = CreateRepo(out _, nameof(GetByIdAsync_Returns_Failure_When_Not_Found));
         var result = await repo.GetByIdAsync(999);
         ResultAssertions.ShouldBeFailure(result);
     }
@@ -38,7 +38,7 @@ public class SandMySqlRepositoryTests
     [Fact]
     public async Task FindAsync_Returns_Filtered_List()
     {
-        var repo = CreateRepo(out var ctx);
+        var repo = CreateRepo(out var ctx, nameof(FindAsync_Returns_Filtered_List));
 
         ctx.AddRange(
             new SandMySqlEntity { subscriptionID = 1 },

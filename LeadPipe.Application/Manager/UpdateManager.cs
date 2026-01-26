@@ -44,7 +44,12 @@ public sealed class UpdateManager(
         if (associated.IsFailure)
             return associated;
 
-        return Result.Combine(" | ", callSaved, sandwichSaved, plumbingSaved, associated);
+        return Result.Combine(" | ", 
+            caliperSaved, 
+            custardSaved,
+            sandwichSaved, 
+            plumbingSaved, 
+            associated);
     }
 
     public async Task<Result> Manage(bool refresh)
@@ -54,15 +59,15 @@ public sealed class UpdateManager(
         if (callSaved.IsFailure)
             return callSaved;
 
-        // Sandwich
-        Result sandwichSaved = await UpdatedAndSaved(refresh, _sandwich);
-        if (sandwichSaved.IsFailure)
-            return sandwichSaved;
-
         // Custard
         Result custardSaved = await UpdatedAndSaved(refresh, _custard);
         if (custardSaved.IsFailure)
             return custardSaved;
+
+        // Sandwich
+        Result sandwichSaved = await UpdatedAndSaved(refresh, _sandwich);
+        if (sandwichSaved.IsFailure)
+            return sandwichSaved;
 
         // Update All Sources
         Source[] sources = Enum.GetValues<Source>();

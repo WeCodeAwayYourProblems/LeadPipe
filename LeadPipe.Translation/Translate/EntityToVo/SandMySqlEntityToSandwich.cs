@@ -19,8 +19,12 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
             throw new ArgumentException($"{nameof(entity.customer)} cannot be null.");
 
         // Convert navigation property
-        DateTimeOffset ceDate = _dt.Convert(entity.customer.dateAdded, ETimeZone.Pacific);
-        DateTimeOffset ceDateCancelled = _dt.Convert(entity.customer.dateCancelled, ETimeZone.Pacific);
+        DateTime cAdded = entity.customer.dateAdded is DateTime cAdd
+            ? cAdd : DateTime.MinValue;
+        DateTime cCxl = entity.customer.dateCancelled is DateTime cxl
+            ? cxl : DateTime.MinValue;
+        DateTimeOffset ceDate = _dt.Convert(cAdded, ETimeZone.Pacific);
+        DateTimeOffset ceDateCancelled = _dt.Convert(cCxl, ETimeZone.Pacific);
         Custard ce = new
         (
             Id: entity.customerID,
@@ -32,9 +36,11 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
         );
 
         // Convert Dates
-        DateTimeOffset subDate = _dt.Convert(entity.dateAdded, ETimeZone.Pacific);
-        DateTimeOffset cancelDate = entity.dateCancelled != DateTime.MinValue
-            ? _dt.Convert(entity.dateCancelled, ETimeZone.Pacific)
+        DateTimeOffset subDate = entity.dateAdded is DateTime added
+            ? _dt.Convert(added, ETimeZone.Pacific)
+            : DateTime.MinValue;
+        DateTimeOffset cancelDate = entity.dateCancelled is not null && entity.dateCancelled != DateTime.MinValue
+            ? _dt.Convert((DateTime)entity.dateCancelled, ETimeZone.Pacific)
             : DateTime.MinValue;
 
         // Get offerman

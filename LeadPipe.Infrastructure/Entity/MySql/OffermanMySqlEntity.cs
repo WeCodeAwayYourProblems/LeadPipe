@@ -28,7 +28,7 @@ public class OffermanMySqlEntity
     public string? phone { get; set; }
     public string? licenseNumber { get; set; }
     public int fds { get; set; }
-    public DateTime dateDeleted { get; set; }
+    public DateTime? dateDeleted { get; set; }
 
     // Navigation property
     public ICollection<SandMySqlEntity> SandEntities { get; set; } = [];

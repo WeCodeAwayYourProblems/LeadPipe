@@ -13,8 +13,12 @@ internal class CustardMySqlEntityToCustard(IDateTimeTranslate dt) : IEntityToVo<
         PhoneNumber phone1 = PhoneNumber.TryParse(entity.phone1, out var p1) ? p1 : new PhoneNumber(PhoneNumber.Default);
         PhoneNumber phone2 = PhoneNumber.TryParse(entity.phone2, out var p2) ? p2 : new PhoneNumber(PhoneNumber.Default);
 
-        DateTimeOffset date = _dt.Convert(entity.dateAdded, ETimeZone.Pacific);
-        DateTimeOffset dateCancelled = _dt.Convert(entity.dateCancelled, ETimeZone.Pacific);
+        DateTime d = entity.dateAdded is DateTime added
+            ? added : DateTime.MinValue;
+        DateTime dcxl = entity.dateCancelled is DateTime cxl
+            ? cxl : DateTime.MinValue;
+        DateTimeOffset date = _dt.Convert(d, ETimeZone.Pacific);
+        DateTimeOffset dateCancelled = _dt.Convert(dcxl, ETimeZone.Pacific);
 
         bool status = entity.status == 1;
 

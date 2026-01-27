@@ -19,8 +19,8 @@ public static class InjectInfrastructureMySql
         if (string.IsNullOrWhiteSpace(settings.Schema1ConnectionString))
             throw new InvalidOperationException("MySqlConnectionString for Schema1 is missing.");
 
-        bool globalUseInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase");
-        bool globalSensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging");
+        bool globalUseInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase", false);
+        bool globalSensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging", false);
         LogLevel globalLogLevel = config.GetValue("Ef:LogLevel", LogLevel.Information);
 
         bool useInMemory = config.GetValue(

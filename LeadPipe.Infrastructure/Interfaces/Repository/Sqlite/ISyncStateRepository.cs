@@ -5,7 +5,7 @@ namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
 public interface ISyncStateRepository
 {
-    Task<Result<SyncStateEntity>> GetAsync();
-    Task<Result<SyncStateEntity>> SaveAsync(SyncStateEntity entity);
+    Task<Result<List<SyncStateEntity>>> UpsertRangeAsync(List<SyncStateEntity> entities);
+    Task<Result<SyncStateEntity>> GetByIdAsync(BusinessId id);
 }
 

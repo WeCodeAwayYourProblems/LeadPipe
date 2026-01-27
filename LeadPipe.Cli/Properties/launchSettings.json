@@ -1,6 +1,8 @@
 {
   "profiles": {
+    // *******************************************
     // Example
+    // *******************************************
     "Example - All Options Dev": {
       "commandName": "Project",
       "commandLineArgs": "example -f ./ -s ../ -t ../../../",
@@ -16,7 +18,9 @@
       }
     },
 
+    // *******************************************
     // Data Reporting
+    // *******************************************
     "Data report only": {
       "commandName": "Project",
       "commandLineArgs": "data -r",
@@ -32,7 +36,9 @@
       }
     },
 
+    // *******************************************
     // Data Updating
+    // *******************************************
     "Data update only | Get all data": {
       "commandName": "Project",
       "commandLineArgs": "data -u",
@@ -47,8 +53,24 @@
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
+    "Data update only | Get all data | Yeller": {
+      "commandName": "Project",
+      "commandLineArgs": "data -us Yeller",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update only | Refresh data | Yeller": {
+      "commandName": "Project",
+      "commandLineArgs": "data -Rus Yeller",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
 
+    // *******************************************
     // Data Updating AND Reporting 
+    // *******************************************
     "Data update and report | Get all data": {
       "commandName": "Project",
       "commandLineArgs": "data",

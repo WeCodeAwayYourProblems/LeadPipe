@@ -11,61 +11,67 @@ public class SyncStateRepository(PlumbingContext context) : ISyncStateRepository
     private readonly PlumbingContext _context = context;
     private readonly DbSet<SyncStateEntity> _set = context.Set<SyncStateEntity>();
 
-    public async Task<Result<SyncStateEntity>> GetAsync()
+    public async Task<Result<SyncStateEntity>> GetByIdAsync(BusinessId id)
     {
         try
         {
-            var entity = await _set.FirstOrDefaultAsync();
+            SyncStateEntity? entity = await _set
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.BusinessId == id);
 
             if (entity is null)
-            {
-                // Always use a fixed ID
-                entity = new SyncStateEntity
-                {
-                    LastProcessedId = "",
-                    LastSyncUtc = DateTime.UtcNow,
-                    UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-                };
-
-                await _set.AddAsync(entity);
-                await _context.SaveChangesAsync();
-            }
+                return Result.Failure<SyncStateEntity>(
+                    $"SyncState not found for BusinessId '{id}'");
 
             return Result.Success(entity);
         }
         catch (Exception ex)
         {
-            return Result.Failure<SyncStateEntity>($"Failed to retrieve SyncState: {ex.Message}");
+            return Result.Failure<SyncStateEntity>(
+                $"Failed to retrieve SyncState for BusinessId '{id}': {ex}");
         }
     }
 
-    public async Task<Result<SyncStateEntity>> SaveAsync(SyncStateEntity updated)
+    public async Task<Result<List<SyncStateEntity>>> UpsertRangeAsync(List<SyncStateEntity> entities)
     {
+        if (entities is null || entities.Count == 0)
+            return Result.Success(new List<SyncStateEntity>());
+
         try
         {
-            SyncStateEntity? existing = await _set.FirstOrDefaultAsync();
+            // Pull all existing rows for the incoming business IDs in one round-trip
+            var businessIds = entities.Select(e => e.BusinessId).ToList();
 
-            if (existing is null)
+            List<SyncStateEntity> existing = await _set
+                .Where(x => businessIds.Contains(x.BusinessId))
+                .ToListAsync();
+
+            Dictionary<BusinessId, SyncStateEntity> existingByBusinessId = existing
+                .ToDictionary(x => x.BusinessId);
+
+            foreach (var incoming in entities)
             {
-                // First-time insert
-                await _set.AddAsync(updated);
-            }
-            else
-            {
-                // Update existing tracked entity
-                existing.LastProcessedId = updated.LastProcessedId;
-                existing.LastSyncUtc = updated.LastSyncUtc;
-                existing.UnixLastSyncUtc = updated.UnixLastSyncUtc;
+                if (existingByBusinessId.TryGetValue(incoming.BusinessId, out var tracked))
+                {
+                    // Update tracked entity
+                    tracked.LastProcessedId = incoming.LastProcessedId;
+                    tracked.LastSyncUtc = incoming.LastSyncUtc;
+                    tracked.UnixLastSyncUtc = incoming.UnixLastSyncUtc;
+                }
+                else
+                {
+                    await _set.AddAsync(incoming);
+                }
             }
 
             await _context.SaveChangesAsync();
 
-            // Return the entity actually saved
-            return Result.Success(existing ?? updated);
+            return Result.Success(entities);
         }
         catch (Exception ex)
         {
-            return Result.Failure<SyncStateEntity>($"Failed to save SyncState: {ex.Message}");
+            return Result.Failure<List<SyncStateEntity>>(
+                $"Failed to upsert SyncState range: {ex}");
         }
     }
 }

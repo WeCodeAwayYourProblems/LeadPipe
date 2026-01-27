@@ -23,7 +23,7 @@ public sealed class CaliperMySqlDataSource(
 
     public async Task<Result<List<CaliperMySqlEntity>>> RefreshAsync()
     {
-        // Find the most recent call date in the call repository
+        // Find the most recent caliper date in the caliper repository
         Result<List<CaliperEntity>> calipersResult = await _caliper.GetAllAsync();
         if (calipersResult.IsFailure || calipersResult.Value.Count == 0)
             return await LoadAsync();

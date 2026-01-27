@@ -7,7 +7,7 @@ public interface ILabSettings
     string? LabId { get; set; }
     string? LabSecret { get; set; }
     string? LabName { get; set; }
-    string? LabUri { get; set; }
+    string? LabBase { get; set; }
     string? LabPlumbing { get; set; }
     string? LabAuth { get; set; }
     Token? LabToken { get; set; }

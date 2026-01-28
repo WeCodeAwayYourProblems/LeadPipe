@@ -185,6 +185,8 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
+                
+                // Keep append instead of multiline interpolated string because this is faster, and with millions of upserts, every little bit counts
                 sql.Append('(')
                    .Append($"{e.Id}, ")
                    .Append($"{e.CustardId}, ")

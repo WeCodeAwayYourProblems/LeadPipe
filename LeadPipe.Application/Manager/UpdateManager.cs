@@ -24,6 +24,8 @@ public sealed class UpdateManager(
 
     private const string _associateStr = "Associate"; // DO NOT change this string if you've migrated any crud dbs
 
+    #region Implementation
+
     public async Task<Result> Manage(Source source, bool refresh)
     {
         Result globals = await RunGlobals(refresh);
@@ -39,8 +41,7 @@ public sealed class UpdateManager(
 
     public async Task<Result> Manage(bool refresh)
     {
-        // UpdateGlobals
-        var globals = await RunGlobals(refresh);
+        Result globals = await RunGlobals(refresh);
         if (globals.IsFailure) return globals;
 
         // Update All Sources
@@ -56,6 +57,10 @@ public sealed class UpdateManager(
         Result combined = Result.Combine(" | ", [.. results, associated]);
         return combined;
     }
+
+    #endregion
+
+    #region Helpers
 
     private async Task<Result> RunSource(Source source, bool refresh) 
         => await RunIfDue(source, nameof(Plumbing), refresh, _update.GetService<Plumbing>(source));
@@ -136,4 +141,5 @@ public sealed class UpdateManager(
         return result;
     }
 
+    #endregion
 }

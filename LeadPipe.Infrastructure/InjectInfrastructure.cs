@@ -127,27 +127,31 @@ public static class InjectInfrastructure
         services.AddScoped<IEntityAssociationService, EntityAssociationService>();
         services.AddScoped<IYellerService, YellerClientService>();
 
+        services.AddScoped<ISyncGate, SyncGate>();
+
         #endregion
         // *****************************************
 
         // *****************************************
         #region ADD CLIENTS
 
-        bool useTestClients = config.GetValue<bool>("HttpClients:UseTestClients");
+        bool useTestClientsGlobal = config.GetValue<bool>("HttpClients:UseTestClients", false);
 
         // Add Leaf Client
-        RegisterHttpClient(settings.LeafName, settings.LeafBase, "application/json", settings.LeafToken, _leafDto, services, useTestClients);
+        RegisterHttpClient(settings.LeafName, settings.LeafBase, "application/json", settings.LeafToken, _leafDto, services, useTestClientsGlobal);
 
         // Add Lab Client
         if (string.IsNullOrWhiteSpace(settings.LabAccept))
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, _labDto, services, useTestClients);
+        RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, _labDto, services, useTestClientsGlobal);
 
         // Add Yeller Client
-        RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, "application/json", settings.YellerToken, _yellerDto, services, useTestClients);
+        bool useYellerGetterTestClient = config.GetValue<bool>("HttpClients:Yeller:Getter:UseTestClients", useTestClientsGlobal);
+        RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, "application/json", settings.YellerToken, _yellerDto, services, useYellerGetterTestClient);
 
         // Add Second Yeller Client
-        RegisterHttpClient(settings.YellerReporterName, settings.YellerBase, "application/json", settings.YellerToken, "{}", services, useTestClients);
+        bool useYellerReporterTestClient = config.GetValue("HttpClients:Yeller:Reporter:UseTestClients", useTestClientsGlobal);
+        RegisterHttpClient(settings.YellerReporterName, settings.YellerBase, "application/json", settings.YellerToken, "{}", services, useYellerReporterTestClient);
 
         #endregion
         // *****************************************

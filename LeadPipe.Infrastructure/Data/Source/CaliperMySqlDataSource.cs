@@ -16,7 +16,7 @@ public sealed class CaliperMySqlDataSource(
     private readonly IRepository<CaliperEntity> _caliper = factory.GetRepository<CaliperEntity>();
     public async Task<Result<List<CaliperMySqlEntity>>> LoadAsync()
     {
-        DateTime dateFilter = DateTime.UtcNow.AddYears(-1);
+        DateTime dateFilter = new(DateTime.UtcNow.Year - 1, 1, 1);
         Result<List<CaliperMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= dateFilter, true);
         return found;
     }

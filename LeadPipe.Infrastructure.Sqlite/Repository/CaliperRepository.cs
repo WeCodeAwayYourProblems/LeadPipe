@@ -177,19 +177,18 @@ public sealed class CaliperRepository
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
+                sql.Append('(')
+                    .Append(e.PhoneNumber).Append(',')
+                    .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}',")
+                    .Append($"{e.UnixDate},")
+                    .Append($"'{Clean(e.Note)}',")
+                    .Append($"'{Clean(e.Source)}',")
+                    .Append($"'{Clean(e.Location)}',")
+                    .Append($"{e.Duration},")
+                    .Append($"{(e.Billable ? 1 : 0)}")
+                    .Append(')');
+                sql.AppendLine();
 
-                sql.Append($"""
-                (
-                    {e.PhoneNumber},
-                    '{e.Date:yyyy-MM-dd HH:mm:ss}',
-                    {e.UnixDate},
-                    '{Clean(e.Note)}',
-                    '{Clean(e.Source)}',
-                    '{Clean(e.Location)}',
-                    {e.Duration},
-                    {(e.Billable ? 1 : 0)}
-                )
-                """);
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");

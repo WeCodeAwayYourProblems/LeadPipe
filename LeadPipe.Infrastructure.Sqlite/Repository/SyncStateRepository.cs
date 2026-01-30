@@ -17,7 +17,7 @@ public class SyncStateRepository(PlumbingContext context) : ISyncStateRepository
         {
             SyncStateEntity? entity = await _set
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.BusinessId == id);
+                .SingleOrDefaultAsync(x => x.BusinessId == id);
 
             if (entity is null)
                 return Result.Failure<SyncStateEntity>(
@@ -40,7 +40,7 @@ public class SyncStateRepository(PlumbingContext context) : ISyncStateRepository
         try
         {
             // Pull all existing rows for the incoming business IDs in one round-trip
-            var businessIds = entities.Select(e => e.BusinessId).ToList();
+            List<BusinessId> businessIds = [.. entities.Select(e => e.BusinessId)];
 
             List<SyncStateEntity> existing = await _set
                 .Where(x => businessIds.Contains(x.BusinessId))

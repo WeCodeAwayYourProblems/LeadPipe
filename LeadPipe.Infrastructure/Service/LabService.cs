@@ -20,6 +20,7 @@ internal class LabService : ILabService
     private readonly ILabSettings _settings;
     private readonly IRepository<PlumbingEntity> _plumbingRepo;
     private readonly SemaphoreSlim _throttle;
+    private readonly JsonSerializerOptions _options;
 
     public LabService(
         IHttpClientFactory httpClientFactory,
@@ -34,6 +35,10 @@ internal class LabService : ILabService
         _settings = settings;
         _plumbingRepo = plumbingRepo;
         _throttle = new(_settings.LabConcurrentMax!);
+        _options = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
     }
     #endregion
 
@@ -56,7 +61,7 @@ internal class LabService : ILabService
         bool resume = true;
         var allDtos = new List<LabDto>();
         int errors = 0;
-        int page = 1; // page is a page number, not an index
+        int page = 1; // page is a page number, not an index, which is why it's 1-based and not zero-based
 
         while (resume)
         {
@@ -112,10 +117,7 @@ internal class LabService : ILabService
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            dtos = JsonSerializer.Deserialize<List<LabDto>>(content, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            dtos = JsonSerializer.Deserialize<List<LabDto>>(content, _options);
 
         }
         catch (Exception ex)
@@ -127,7 +129,7 @@ internal class LabService : ILabService
         {
             _throttle.Release();
         }
-        return Result.Success(dtos ?? new List<LabDto>());
+        return Result.Success(dtos ?? []);
     }
 
     public async Task<Result<List<Plumbing>>> GetLabsAsync(int errorLimit = 5)

@@ -17,5 +17,4 @@ internal class TableNames
     public const string SandCaliperLinksName = nameof(PlumbingContext.SandCaliperLinks);
     public const string SandCornLinksName = nameof(PlumbingContext.SandCornLinks);
     public const string SandPlumbingLinksName = nameof(PlumbingContext.SandPlumbingLinks);
-
 }

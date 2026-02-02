@@ -82,5 +82,5 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
 
 
     // SyncState
-    public int HourInterval { get; set; }
+    public double HourInterval { get; set; }
 }

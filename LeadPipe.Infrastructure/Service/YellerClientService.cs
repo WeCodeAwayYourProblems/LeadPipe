@@ -83,7 +83,7 @@ internal class YellerClientService : IYellerService
         allRaw = [.. allRaw.Distinct()];
 
         // finalId is an opaque, API-defined cursor (alphanumeric).
-        // We intentionally persist the last cursor returned by the API,
+        // We intentionally persist the first cursor returned by the API,
         // not a computed max, because ordering semantics are undocumented.
         List<SyncStateEntity> states = [];
         foreach (var bId in finalIds.Keys)

@@ -154,7 +154,9 @@ public sealed class CornRepository(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(CornEntity));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
+                nameof(CornEntity),
+                ex.Message);
             return Result.Failure<List<CornEntity>>(ex.ToString());
         }
 

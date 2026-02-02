@@ -136,7 +136,7 @@ public static class InjectInfrastructure
         // *****************************************
         #region ADD CLIENTS
 
-        bool useTestClientsGlobal = config.GetValue<bool>("HttpClients:UseTestClients", false);
+        bool useTestClientsGlobal = config.GetValue("HttpClients:UseTestClients", false);
         string accept = "application/json";
 
         // Add Leaf Client
@@ -148,7 +148,8 @@ public static class InjectInfrastructure
         RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
 
         // Add Yeller Client
-        bool useYellerGetterTestClient = config.GetValue<bool>("HttpClients:Yeller:Getter:UseTestClients", useTestClientsGlobal);
+        bool useYellerGetterTestClient = config.GetValue("HttpClients:Yeller:Getter:UseTestClients", useTestClientsGlobal);
+
         RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
         // Add Second Yeller Client
@@ -213,7 +214,7 @@ public static class InjectInfrastructure
             return Task.FromResult(response);
         }
     }
-    
+
     public class YellerTestHttpMessageHandler(string prelim, string final, IYellerSettings settings) : BaseTestHttpMessageHandler(final)
     {
         private readonly IYellerSettings _settings = settings;

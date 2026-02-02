@@ -4,10 +4,10 @@ namespace LeadPipe.Application.Service;
 
 public interface ISyncGate
 {
-    Task<bool> ShouldRunAsync(Source source, string entity);
-    Task<bool> ShouldRunAsync(string entity);
-    Task MarkSuccessAsync(Source source, string entity);
-    Task MarkSuccessAsync(string entity);
-    Task MarkFailureAsync(Source source, string entity, string error);
-    Task MarkFailureAsync(string entity, string error);
+    Task<bool> ShouldRunAsync(Source source, SyncKey key);
+    Task<bool> ShouldRunAsync(SyncKey key);
+    Task MarkSuccessAsync(Source source, SyncKey key);
+    Task MarkSuccessAsync(SyncKey key);
+    Task MarkFailureAsync(Source source, SyncKey key, string error);
+    Task MarkFailureAsync(SyncKey key, string error);
 }

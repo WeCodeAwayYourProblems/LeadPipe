@@ -80,11 +80,12 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                         nameof(PlumbingEntity),
-                        batchSize);
+                        batchSize,
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -185,8 +186,9 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed",
-                nameof(PlumbingEntity));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
+                nameof(PlumbingEntity), 
+                ex.Message);
             return Result.Failure<List<PlumbingEntity>>(ex.ToString());
         }
 

@@ -2,5 +2,5 @@
 
 public interface ISyncSettings
 {
-    int HourInterval { get; set; }
+    double HourInterval { get; set; }
 }

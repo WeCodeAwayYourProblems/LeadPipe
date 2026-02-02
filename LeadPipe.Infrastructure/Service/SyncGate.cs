@@ -15,7 +15,7 @@ public sealed class SyncGate(
     private readonly ISyncStateRepository _repo = repo;
     private readonly TimeSpan _interval = TimeSpan.FromHours(settings.HourInterval);
 
-    public async Task<bool> ShouldRunAsync(Source source, string entity)
+    public async Task<bool> ShouldRunAsync(Source source, SyncKey entity)
     {
         BusinessId id = BuildBusinessId(source, entity);
 
@@ -34,7 +34,7 @@ public sealed class SyncGate(
         return run;
     }
 
-    public async Task<bool> ShouldRunAsync(string entity)
+    public async Task<bool> ShouldRunAsync(SyncKey entity)
     {
         BusinessId id = BuildBusinessId(null, entity);
 
@@ -51,28 +51,28 @@ public sealed class SyncGate(
         return run;
     }
 
-    public async Task MarkSuccessAsync(Source source, string entity)
+    public async Task MarkSuccessAsync(Source source, SyncKey entity)
     {
         await UpsertAsync(source, entity);
     }
 
-    public async Task MarkSuccessAsync(string entity)
+    public async Task MarkSuccessAsync(SyncKey entity)
     {
         await UpsertAsync(null, entity);
     }
 
-    public async Task MarkFailureAsync(Source source, string entity, string error)
+    public async Task MarkFailureAsync(Source source, SyncKey entity, string error)
     {
         // don't currently persist error state.
         await UpsertAsync(source, entity);
     }
 
-    public async Task MarkFailureAsync(string entity, string error)
+    public async Task MarkFailureAsync(SyncKey entity, string error)
     {
         await UpsertAsync(null, entity);
     }
 
-    private async Task UpsertAsync(Source? source, string entity)
+    private async Task UpsertAsync(Source? source, SyncKey entity)
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
@@ -87,13 +87,13 @@ public sealed class SyncGate(
         await _repo.UpsertRangeAsync([state]);
     }
 
-    private static BusinessId BuildBusinessId(Source? source, string entity)
+    private static BusinessId BuildBusinessId(Source? source, SyncKey entity)
     {
         string scope = source is null 
             ? "global" 
             : source.ToString()!.ToLowerInvariant();
 
-        return BusinessId.From($"{scope}:{entity}");
+        return BusinessId.From($"{scope}:{entity.Value}");
     }
 }
 

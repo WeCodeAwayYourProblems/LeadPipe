@@ -163,7 +163,7 @@ public sealed class CaliperRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(CaliperEntity));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", nameof(CaliperEntity), ex.Message);
             return Result.Failure<List<CaliperEntity>>(ex.ToString());
         }
 

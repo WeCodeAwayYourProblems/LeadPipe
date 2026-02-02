@@ -89,11 +89,12 @@ public sealed class CustardRepository
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                         nameof(CustardEntity),
-                        batchSize);
+                        batchSize,
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -179,7 +180,7 @@ public sealed class CustardRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(CustardEntity));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", nameof(CustardEntity), ex.Message);
             return Result.Failure<List<CustardEntity>>(ex.ToString());
         }
 

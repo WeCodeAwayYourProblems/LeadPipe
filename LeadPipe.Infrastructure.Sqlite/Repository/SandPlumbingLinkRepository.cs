@@ -68,11 +68,12 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                        nameof(SandPlumbingLink),
-                       batchSize);
+                       batchSize,
+                       ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -146,8 +147,9 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed",
-                nameof(SandPlumbingLink));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
+                nameof(SandPlumbingLink),
+                ex.Message);
             return Result.Failure<List<SandPlumbingLink>>(ex.Message);
         }
 

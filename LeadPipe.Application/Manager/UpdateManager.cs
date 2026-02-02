@@ -22,8 +22,6 @@ public sealed class UpdateManager(
     private readonly IEntityAssociationService _associate = associate;
     private readonly ISyncGate _syncGate = syncGate;
 
-    private const string _associateStr = "Associate"; // DO NOT change this string if you've migrated any crud dbs
-
     #region Implementation
 
     public async Task<Result> Manage(Source source, bool refresh)
@@ -63,7 +61,7 @@ public sealed class UpdateManager(
     #region Helpers
 
     private async Task<Result> RunSource(Source source, bool refresh) 
-        => await RunIfDue(source, nameof(Plumbing), refresh, _update.GetService<Plumbing>(source));
+        => await RunIfDue(source, SyncKey.Plumbing, refresh, _update.GetService<Plumbing>(source));
 
     /// <summary>
     /// Whenever you need to update new global value objects, this is where they will update
@@ -72,15 +70,15 @@ public sealed class UpdateManager(
     /// <returns></returns>
     private async Task<Result> RunGlobals(bool refresh)
     {
-        Result caliperSaved = await RunIfDue(nameof(Caliper), refresh, _call);
+        Result caliperSaved = await RunIfDue(SyncKey.Caliper, refresh, _call);
         if (caliperSaved.IsFailure) 
             return caliperSaved;
 
-        Result custardSaved = await RunIfDue(nameof(Custard), refresh, _custard);
+        Result custardSaved = await RunIfDue(SyncKey.Custard, refresh, _custard);
         if (custardSaved.IsFailure) 
             return custardSaved;
 
-        Result sandwichSaved = await RunIfDue(nameof(Sandwich), refresh, _sandwich);
+        Result sandwichSaved = await RunIfDue(SyncKey.Sandwich, refresh, _sandwich);
         if (sandwichSaved.IsFailure) 
             return sandwichSaved;
 
@@ -100,46 +98,47 @@ public sealed class UpdateManager(
 
     private async Task<Result> AssociateIfDue()
     {
-        if (!await _syncGate.ShouldRunAsync(_associateStr))
+        var key = SyncKey.Associate;
+        if (!await _syncGate.ShouldRunAsync(key))
             return Result.Success();
 
         Result result = await _associate.AssociateAsync();
         if (result.IsSuccess)
-            await _syncGate.MarkSuccessAsync(_associateStr);
+            await _syncGate.MarkSuccessAsync(key);
         else
-            await _syncGate.MarkFailureAsync(_associateStr, result.Error);
+            await _syncGate.MarkFailureAsync(key, result.Error);
 
         return result;
     }
 
-    private async Task<Result> RunIfDue<T>(Source source, string entity, bool refresh, IUpdateService<T> service)
+    private async Task<Result> RunIfDue<T>(Source source, SyncKey key, bool refresh, IUpdateService<T> service)
     {
-        bool shouldRun = await _syncGate.ShouldRunAsync(source, entity);
+        bool shouldRun = await _syncGate.ShouldRunAsync(source, key);
         if (!shouldRun)
             return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, service);
 
         if (result.IsSuccess)
-            await _syncGate.MarkSuccessAsync(source, entity);
+            await _syncGate.MarkSuccessAsync(source, key);
         else
-            await _syncGate.MarkFailureAsync(source, entity, result.Error);
+            await _syncGate.MarkFailureAsync(source, key, result.Error);
 
         return result;
     }
 
-    private async Task<Result> RunIfDue<T>(string entity, bool refresh, IUpdateService<T> service)
+    private async Task<Result> RunIfDue<T>(SyncKey key, bool refresh, IUpdateService<T> service)
     {
-        bool shouldRun = await _syncGate.ShouldRunAsync(entity);
+        bool shouldRun = await _syncGate.ShouldRunAsync(key);
         if (!shouldRun)
             return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, service);
 
         if (result.IsSuccess)
-            await _syncGate.MarkSuccessAsync(entity);
+            await _syncGate.MarkSuccessAsync(key);
         else
-            await _syncGate.MarkFailureAsync(entity, result.Error);
+            await _syncGate.MarkFailureAsync(key, result.Error);
 
         return result;
     }

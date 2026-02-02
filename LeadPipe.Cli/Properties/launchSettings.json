@@ -84,6 +84,20 @@
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
+    },
+    "Data update and report | Get all data | Yeller": {
+      "commandName": "Project",
+      "commandLineArgs": "data -s Yeller",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update and report | Refresh data | Yeller": {
+      "commandName": "Project",
+      "commandLineArgs": "data -Rs Yeller",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     }
   }
 }

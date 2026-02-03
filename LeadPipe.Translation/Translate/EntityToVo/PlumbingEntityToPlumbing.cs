@@ -10,7 +10,7 @@ internal class PlumbingEntityToPlumbing : IEntityToVo<PlumbingEntity, Plumbing>
     {
         var number = new PhoneNumber(entity.PhoneNumber);
         DateTime d = DateTime.SpecifyKind(entity.Date, DateTimeKind.Utc);
-        DateTimeOffset date = new(d, TimeSpan.FromSeconds(0));
+        DateTimeOffset date = new(d, TimeSpan.Zero);
         var contents = entity.Contents;
         var source = entity.Source;
 

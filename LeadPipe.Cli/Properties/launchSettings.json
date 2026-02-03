@@ -98,6 +98,20 @@
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
+    },
+    "Data update and report | Get all data | Lab": {
+      "commandName": "Project",
+      "commandLineArgs": "data -s Lab",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update and report | Refresh data | Lab": {
+      "commandName": "Project",
+      "commandLineArgs": "data -Rs Lab",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     }
   }
 }

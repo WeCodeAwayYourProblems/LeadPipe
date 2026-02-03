@@ -282,11 +282,7 @@ public static class InjectInfrastructure
                 }]
     }, _options);
 
-    private static readonly string _labDto = JsonSerializer.Serialize<List<LabDto>>([new LabDto()
-    {
-        PhoneNumber = 5555555555,
-        Date = _creationDate
-    }], _options);
+    private static readonly string _labDto = JsonSerializer.Serialize<List<LabDto>>([new LabDto()], _options);
 
     private static readonly string _yellerDto = JsonSerializer.Serialize(new YellerDto()
     {

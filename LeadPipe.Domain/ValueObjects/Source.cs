@@ -2,6 +2,9 @@
 
 public enum Source
 {
+    Test,
+    Test2,
+
     Calli,
     Lab,
     Leaf,
@@ -9,6 +12,4 @@ public enum Source
     Libacion,
     Pan,
     Yeller,
-    Test,
-    Test2,
 }

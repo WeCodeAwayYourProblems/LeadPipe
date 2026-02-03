@@ -60,7 +60,7 @@ public sealed class UpdateManager(
 
     #region Helpers
 
-    private async Task<Result> RunSource(Source source, bool refresh) 
+    private async Task<Result> RunSource(Source source, bool refresh)
         => await RunIfDue(source, SyncKey.Plumbing, refresh, _update.GetService<Plumbing>(source));
 
     /// <summary>
@@ -71,15 +71,15 @@ public sealed class UpdateManager(
     private async Task<Result> RunGlobals(bool refresh)
     {
         Result caliperSaved = await RunIfDue(SyncKey.Caliper, refresh, _call);
-        if (caliperSaved.IsFailure) 
+        if (caliperSaved.IsFailure)
             return caliperSaved;
 
         Result custardSaved = await RunIfDue(SyncKey.Custard, refresh, _custard);
-        if (custardSaved.IsFailure) 
+        if (custardSaved.IsFailure)
             return custardSaved;
 
         Result sandwichSaved = await RunIfDue(SyncKey.Sandwich, refresh, _sandwich);
-        if (sandwichSaved.IsFailure) 
+        if (sandwichSaved.IsFailure)
             return sandwichSaved;
 
         return Result.Success();

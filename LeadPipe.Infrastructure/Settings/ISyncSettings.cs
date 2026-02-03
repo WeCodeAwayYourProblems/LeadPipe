@@ -2,5 +2,13 @@
 
 public interface ISyncSettings
 {
-    double HourInterval { get; set; }
+    double DefaultInterval { get; set; }
+    double DefaultSourceInterval { get; set; }
+    double CalliInterval { get; set; }
+    double LabInterval {get;set;}
+    double LeafInterval {get;set;}
+    double LeasedInterval {get;set;}
+    double LibacionInterval {get;set;}
+    double PanInterval {get;set;}
+    double YellerInterval {get;set;}
 }

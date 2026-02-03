@@ -13,7 +13,6 @@ public sealed record SyncKey
     public static readonly SyncKey Sandwich = new(nameof(Sandwich).ToLowerInvariant());
     public static readonly SyncKey Associate = new("association");
 
-
     // All predefined keys for TryParse and iteration
     private static readonly List<SyncKey> AllKeys =
     [

@@ -1,10 +1,13 @@
-﻿namespace LeadPipe.Infrastructure.Dto;
+﻿
+namespace LeadPipe.Infrastructure.Dto;
 
 #pragma warning disable IDE1006 // Naming Styles
-public class LabDto
+public class LabHelperDto
 {
     public bool status { get; set; }
     public Data? data { get; set; }
+    public long PhoneNumber { get; internal set; }
+    public DateTime Date { get; internal set; }
 }
 
 public class Data
@@ -13,7 +16,7 @@ public class Data
     public int per_page { get; set; }
     public int current_page { get; set; }
     public int last_page { get; set; }
-    public Item[]? items { get; set; }
+    public LabDto[]? items { get; set; }
     public string? next_page { get; set; }
     public object[]? checked_projects { get; set; }
     public Filters? filters { get; set; }
@@ -41,7 +44,7 @@ public class Date
     public bool default_selected { get; set; }
 }
 
-public class Item
+public class LabDto
 {
     public int id { get; set; }
     public int credits_required { get; set; }

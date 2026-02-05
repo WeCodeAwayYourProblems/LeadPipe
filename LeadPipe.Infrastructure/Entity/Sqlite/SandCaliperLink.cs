@@ -7,11 +7,12 @@
 public class SandCaliperLink : IEntity
 {
     public long Id { get; set; }
-    public long SandId { get; set; }
+    public required long SandId { get; set; }
     public SandEntity? SandEntity { get; set; }
 
-    public long CaliperId { get; set; }
+    public required long CaliperId { get; set; }
     public CaliperEntity? CaliperEntity { get; set; }
 
-    public long MatchingPhone { get; set; }
+    public required long MatchingPhone { get; set; }
+    public required long UnixMatchDate { get; set; }
 }

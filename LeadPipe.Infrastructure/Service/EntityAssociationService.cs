@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
@@ -103,253 +104,336 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
     }
 
     // Custard to Corn
-    private static List<CustardCornLink> GenerateCustardCornLinks(List<CustardEntity> custards, List<CornEntity> corns, HashSet<(long CustardId, long CornId)> existing)
+    private static List<CustardCornLink> GenerateCustardCornLinks(
+        List<CustardEntity> custards,
+        List<CornEntity> corns,
+        HashSet<(long CustardId, long CornId)> existing)
     {
         List<CustardCornLink> results = [];
 
         // Build Corn lookup by phone
-        Dictionary<long, CornEntity> cornByPhone = corns
+        var byPhone = corns
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(g => g.Key, g => g.Last());
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (CustardEntity c in custards)
+        foreach (CustardEntity e in custards)
         {
-            foreach (long phone in new[] { c.PhoneNumber, c.PhoneNumber2 })
-            {
-                if (!cornByPhone.TryGetValue(phone, out var corn))
-                    continue;
-
-                var key = (c.Id, corn.Id);
-                if (existing.Contains(key))
-                    continue;
-
-                results.Add(new CustardCornLink
+            var link = CreateLink(
+                e,
+                [e.PhoneNumber, e.PhoneNumber2],
+                byPhone,
+                existing,
+                (corn, custard, phone) => new CustardCornLink
                 {
-                    CustardId = c.Id,
+                    CustardId = e.Id,
                     CornId = corn.Id,
-                    MatchingPhone = phone
-                });
-            }
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = corn.UnixDate
+                }
+            );
+            results.AddRange(link);
         }
 
         return results;
     }
 
     // Custard to Plumbing
-    private static List<CustardPlumbingLink> GenerateCustardPlumbingLinks(List<CustardEntity> custards, List<PlumbingEntity> plumbings, HashSet<(long CustardId, long PlumbingId)> existing)
+    private static List<CustardPlumbingLink> GenerateCustardPlumbingLinks(
+        List<CustardEntity> custards,
+        List<PlumbingEntity> plumbings,
+        HashSet<(long CustardId, long PlumbingId)> existing)
     {
         var results = new List<CustardPlumbingLink>();
 
-        var plumbingByPhone = plumbings
-            .GroupBy(p => p.PhoneNumber)
-            .ToDictionary(g => g.Key, g => g.Last());
+        var byPhone = plumbings
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
+            .GroupBy(c => c.PhoneNumber)
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (CustardEntity c in custards)
+        foreach (CustardEntity e in custards)
         {
-            foreach (long phone in new[] { c.PhoneNumber, c.PhoneNumber2 })
-            {
-                if (!plumbingByPhone.TryGetValue(phone, out var plumbing))
-                    continue;
-
-                var key = (c.Id, plumbing.Id);
-                if (existing.Contains(key))
-                    continue;
-
-                results.Add(new CustardPlumbingLink
+            var link = CreateLink(
+                e,
+                [e.PhoneNumber, e.PhoneNumber2],
+                byPhone,
+                existing,
+                (custard, plumbing, phone) => new CustardPlumbingLink
                 {
-                    CustardId = c.Id,
+                    CustardId = e.Id,
                     PlumbingId = plumbing.Id,
-                    MatchingPhone = phone
-                });
-            }
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = plumbing.UnixDate
+                }
+            );
+            results.AddRange(link);
         }
 
         return results;
     }
 
     // Custard to Caliper
-    private static List<CustardCaliperLink> GenerateCustardCaliperLinks(List<CustardEntity> custards, List<CaliperEntity> calipers, HashSet<(long CustardId, long CaliperId)> existing)
+    private static List<CustardCaliperLink> GenerateCustardCaliperLinks(
+        List<CustardEntity> custards,
+        List<CaliperEntity> calipers,
+        HashSet<(long CustardId, long CaliperId)> existing)
     {
         List<CustardCaliperLink> results = [];
 
-        Dictionary<long, CaliperEntity> caliperByPhone = calipers
+        var byPhone = calipers
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(g => g.Key, g => g.Last());
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (var c in custards)
+        foreach (CustardEntity e in custards)
         {
-            foreach (var phone in new[] { c.PhoneNumber, c.PhoneNumber2 })
-            {
-                if (!caliperByPhone.TryGetValue(phone, out var caliper))
-                    continue;
-
-                var key = (c.Id, caliper.Id);
-                if (existing.Contains(key))
-                    continue;
-
-                results.Add(new CustardCaliperLink
+            var link = CreateLink(
+                e,
+                [e.PhoneNumber, e.PhoneNumber2],
+                byPhone,
+                existing,
+                (custard, caliper, phone) => new CustardCaliperLink
                 {
-                    CustardId = c.Id,
+                    CustardId = e.Id,
                     CaliperId = caliper.Id,
-                    MatchingPhone = phone
-                });
-            }
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = caliper.UnixDate
+                }
+            );
+            results.AddRange(link);
         }
 
         return results;
     }
 
     // Sand to Plumbing
-    private static List<SandPlumbingLink> GenerateSandPlumbingLinks(List<SandEntity> sands, List<PlumbingEntity> plumbings, HashSet<(long SandId, long PlumbingId)> existing)
+    private static List<SandPlumbingLink> GenerateSandPlumbingLinks(
+        List<SandEntity> sands,
+        List<PlumbingEntity> plumbings,
+        HashSet<(long SandId, long PlumbingId)> existing)
     {
         List<SandPlumbingLink> results = [];
 
-        var plumbingByPhone = plumbings
-            .GroupBy(p => p.PhoneNumber)
-            .ToDictionary(g => g.Key, g => g.Last());
+        var byPhone = plumbings
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
+            .GroupBy(c => c.PhoneNumber)
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (SandEntity s in sands)
+        foreach (SandEntity e in sands)
         {
-            if (s.CustardEntity is null)
-                throw new Exception($"{nameof(SandEntity)} cannot have null navigation values to {nameof(s.CustardEntity)}");
-
-            foreach (long phone in new[] { s.CustardEntity.PhoneNumber, s.CustardEntity.PhoneNumber2 })
-            {
-                if (!plumbingByPhone.TryGetValue(phone, out var plumbing))
-                    continue;
-
-                var key = (s.Id, plumbing.Id);
-                if (existing.Contains(key))
-                    continue;
-
-                results.Add(new SandPlumbingLink
+            if (e.CustardEntity is null)
+                throw new Exception($"{nameof(SandEntity)} cannot have null navigation values to {nameof(e.CustardEntity)}");
+            var link = CreateLink(
+                e,
+                [e.CustardEntity.PhoneNumber, e.CustardEntity.PhoneNumber2],
+                byPhone,
+                existing,
+                (sand, plumbing, phone) => new SandPlumbingLink
                 {
-                    SandId = s.Id,
+                    SandId = e.Id,
                     PlumbingId = plumbing.Id,
-                    MatchingPhone = phone
-                });
-            }
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = plumbing.UnixDate
+                }
+             );
+            results.AddRange(link);
         }
 
         return results;
     }
 
     // Sand to Caliper
-    private static List<SandCaliperLink> GenerateSandCaliperLinks(List<SandEntity> sands, List<CaliperEntity> calipers, HashSet<(long SandId, long CaliperId)> existing)
+    private static List<SandCaliperLink> GenerateSandCaliperLinks(
+        List<SandEntity> sands,
+        List<CaliperEntity> calipers,
+        HashSet<(long SandId, long CaliperId)> existing)
     {
         List<SandCaliperLink> results = [];
 
-        Dictionary<long, CaliperEntity> caliperByPhone = calipers
+        var byPhone = calipers
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(g => g.Key, g => g.Last());
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (SandEntity s in sands)
+        foreach (SandEntity e in sands)
         {
-            if (s.CustardEntity is null)
-                throw new Exception($"{nameof(SandEntity)} cannot have null navigation values to {nameof(s.CustardEntity)}");
-
-            foreach (long phone in new[] { s.CustardEntity.PhoneNumber, s.CustardEntity.PhoneNumber2 })
-            {
-                if (!caliperByPhone.TryGetValue(phone, out var caliper))
-                    continue;
-
-                var key = (s.Id, caliper.Id);
-                if (existing.Contains(key))
-                    continue;
-
-                results.Add(new SandCaliperLink
+            if (e.CustardEntity is null)
+                throw new Exception($"{nameof(SandEntity)} cannot have null navigation values to {nameof(e.CustardEntity)}");
+            var link =
+            CreateLink(
+                e,
+                [e.CustardEntity.PhoneNumber, e.CustardEntity.PhoneNumber2],
+                byPhone,
+                existing,
+                (sand, caliper, phone) => new SandCaliperLink
                 {
-                    SandId = s.Id,
+                    SandId = e.Id,
                     CaliperId = caliper.Id,
-                    MatchingPhone = phone
-                });
-            }
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = caliper.UnixDate
+                }
+            );
+            results.AddRange(link);
         }
 
         return results;
     }
 
     // Plumbing to Caliper
-    private static List<PlumbingCaliperLink> GeneratePlumbingCaliperLinks(List<PlumbingEntity> plumbings, List<CaliperEntity> calipers, HashSet<(long PlumbingId, long CaliperId)> existing)
+    private static List<PlumbingCaliperLink> GeneratePlumbingCaliperLinks(
+        List<PlumbingEntity> plumbings,
+        List<CaliperEntity> calipers,
+        HashSet<(long PlumbingId, long CaliperId)> existing)
     {
         var results = new List<PlumbingCaliperLink>();
 
-        var caliperByPhone = calipers.GroupBy(c => c.PhoneNumber)
-                                     .ToDictionary(g => g.Key, g => g.Last());
+        var byPhone = calipers
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
+            .GroupBy(c => c.PhoneNumber)
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (var p in plumbings)
+        foreach (var e in plumbings)
         {
-            if (!caliperByPhone.TryGetValue(p.PhoneNumber, out var caliper))
-                continue;
-
-            var key = (p.Id, caliper.Id);
-            if (existing.Contains(key))
-                continue;
-
-            results.Add(new PlumbingCaliperLink
-            {
-                PlumbingId = p.Id,
-                CaliperId = caliper.Id,
-                MatchingPhone = p.PhoneNumber
-            });
+            results.AddRange(
+            CreateLink(
+                e,
+                [e.PhoneNumber],
+                byPhone,
+                existing,
+                (plumbing, caliper, phone) => new PlumbingCaliperLink
+                {
+                    PlumbingId = e.Id,
+                    CaliperId = caliper.Id,
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = byPhone.TryGetValue(phone, out var cal) && cal.UnixDate < plumbing.UnixDate
+                        ? cal.UnixDate
+                        : plumbing.UnixDate
+                }
+            ));
         }
 
         return results;
     }
 
     // Corn to Plumbing
-    private static List<CornPlumbingLink> GenerateCornPlumbingLinks(List<CornEntity> corns, List<PlumbingEntity> plumbings, HashSet<(long CornId, long PlumbingId)> existing)
+    private static List<CornPlumbingLink> GenerateCornPlumbingLinks(
+        List<CornEntity> corns,
+        List<PlumbingEntity> plumbings,
+        HashSet<(long CornId, long PlumbingId)> existing)
     {
-        var results = new List<CornPlumbingLink>();
+        List<CornPlumbingLink> results = [];
 
-        var plumbingByPhone = plumbings.GroupBy(p => p.PhoneNumber)
-                                       .ToDictionary(g => g.Key, g => g.Last());
+        var byPhone = plumbings
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
+            .GroupBy(c => c.PhoneNumber)
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (var c in corns)
+        foreach (CornEntity e in corns)
         {
-            if (!plumbingByPhone.TryGetValue(c.PhoneNumber, out var plumbing))
-                continue;
-
-            var key = (c.Id, plumbing.Id);
-            if (existing.Contains(key))
-                continue;
-
-            results.Add(new CornPlumbingLink
-            {
-                CornId = c.Id,
-                PlumbingId = plumbing.Id,
-                MatchingPhone = c.PhoneNumber
-            });
+            results.AddRange(
+            CreateLink(
+                e,
+                [e.PhoneNumber],
+                byPhone,
+                existing,
+                (corn, plumbing, phone) => new CornPlumbingLink
+                {
+                    CornId = e.Id,
+                    PlumbingId = plumbing.Id,
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = byPhone.TryGetValue(phone, out var plumb) && plumb.UnixDate < corn.UnixDate
+                        ? plumb.UnixDate
+                        : corn.UnixDate
+                }
+            ));
         }
 
         return results;
     }
 
     // Corn to Caliper
-    private static List<CornCaliperLink> GenerateCornCaliperLinks(List<CornEntity> corns, List<CaliperEntity> calipers, HashSet<(long CornId, long CaliperId)> existing)
+    private static List<CornCaliperLink> GenerateCornCaliperLinks(
+        List<CornEntity> corns,
+        List<CaliperEntity> calipers,
+        HashSet<(long CornId, long CaliperId)> existing)
     {
         var results = new List<CornCaliperLink>();
 
-        var caliperByPhone = calipers.GroupBy(c => c.PhoneNumber)
-                                     .ToDictionary(g => g.Key, g => g.Last());
+        var byPhone = calipers
+            .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
+            .GroupBy(c => c.PhoneNumber)
+            .ToDictionary(
+                g => g.Key!,
+                g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
+            );
 
-        foreach (var c in corns)
+        foreach (CornEntity e in corns)
         {
-            if (!caliperByPhone.TryGetValue(c.PhoneNumber, out var caliper))
-                continue;
-
-            var key = (c.Id, caliper.Id);
-            if (existing.Contains(key))
-                continue;
-
-            results.Add(new CornCaliperLink
-            {
-                CornId = c.Id,
-                CaliperId = caliper.Id,
-                MatchingPhone = c.PhoneNumber
-            });
+            results.AddRange(
+            CreateLink(
+                e,
+                [e.PhoneNumber],
+                byPhone,
+                existing,
+                (corn, caliper, phone) => new CornCaliperLink
+                {
+                    CornId = e.Id,
+                    CaliperId = caliper.Id,
+                    MatchingPhone = phone.Number,
+                    UnixMatchDate = byPhone.TryGetValue(phone, out var cal) && cal.UnixDate < corn.UnixDate
+                        ? cal.UnixDate
+                        : corn.UnixDate // Choose the first one between the matching caliper vs corn 
+                }
+            ));
         }
 
         return results;
+    }
+
+    private static List<TLink> CreateLink<TSource, TTarget, TLink>
+    (
+        TSource source,
+        IEnumerable<PhoneNumber?> phones,
+        Dictionary<PhoneNumber, TTarget> lookup,
+        HashSet<(long, long)> existing,
+        Func<TSource, TTarget, PhoneNumber, TLink> createLink
+    )
+    where TTarget : IEntity
+    where TSource : IEntity
+    {
+        List<TLink> result = [];
+        foreach (var phone in phones)
+        {
+            if (phone is null || !phone.CanParticipateInDeduplication || !lookup.TryGetValue(phone, out var target))
+                continue;
+
+            var key = (source.Id, target.Id);
+            if (existing.Contains(key))
+                continue;
+
+            result.Add(createLink(source, target, phone));
+        }
+        return result;
     }
 }

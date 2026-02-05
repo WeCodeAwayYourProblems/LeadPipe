@@ -35,14 +35,6 @@ public sealed class CaliperRepository
         AssertNotString<CaliperEntity>(nameof(CaliperEntity.UnixDate));
         AssertNotString<CaliperEntity>(nameof(CaliperEntity.Duration));
 
-        // Deduplicate in-memory
-        List<CaliperEntity> uniqueEntities =
-        [
-            .. entities
-                .GroupBy(e => (e.PhoneNumber, e.Date))
-                .Select(g => g.Last())
-        ];
-
         int batchSize = 200;
         const int minBatchSize = 1;
         int stagedCount = 0;
@@ -70,10 +62,10 @@ public sealed class CaliperRepository
 
             int index = 0;
 
-            while (index < uniqueEntities.Count)
+            while (index < entities.Count)
             {
-                int take = Math.Min(batchSize, uniqueEntities.Count - index);
-                var batch = uniqueEntities.GetRange(index, take);
+                int take = Math.Min(batchSize, entities.Count - index);
+                var batch = entities.GetRange(index, take);
 
                 try
                 {
@@ -146,16 +138,15 @@ public sealed class CaliperRepository
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 nameof(CaliperEntity),
                 entities.Count,
-                uniqueEntities.Count,
                 stagedCount,
                 updated,
                 inserted,
                 skipped);
 
-            return Result.Success(uniqueEntities);
+            return Result.Success(entities);
         }
         catch (OperationCanceledException)
         {

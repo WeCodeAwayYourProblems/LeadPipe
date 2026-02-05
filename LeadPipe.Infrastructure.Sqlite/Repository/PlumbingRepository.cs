@@ -30,14 +30,6 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
         AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.UnixDate));
         AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.Source));
 
-        // Deduplicate in-memory by (PhoneNumber, Source)
-        List<PlumbingEntity> uniqueEntities =
-            [
-                .. entities
-                    .GroupBy(e => (e.PhoneNumber, e.Source))
-                    .Select(g => g.MaxBy(e => e.Date)!)
-            ];
-
         int batchSize = 200;
         const int minBatchSize = 1;
         int skipped = 0;
@@ -63,10 +55,10 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
 
             int index = 0;
 
-            while (index < uniqueEntities.Count)
+            while (index < entities.Count)
             {
-                int take = Math.Min(batchSize, uniqueEntities.Count - index);
-                var batch = uniqueEntities.GetRange(index, take);
+                int take = Math.Min(batchSize, entities.Count - index);
+                var batch = entities.GetRange(index, take);
 
                 try
                 {
@@ -169,16 +161,15 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 nameof(PlumbingEntity),
                 entities.Count,
-                uniqueEntities.Count,
                 stagedCount,
                 updated,
                 inserted,
                 skipped);
 
-            return Result.Success(uniqueEntities);
+            return Result.Success(entities);
         }
         catch (OperationCanceledException)
         {
@@ -200,16 +191,14 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append($"""
-                    (
-                        {e.PhoneNumber},
-                        '{e.Date:yyyy-MM-dd HH:mm:ss}',
-                        {e.UnixDate},
-                        '{Clean(e.Contents)}',
-                        '{e.Source}',
-                        '{Clean(e.MetaData)}'
-                    )
-                """);
+                sql.Append('(')
+                   .Append($"{e.PhoneNumber},")
+                   .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}',")
+                   .Append($"{e.UnixDate},")
+                   .Append($"'{Clean(e.Contents)}',")
+                   .Append($"'{e.Source}',")
+                   .Append($"'{Clean(e.MetaData)}'")
+                   .Append(')');
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");

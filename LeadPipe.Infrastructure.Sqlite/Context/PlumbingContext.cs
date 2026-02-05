@@ -41,7 +41,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         var sync = modelBuilder.Entity<SyncStateEntity>()
             .ToTable(TableNames.SyncStateName);
         sync.HasKey(x => x.Id);
-        sync.Property(x => x.Id).ValueGeneratedOnAdd(); // External id
+        sync.Property(x => x.Id).ValueGeneratedOnAdd(); // Internal Id
         sync.HasIndex(x => x.BusinessId)
             .IsUnique();
         sync.Property(x => x.BusinessId)
@@ -58,7 +58,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         caliper.HasIndex(c => c.PhoneNumber);
         caliper.Property(c => c.Date).IsRequired();
         caliper.Property(c => c.UnixDate).IsRequired();
-        caliper.HasIndex(c => new { c.PhoneNumber, c.Date }).IsUnique();
+        caliper.HasIndex(c => new { c.PhoneNumber, c.Date });
 
         // CornEntity
         var corn = modelBuilder.Entity<CornEntity>()
@@ -66,7 +66,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         corn.HasKey(c => c.Id);
         corn.Property(c => c.Id).ValueGeneratedNever(); // External id
         corn.HasIndex(c => c.PhoneNumber);
-        corn.HasIndex(c => new { c.PhoneNumber, c.Source }).IsUnique();
+        corn.HasIndex(c => new { c.PhoneNumber, c.Source });
         corn.Property(c => c.Source)
             .HasConversion<string>()
             .IsRequired();
@@ -83,9 +83,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         var plumb = modelBuilder.Entity<PlumbingEntity>()
             .ToTable(TableNames.PlumbingEntitiesName);
         plumb.HasKey(p => p.Id);
-        plumb.Property(p => p.Id).ValueGeneratedOnAdd();
+        plumb.Property(p => p.Id).ValueGeneratedOnAdd(); // Internal Id
         plumb.HasIndex(p => p.PhoneNumber);
-        plumb.HasIndex(p => new { p.PhoneNumber, p.Source }).IsUnique();
+        plumb.HasIndex(p => new { p.PhoneNumber, p.Source });
         plumb.Property(p => p.Source)
             .HasConversion<string>()
             .IsRequired();
@@ -118,7 +118,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         // Links
         // **************************************
 
-        #region PlumbingCaliperLinks, CornCaliperLinks, CornPlumbingLinks
+        #region Links
         // PlumbingCaliperLink
         var plumbCaliper = modelBuilder.Entity<PlumbingCaliperLink>()
             .ToTable(TableNames.PlumbingCaliperLinksName);

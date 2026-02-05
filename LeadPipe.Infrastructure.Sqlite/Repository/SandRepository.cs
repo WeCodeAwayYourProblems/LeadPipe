@@ -25,7 +25,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
         CancellationToken ct = default)
     {
         if (entities.Count == 0)
-            return Result.Success(new List<SandEntity>());
+            return Result.Success<List<SandEntity>>([]);
 
         AssertNotString<SandEntity>(nameof(SandEntity.Id));
         AssertNotString<SandEntity>(nameof(SandEntity.CustardId));

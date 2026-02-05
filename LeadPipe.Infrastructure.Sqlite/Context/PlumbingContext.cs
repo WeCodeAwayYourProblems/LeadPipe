@@ -1,5 +1,8 @@
-﻿using LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LeadPipe.Infrastructure.Sqlite.Context;
 
@@ -27,6 +30,37 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
     public DbSet<SandPlumbingLink> SandPlumbingLinks { get; set; }
 
 #pragma warning restore IDE0079
+    #endregion
+
+    #region Value Convert and Compare
+
+    static readonly ValueComparer<PhoneNumber> PhoneNumberComparer = new(
+        (a, b) =>
+            ReferenceEquals(a, b) ||
+            (a != null && b != null && a.Number == b.Number),
+        p => p == null || p.Number == PhoneNumber.Default
+            ? 0 
+            : p.Number.GetHashCode(),
+        p => p == null ? null! : new PhoneNumber(p.Number)
+    );
+    static readonly ValueComparer<PhoneNumber?> NullablePhoneNumberComparer = new(
+        (a, b) =>
+            ReferenceEquals(a, b) ||
+            (a != null && b != null && a.Number == b.Number),
+        p => p == null || p.Number == PhoneNumber.Default
+            ? 0 
+            : p.Number.GetHashCode(),
+        p => p == null ? null : new PhoneNumber(p.Number)
+    );
+    static readonly ValueConverter<PhoneNumber, long> PhoneNumberAndLongConversion = new(
+        p => p.Number,
+        v => new PhoneNumber(v)
+    );
+    static readonly ValueConverter<PhoneNumber?, long?> PhoneNumberNullableConverter = new(
+        p => p == null ? null : p.Number,
+        v => v == null ? null : new PhoneNumber(v.Value)
+    );
+
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,6 +93,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         caliper.Property(c => c.Date).IsRequired();
         caliper.Property(c => c.UnixDate).IsRequired();
         caliper.HasIndex(c => new { c.PhoneNumber, c.Date });
+        caliper.Property(c => c.PhoneNumber)
+            .HasConversion(PhoneNumberAndLongConversion)
+            .Metadata.SetValueComparer(PhoneNumberComparer);
 
         // CornEntity
         var corn = modelBuilder.Entity<CornEntity>()
@@ -78,6 +115,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .IsRequired();
         corn.Property(c => c.UnixDate)
             .IsRequired();
+        corn.Property(c => c.PhoneNumber)
+            .HasConversion(PhoneNumberAndLongConversion)
+            .Metadata.SetValueComparer(PhoneNumberComparer);
 
         // PlumbingEntity
         var plumb = modelBuilder.Entity<PlumbingEntity>()
@@ -89,6 +129,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         plumb.Property(p => p.Source)
             .HasConversion<string>()
             .IsRequired();
+        plumb.Property(c => c.PhoneNumber)
+            .HasConversion(PhoneNumberAndLongConversion)
+            .Metadata.SetValueComparer(PhoneNumberComparer);
 
         // Custard Entity
         var custard = modelBuilder.Entity<CustardEntity>();
@@ -101,6 +144,12 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .OnDelete(DeleteBehavior.Cascade);
         custard.HasIndex(c => c.PhoneNumber);
         custard.HasIndex(c => c.PhoneNumber2);
+        custard.Property(c => c.PhoneNumber)
+            .HasConversion(PhoneNumberAndLongConversion)
+            .Metadata.SetValueComparer(PhoneNumberComparer);
+        custard.Property(c => c.PhoneNumber2)
+            .HasConversion(PhoneNumberNullableConverter)
+            .Metadata.SetValueComparer(NullablePhoneNumberComparer);
 
         // SandEntity
         var sub = modelBuilder.Entity<SandEntity>()

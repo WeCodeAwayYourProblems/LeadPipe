@@ -14,11 +14,12 @@ internal class SandEntityToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo
             throw new ArgumentException($"Navigation property {nameof(entity.CustardEntity)} cannot be null.");
 
         CustardEntity ce = entity.CustardEntity;
+        PhoneNumber? num2 = ce.PhoneNumber2 is null ? null : new(ce.PhoneNumber2);
         Custard custard = new(
                 Id: ce.Id,
                 Status: ce.Active,
                 Phone1: new PhoneNumber(ce.PhoneNumber),
-                Phone2: new PhoneNumber(ce.PhoneNumber2),
+                Phone2: num2,
                 Date: ce.Date,
                 DateCancelled: ce.CancelDate
             );

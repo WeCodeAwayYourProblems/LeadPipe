@@ -47,7 +47,7 @@ public class TranslatorBackAndForthFullTests
         var entity = new CaliperEntity
         {
             Id = 1,
-            PhoneNumber = 5551234567,
+            PhoneNumber = new(5551234567),
             Date = new DateTime(2025, 6, 1, 12, 0, 0),
             Duration = 120,
             Note = "Note",
@@ -63,7 +63,7 @@ public class TranslatorBackAndForthFullTests
         Caliper vo = RoundTrip(entity, toVo, voToEntity2, entity2ToVo, 1_000_000);
 
         Assert.Equal(entity.Id, vo.Id);
-        Assert.Equal(entity.PhoneNumber, vo.Number.Number);
+        Assert.Equal(entity.PhoneNumber.Number, vo.Number.Number);
         Assert.Equal(TimeSpan.FromSeconds(entity.Duration), vo.Duration);
         Assert.Equal(entity.Note, vo.Note);
         Assert.Equal(entity.Source, vo.Source);
@@ -175,7 +175,7 @@ public class TranslatorBackAndForthFullTests
         var entity = new PlumbingEntity
         {
             Id = 5,
-            PhoneNumber = 5551112222,
+            PhoneNumber = new(5551112222),
             Date = new DateTime(2025, 6, 1, 12, 0, 0),
             Contents = "Some content",
             MetaData = "Meta",
@@ -188,7 +188,7 @@ public class TranslatorBackAndForthFullTests
         Plumbing vo = RoundTrip(entity, toVo, toEntity, toVo, 500_000);
 
         Assert.Equal(entity.Id, vo.Id);
-        Assert.Equal(entity.PhoneNumber, vo.PhoneNumber.Number);
+        Assert.Equal(entity.PhoneNumber.Number, vo.PhoneNumber.Number);
         Assert.Equal("Some content", vo.Contents);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
     }
@@ -258,8 +258,8 @@ public class TranslatorBackAndForthFullTests
         {
             Id = 10,
             Active = true,
-            PhoneNumber = 5551002000,
-            PhoneNumber2 = 5551003000,
+            PhoneNumber = new(5551002000),
+            PhoneNumber2 = new(5551003000),
             Date = new DateTime(2025, 6, 1, 12, 0, 0),
             CancelDate = new DateTime(2025, 12, 31, 23, 59, 59)
         };
@@ -287,7 +287,7 @@ public class TranslatorBackAndForthFullTests
         Sandwich vo = RoundTrip(entity, toVo, toEntity, toVo, 500_000);
 
         Assert.Equal(entity.Id, vo.SandId);
-        Assert.Equal(entity.CustardEntity.PhoneNumber, vo.Custard.Phone1.Number);
+        Assert.Equal(entity.CustardEntity.PhoneNumber.Number, vo.Custard.Phone1.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
         Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
     }

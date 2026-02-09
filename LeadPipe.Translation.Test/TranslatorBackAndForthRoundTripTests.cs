@@ -42,7 +42,7 @@ public class TranslatorBackAndForthRoundTripTests
         var e1 = new CaliperEntity
         {
             Id = 1,
-            PhoneNumber = 5551234567,
+            PhoneNumber = new(5551234567),
             Date = new DateTime(2025, 6, 1, 12, 0, 0),
             Duration = 123,
             Note = "Note",
@@ -59,7 +59,7 @@ public class TranslatorBackAndForthRoundTripTests
         Caliper vo = RoundTrip(e1, e1ToVo, voToE2, e2ToVo, voToE1, 1_000_000);
 
         Assert.Equal(e1.Id, vo.Id);
-        Assert.Equal(e1.PhoneNumber, vo.Number.Number);
+        Assert.Equal(e1.PhoneNumber.Number, vo.Number.Number);
         Assert.Equal(TimeSpan.FromSeconds(e1.Duration), vo.Duration);
         Assert.Equal(e1.Note, vo.Note);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
@@ -68,10 +68,11 @@ public class TranslatorBackAndForthRoundTripTests
     [Fact]
     public void CaliperMySqlEntity_To_Caliper_RoundTrip_ShouldRemainConsistent()
     {
+        long numb = 5551234567;
         var e1 = new CaliperMySqlEntity
         {
             call_id = 1,
-            contact_number_clean = "5551234567",
+            contact_number_clean = $"{numb}",
             called_at_utc = new DateTime(2025, 6, 1, 12, 0, 0),
             duration = 123,
             sale_billable = "billable",
@@ -89,7 +90,7 @@ public class TranslatorBackAndForthRoundTripTests
         Caliper vo = RoundTrip(e1, e1ToVo, voToE2, e2ToVo, voToE1, 1_000_000);
 
         Assert.Equal(e1.call_id, vo.Id);
-        Assert.Equal(5551234567, vo.Number.Number);
+        Assert.Equal(numb, vo.Number.Number);
         Assert.Equal(TimeSpan.FromSeconds((double)e1.duration), vo.Duration);
         Assert.Equal("Summary | Hello", vo.Note);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
@@ -98,10 +99,11 @@ public class TranslatorBackAndForthRoundTripTests
     [Fact]
     public void CornMySqlEntity_To_CornFormula_RoundTrip_ShouldRemainConsistent()
     {
+        long numb = 5551002000;
         var e1 = new CornMySqlEntity
         {
             id = 1,
-            phoneNumber = "5551002000",
+            phoneNumber = $"{numb}",
             timestamp = new DateTime(2025, 6, 1, 12, 0, 0),
             comments = "Payload",
             form = "FormX",
@@ -117,7 +119,7 @@ public class TranslatorBackAndForthRoundTripTests
         CornFormula vo = RoundTrip(e1, e1ToVo, voToE2, e2ToVo, voToE1, 1_000_000);
 
         Assert.Equal(e1.id, vo.Id);
-        Assert.Equal(5551002000, vo.PhoneNumber.Number);
+        Assert.Equal(numb, vo.PhoneNumber.Number);
         Assert.Equal("Payload", vo.PayLoad);
         Assert.Equal("Form: FormX | Referring: http://ref.url", vo.MetaData);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
@@ -126,11 +128,13 @@ public class TranslatorBackAndForthRoundTripTests
     [Fact]
     public void CustardMySqlEntity_To_Custard_RoundTrip_ShouldRemainConsistent()
     {
+        long numb1 = 5551002000;
+        long numb2 = 5551003000;
         var e1 = new CustardMySqlEntity
         {
             customerID = 10,
-            phone1 = "5551002000",
-            phone2 = "5551003000",
+            phone1 = $"{numb1}",
+            phone2 = $"{numb2}",
             status = 1,
             dateAdded = new DateTime(2025, 6, 1, 12, 0, 0),
             dateCancelled = new DateTime(2025, 12, 31, 23, 59, 59)
@@ -145,8 +149,8 @@ public class TranslatorBackAndForthRoundTripTests
 
         Assert.Equal(e1.customerID, vo.Id);
         Assert.True(vo.Status);
-        Assert.Equal(5551002000, vo.Phone1.Number);
-        Assert.Equal(5551003000, vo.Phone2.Number);
+        Assert.Equal(numb1, vo.Phone1.Number);
+        Assert.Equal(numb2, vo.Phone2.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
         Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
     }

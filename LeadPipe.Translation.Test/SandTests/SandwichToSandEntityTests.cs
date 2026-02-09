@@ -76,8 +76,8 @@ public sealed class SandwichToSandEntityTests
             {
                 Id = vo.Custard.Id,
                 Active = vo.Custard.Status,
-                PhoneNumber = vo.Custard.Phone1.Number,
-                PhoneNumber2 = vo.Custard.Phone2.Number,
+                PhoneNumber = vo.Custard.Phone1,
+                PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
                 CancelDate = vo.Custard.DateCancelled.UtcDateTime
             },
@@ -120,8 +120,8 @@ public sealed class SandwichToSandEntityTests
             {
                 Id = vo.Custard.Id,
                 Active = vo.Custard.Status,
-                PhoneNumber = vo.Custard.Phone1.Number,
-                PhoneNumber2 = vo.Custard.Phone2.Number,
+                PhoneNumber = vo.Custard.Phone1,
+                PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
                 CancelDate = vo.Custard.DateCancelled.UtcDateTime
             },

@@ -10,7 +10,7 @@ public sealed class PlumbingEntityToPlumbingTests
         => new()
         {
             Id = 42,
-            PhoneNumber = 5558889999,
+            PhoneNumber = new(5558889999),
             Date = date,
             UnixDate = new DateTimeOffset(date, TimeSpan.Zero).ToUnixTimeSeconds(),
             Contents = "Pest issue",

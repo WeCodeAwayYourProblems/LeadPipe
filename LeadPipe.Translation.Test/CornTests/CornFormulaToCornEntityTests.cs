@@ -39,7 +39,7 @@ public sealed class CornFormulaToCornEntityTests
         var entity = translator.Translate(vo);
 
         Assert.Equal(vo.Id, entity.Id);
-        Assert.Equal(5558887777, entity.PhoneNumber);
+        Assert.Equal(5558887777, entity.PhoneNumber.Number);
         Assert.Equal(vo.PayLoad, entity.Payload);
         Assert.Equal(vo.MetaData, entity.MetaData);
         Assert.Equal(vo.Source, entity.Source);
@@ -62,6 +62,6 @@ public sealed class CornFormulaToCornEntityTests
 
         Assert.Equal(vo.Date.UtcDateTime, current.Date);
         Assert.Equal(vo.Date.ToUnixTimeSeconds(), current.UnixDate);
-        Assert.Equal(5558887777, current.PhoneNumber);
+        Assert.Equal(5558887777, current.PhoneNumber.Number);
     }
 }

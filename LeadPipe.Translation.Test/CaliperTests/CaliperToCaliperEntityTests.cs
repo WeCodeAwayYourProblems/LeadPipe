@@ -31,7 +31,7 @@ public sealed class CaliperToCaliperEntityTests
 
         // Assert
         Assert.Equal(vo.Id, entity.Id);
-        Assert.Equal(5551234567, entity.PhoneNumber);
+        Assert.Equal(5551234567, entity.PhoneNumber.Number);
         Assert.Equal(date.UtcDateTime, entity.Date);
         Assert.Equal(date.ToUnixTimeSeconds(), entity.UnixDate);
         Assert.Equal(vo.Note, entity.Note);

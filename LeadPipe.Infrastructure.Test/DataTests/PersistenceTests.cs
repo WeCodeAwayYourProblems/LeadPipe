@@ -15,7 +15,7 @@ public class PersistenceTests
     public async Task PlumbingPersistence_SaveAsync_ReturnsSuccess()
     {
         var repo = Substitute.For<IRepository<PlumbingEntity>>();
-        var entity = new PlumbingEntity() { Id = 0, MetaData = string.Empty };
+        var entity = new PlumbingEntity() { Id = 0, MetaData = string.Empty, PhoneNumber = new(PhoneNumber.Default) };
         repo.UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<PlumbingEntity> { entity })));
 
@@ -36,7 +36,7 @@ public class PersistenceTests
 
         var persistence = new PlumbingPersistence(repo);
 
-        var result = await persistence.SaveAsync(new List<PlumbingEntity> { new PlumbingEntity() { Id = 0, MetaData = string.Empty } });
+        var result = await persistence.SaveAsync(new List<PlumbingEntity> { new PlumbingEntity() { Id = 0, MetaData = string.Empty, PhoneNumber = new(PhoneNumber.Default) } });
 
         Assert.True(result.IsFailure);
         Assert.Equal("error", result.Error);
@@ -51,7 +51,7 @@ public class PersistenceTests
     public async Task CaliperEntityPersistence_SaveAsync_ReturnsSuccess()
     {
         var repo = Substitute.For<IRepository<CaliperEntity>>();
-        var entity = new CaliperEntity() { Id = 0, Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}" };
+        var entity = new CaliperEntity() { Id = 0, Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}", PhoneNumber = new(PhoneNumber.Default)};
         repo.UpsertRangeAsync(Arg.Any<List<CaliperEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<CaliperEntity> { entity })));
 
@@ -72,7 +72,7 @@ public class PersistenceTests
 
         var persistence = new CaliperEntityPersistence(repo);
 
-        var result = await persistence.SaveAsync(new List<CaliperEntity> { new CaliperEntity() { Id = 0, Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}" } });
+        var result = await persistence.SaveAsync(new List<CaliperEntity> { new CaliperEntity() { Id = 0, Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}", PhoneNumber = new(PhoneNumber.Default) } });
 
         Assert.True(result.IsFailure);
         Assert.Equal("error", result.Error);

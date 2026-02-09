@@ -40,7 +40,7 @@ public sealed class PlumbingToPlumbingEntityTests
         PlumbingEntity entity = translator.Translate(vo);
 
         Assert.Equal(42, entity.Id);
-        Assert.Equal(5558889999, entity.PhoneNumber);
+        Assert.Equal(5558889999, entity.PhoneNumber.Number);
         Assert.Equal("Rodents", entity.Contents);
         Assert.Equal("Meta", entity.MetaData);
         Assert.Equal(Source.Calli, entity.Source);

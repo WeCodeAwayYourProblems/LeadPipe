@@ -15,7 +15,7 @@ public sealed class CaliperEntityToCaliperTests
         return new CaliperEntity
         {
             Id = 42,
-            PhoneNumber = phone,
+            PhoneNumber = new(phone),
             Date = date,
             Duration = durationSeconds,
             Note = "Test note",
@@ -38,7 +38,7 @@ public sealed class CaliperEntityToCaliperTests
 
         // Assert
         Assert.Equal(entity.Id, result.Id);
-        Assert.Equal(entity.PhoneNumber, result.Number.Number);
+        Assert.Equal(entity.PhoneNumber.Number, result.Number.Number);
         Assert.Equal(entity.Note, result.Note);
         Assert.Equal(entity.Source, result.Source);
         Assert.Equal(entity.Location, result.Location);
@@ -104,7 +104,7 @@ public sealed class CaliperEntityToCaliperTests
 
         // Assert
         Assert.Equal(entity.Id, current.Id);
-        Assert.Equal(entity.PhoneNumber, current.Number.Number);
+        Assert.Equal(entity.PhoneNumber.Number, current.Number.Number);
         Assert.Equal(dt, current.Date.UtcDateTime);
         Assert.Equal(TimeSpan.Zero, current.Date.Offset);
         Assert.Equal(TimeSpan.FromSeconds(entity.Duration), current.Duration);

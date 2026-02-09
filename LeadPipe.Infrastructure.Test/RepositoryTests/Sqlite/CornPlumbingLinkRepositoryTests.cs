@@ -43,7 +43,8 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         {
             CornId = 1,
             PlumbingId = 10,
-            MatchingPhone = 555
+            MatchingPhone = 555,
+            UnixMatchDate = 7568921
         };
 
         var result = await _repo.UpsertRangeAsync([link]);
@@ -62,8 +63,8 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
 
         List<CornPlumbingLink> links =
             [
-                new CornPlumbingLink { CornId = 1, PlumbingId = 10, MatchingPhone = 111 },
-                new CornPlumbingLink { CornId = 1, PlumbingId = 10, MatchingPhone = 222 }
+                new CornPlumbingLink { CornId = 1, PlumbingId = 10, MatchingPhone = 111, UnixMatchDate = 7568921 },
+                new CornPlumbingLink { CornId = 1, PlumbingId = 10, MatchingPhone = 222, UnixMatchDate = 7568920 }
             ];
 
         var result = await _repo.UpsertRangeAsync(links);
@@ -83,7 +84,8 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         {
             CornId = 1,
             PlumbingId = 10,
-            MatchingPhone = 123
+            MatchingPhone = 123,
+            UnixMatchDate = 7568921
         });
         await _context.SaveChangesAsync();
 
@@ -91,7 +93,8 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         {
             CornId = 1,
             PlumbingId = 10,
-            MatchingPhone = 999
+            MatchingPhone = 999,
+            UnixMatchDate = 7568921
         };
 
         var result = await _repo.UpsertRangeAsync([update]);
@@ -111,7 +114,8 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         {
             CornId = 1,
             PlumbingId = 10,
-            MatchingPhone = 555
+            MatchingPhone = 555,
+            UnixMatchDate = 7568921
         });
 
         // Add Corn
@@ -120,7 +124,7 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         CornEntity corn = new()
         {
             Id = 1,
-            PhoneNumber = 555,
+            PhoneNumber = new(2345678910),
             Date = now,
             UnixDate = nowOffset.ToUnixTimeSeconds(),
             Payload = string.Empty,
@@ -133,7 +137,7 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         PlumbingEntity plumb = new()
         {
             Id = 10,
-            PhoneNumber = 555,
+            PhoneNumber = new(2345678910),
             MetaData = string.Empty
         };
         _context.PlumbingEntities.Add(plumb);
@@ -154,7 +158,7 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         _context.CornEntities.Add(new CornEntity
         {
             Id = cornId,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678910),
             Source = string.Empty,
             MetaData = "{}",
             Payload = "{}",
@@ -165,7 +169,7 @@ public class CornPlumbingLinkRepositoryTests : IDisposable
         _context.PlumbingEntities.Add(new PlumbingEntity
         {
             Id = plumbingId,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678910),
             Source = Domain.ValueObjects.Source.Test,
             MetaData = string.Empty
         });

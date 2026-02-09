@@ -33,7 +33,7 @@ public class CaliperRepositoryTests : IDisposable
         new()
         {
             Id = 1,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678901),
             Date = DateTime.UtcNow,
             UnixDate = 111,
             Duration = 30,
@@ -63,7 +63,7 @@ public class CaliperRepositoryTests : IDisposable
             new CaliperEntity
             {
                 Id = 1,
-                PhoneNumber = 123,
+                PhoneNumber = new(2345678910),
                 Date = date,
                 UnixDate = 111,
                 Duration = 30,
@@ -78,7 +78,7 @@ public class CaliperRepositoryTests : IDisposable
             [new CaliperEntity
             {
                 Id = 1,
-                PhoneNumber = 123,
+                PhoneNumber = new(2345678910),
                 Date = date,
                 UnixDate = 222,
                 Duration = 60,
@@ -101,7 +101,7 @@ public class CaliperRepositoryTests : IDisposable
         var caliper = new CaliperEntity
         {
             Id = 1,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678910),
             Date = DateTime.UtcNow,
             UnixDate = 1,
             Note = string.Empty,

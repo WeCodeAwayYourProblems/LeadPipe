@@ -43,8 +43,8 @@ public sealed class CustardToCustardEntityTests
 
         Assert.Equal(99, entity.Id);
         Assert.True(entity.Active);
-        Assert.Equal(5551112222, entity.PhoneNumber);
-        Assert.Equal(5553334444, entity.PhoneNumber2);
+        Assert.Equal(5551112222, entity.PhoneNumber.Number);
+        Assert.Equal(5553334444, entity.PhoneNumber2?.Number);
     }
 
     [Fact]
@@ -65,6 +65,6 @@ public sealed class CustardToCustardEntityTests
 
         Assert.Equal(vo.Date.UtcDateTime, current.Date);
         Assert.Equal(vo.Date.ToUnixTimeSeconds(), current.UnixDate);
-        Assert.Equal(5551112222, current.PhoneNumber);
+        Assert.Equal(5551112222, current.PhoneNumber.Number);
     }
 }

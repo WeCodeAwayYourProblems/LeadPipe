@@ -40,7 +40,7 @@ public class CornCaliperLinkRepositoryTests : IDisposable
         _context.CornEntities.Add(new CornEntity
         {
             Id = 1,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678910),
             Source = string.Empty,
             MetaData = "{}",
             Payload = "{}",
@@ -51,7 +51,7 @@ public class CornCaliperLinkRepositoryTests : IDisposable
         _context.CaliperEntities.Add(new CaliperEntity
         {
             Id = 10,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678910),
             Date = DateTime.UtcNow,
             UnixDate = 1,
             Note = string.Empty,
@@ -65,7 +65,8 @@ public class CornCaliperLinkRepositoryTests : IDisposable
         {
             CornId = 1,
             CaliperId = 10,
-            MatchingPhone = 123
+            MatchingPhone = 123,
+            UnixMatchDate = 7568920
         };
 
         // Act
@@ -86,8 +87,8 @@ public class CornCaliperLinkRepositoryTests : IDisposable
 
         List<CornCaliperLink> links =
             [
-                new CornCaliperLink { CornId = 1, CaliperId = 10, MatchingPhone = 111 },
-                new CornCaliperLink { CornId = 1, CaliperId = 10, MatchingPhone = 222 }
+                new CornCaliperLink { CornId = 1, CaliperId = 10, MatchingPhone = 111, UnixMatchDate = 7568921 },
+                new CornCaliperLink { CornId = 1, CaliperId = 10, MatchingPhone = 222, UnixMatchDate = 7568922 }
             ];
 
         var result = await _repo.UpsertRangeAsync(links);
@@ -107,7 +108,8 @@ public class CornCaliperLinkRepositoryTests : IDisposable
         {
             CornId = 1,
             CaliperId = 10,
-            MatchingPhone = 111
+            MatchingPhone = 111,
+            UnixMatchDate = 7568921
         });
         await _context.SaveChangesAsync();
 
@@ -115,7 +117,8 @@ public class CornCaliperLinkRepositoryTests : IDisposable
         {
             CornId = 1,
             CaliperId = 10,
-            MatchingPhone = 999
+            MatchingPhone = 999,
+            UnixMatchDate = 7568921
         };
 
         var result = await _repo.UpsertRangeAsync([update]);
@@ -131,7 +134,7 @@ public class CornCaliperLinkRepositoryTests : IDisposable
         _context.CornEntities.Add(new CornEntity
         {
             Id = cornId,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678910),
             Source = string.Empty,
             MetaData = "{}",
             Payload = "{}",
@@ -142,7 +145,7 @@ public class CornCaliperLinkRepositoryTests : IDisposable
         _context.CaliperEntities.Add(new CaliperEntity
         {
             Id = caliperId,
-            PhoneNumber = 123,
+            PhoneNumber = new(2345678910),
             Date = DateTime.UtcNow,
             UnixDate = 1,
             Note = string.Empty,

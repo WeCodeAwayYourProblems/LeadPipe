@@ -197,10 +197,16 @@ public class TransformYellerReportTests
         );
 
         // Act
-        var result = await transformer.TransformAsync(new List<Plumbing>
-            {
-                new Plumbing(1, new PhoneNumber(numb), DateTimeOffset.Now, null, null, "meta", Source.Yeller)
-            });
+        Result<List<ReportYeller>> result = await transformer.TransformAsync(
+        [
+            new Plumbing(1, 
+            new PhoneNumber(numb), 
+            DateTimeOffset.Now, 
+            null, 
+            null, 
+            "meta", 
+            Source.Yeller)
+        ]);
 
         // Assert
         Assert.True(result.IsSuccess);

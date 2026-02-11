@@ -143,14 +143,14 @@ public sealed class CustardRepository
                 {nameof(CustardEntity.UnixCancelDate)}
             )
             SELECT
-                {nameof(CustardEntity.Id)},
-                {nameof(CustardEntity.Active)},
-                {nameof(CustardEntity.PhoneNumber)},
-                {nameof(CustardEntity.PhoneNumber2)},
-                {nameof(CustardEntity.Date)},
-                {nameof(CustardEntity.UnixDate)},
-                {nameof(CustardEntity.CancelDate)},
-                {nameof(CustardEntity.UnixCancelDate)}
+                t.{nameof(CustardEntity.Id)},
+                t.{nameof(CustardEntity.Active)},
+                t.{nameof(CustardEntity.PhoneNumber)},
+                t.{nameof(CustardEntity.PhoneNumber2)},
+                t.{nameof(CustardEntity.Date)},
+                t.{nameof(CustardEntity.UnixDate)},
+                t.{nameof(CustardEntity.CancelDate)},
+                t.{nameof(CustardEntity.UnixCancelDate)}
             FROM {tempTable} t
             WHERE NOT EXISTS (
                 SELECT 1

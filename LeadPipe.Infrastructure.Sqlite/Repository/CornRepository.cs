@@ -45,13 +45,14 @@ public sealed class CornRepository(
 
             await _context.Database.ExecuteSqlRawAsync($"""
                 CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(CornEntity.Id)} INTEGER NOT NULL,
                     {nameof(CornEntity.PhoneNumber)} INTEGER NOT NULL,
                     {nameof(CornEntity.Date)} TEXT NOT NULL,
                     {nameof(CornEntity.UnixDate)} INTEGER NOT NULL,
                     {nameof(CornEntity.Payload)} TEXT NOT NULL,
                     {nameof(CornEntity.MetaData)} TEXT NOT NULL,
                     {nameof(CornEntity.Source)} TEXT NOT NULL,
-                    PRIMARY KEY ({nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)})
+                    PRIMARY KEY ({nameof(CornEntity.Id)})
                 ) WITHOUT ROWID;
             """, ct);
 
@@ -100,14 +101,14 @@ public sealed class CornRepository(
                     {nameof(CornEntity.MetaData)} = t.{nameof(CornEntity.MetaData)},
                     {nameof(CornEntity.Source)} = t.{nameof(CornEntity.Source)}
                 FROM {tempTable} t
-                WHERE t.{nameof(CornEntity.PhoneNumber)} = {TableNames.CornEntitiesName}.{nameof(CornEntity.PhoneNumber)}
-                  AND t.Date = {TableNames.CornEntitiesName}.Date;
+                WHERE t.{nameof(CornEntity.Id)} = {TableNames.CornEntitiesName}.{nameof(CornEntity.Id)};
             """, ct);
 
             int inserted = await _context.Database.ExecuteSqlRawAsync($"""
                 INSERT INTO {TableNames.CornEntitiesName}
-                    ({nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)}, {nameof(CornEntity.UnixDate)}, {nameof(CornEntity.Payload)}, {nameof(CornEntity.MetaData)}, {nameof(CornEntity.Source)})
+                    ({nameof(CornEntity.Id)}, {nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)}, {nameof(CornEntity.UnixDate)}, {nameof(CornEntity.Payload)}, {nameof(CornEntity.MetaData)}, {nameof(CornEntity.Source)})
                 SELECT
+                    t.{nameof(CornEntity.Id)},
                     t.{nameof(CornEntity.PhoneNumber)},
                     t.{nameof(CornEntity.Date)},
                     t.{nameof(CornEntity.UnixDate)},
@@ -118,8 +119,7 @@ public sealed class CornRepository(
                 WHERE NOT EXISTS (
                     SELECT 1
                     FROM {TableNames.CornEntitiesName} c
-                    WHERE c.{nameof(CornEntity.PhoneNumber)} = t.{nameof(CornEntity.PhoneNumber)}
-                      AND c.{nameof(CornEntity.Date)} = t.{nameof(CornEntity.Date)}
+                    WHERE c.{nameof(CornEntity.Id)} = t.{nameof(CornEntity.Id)}
                 );
             """, ct);
 
@@ -163,7 +163,8 @@ public sealed class CornRepository(
                 var e = batch[i];
 
                 sql.Append('(')
-                   .Append($"{e.PhoneNumber},")
+                   .Append(e.Id).Append(',')
+                   .Append($"{e.PhoneNumber.Number},")
                    .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}',")
                    .Append($"{e.UnixDate},")
                    .Append($"'{Clean(e.Payload)}',")

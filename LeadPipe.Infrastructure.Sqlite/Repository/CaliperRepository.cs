@@ -48,6 +48,7 @@ public sealed class CaliperRepository
 
             await _context.Database.ExecuteSqlRawAsync($"""
                 CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(CaliperEntity.Id)} INTEGER NOT NULL,
                     {nameof(CaliperEntity.PhoneNumber)} INTEGER NOT NULL,
                     {nameof(CaliperEntity.Date)} TEXT NOT NULL,
                     {nameof(CaliperEntity.UnixDate)} INTEGER NOT NULL,
@@ -56,7 +57,7 @@ public sealed class CaliperRepository
                     {nameof(CaliperEntity.Location)} TEXT,
                     {nameof(CaliperEntity.Duration)} INTEGER,
                     {nameof(CaliperEntity.Billable)} INTEGER,
-                    PRIMARY KEY ({nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)})
+                    PRIMARY KEY ({nameof(CaliperEntity.Id)})
                 ) WITHOUT ROWID;
             """, ct);
 
@@ -107,14 +108,14 @@ public sealed class CaliperRepository
                     {nameof(CaliperEntity.Duration)} = t.{nameof(CaliperEntity.Duration)},
                     {nameof(CaliperEntity.Billable)} = t.{nameof(CaliperEntity.Billable)}
                 FROM {tempTable} t
-                WHERE t.{nameof(CaliperEntity.PhoneNumber)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.PhoneNumber)}
-                  AND t.{nameof(CaliperEntity.Date)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Date)};
+                WHERE t.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)};
             """, ct);
 
             int inserted = await _context.Database.ExecuteSqlRawAsync($"""
                 INSERT INTO {TableNames.CaliperEntitiesName}
-                    ({nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)}, {nameof(CaliperEntity.UnixDate)}, {nameof(CaliperEntity.Note)}, {nameof(CaliperEntity.Source)}, {nameof(CaliperEntity.Location)}, {nameof(CaliperEntity.Duration)}, {nameof(CaliperEntity.Billable)})
+                    ({nameof(CaliperEntity.Id)}, {nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)}, {nameof(CaliperEntity.UnixDate)}, {nameof(CaliperEntity.Note)}, {nameof(CaliperEntity.Source)}, {nameof(CaliperEntity.Location)}, {nameof(CaliperEntity.Duration)}, {nameof(CaliperEntity.Billable)})
                 SELECT
+                    t.{nameof(CaliperEntity.Id)},
                     t.{nameof(CaliperEntity.PhoneNumber)},
                     t.{nameof(CaliperEntity.Date)},
                     t.{nameof(CaliperEntity.UnixDate)},
@@ -127,8 +128,7 @@ public sealed class CaliperRepository
                 WHERE NOT EXISTS (
                     SELECT 1
                     FROM {TableNames.CaliperEntitiesName} c
-                    WHERE c.{nameof(CaliperEntity.PhoneNumber)} = t.{nameof(CaliperEntity.PhoneNumber)}
-                      AND c.{nameof(CaliperEntity.Date)} = t.{nameof(CaliperEntity.Date)}
+                    WHERE c.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
                 );
             """, ct);
 
@@ -169,7 +169,8 @@ public sealed class CaliperRepository
             {
                 var e = batch[i];
                 sql.Append('(')
-                    .Append(e.PhoneNumber).Append(',')
+                    .Append(e.Id).Append(',')
+                    .Append(e.PhoneNumber.Number).Append(',')
                     .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}',")
                     .Append($"{e.UnixDate},")
                     .Append($"'{Clean(e.Note)}',")

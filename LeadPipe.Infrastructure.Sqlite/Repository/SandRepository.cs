@@ -108,7 +108,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                 {nameof(SandEntity.UnixCancelDate)} INTEGER,
                 {nameof(SandEntity.Active)} INTEGER,
                 {nameof(SandEntity.Complete)} INTEGER,
-                {nameof(SandEntity.Value)} REAL,
+                {nameof(SandEntity.Value)} TEXT,
                 {nameof(SandEntity.Type)} TEXT,
                 {nameof(SandEntity.Seller)} INTEGER,
                 {nameof(SandEntity.Seller2)} INTEGER,
@@ -237,7 +237,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                    .Append($"{e.UnixCancelDate}, ")
                    .Append($"{(e.Active ? 1 : 0)}, ")
                    .Append($"{(e.Complete ? 1 : 0)}, ")
-                   .Append($"{e.Value}, ")
+                   .Append($"{e.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}, ")
                    .Append($"'{Clean(e.Type)}', ")
                    .Append($"{e.Seller}, ")
                    .Append($"{e.Seller2}, ")
@@ -253,4 +253,5 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
     }
+
 }

@@ -192,11 +192,12 @@ public sealed class CustardRepository
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
+                long num2 = e.PhoneNumber2 is null ? 0 : e.PhoneNumber2.Number;
                 sql.Append('(')
                    .Append($"{e.Id}, ")
                    .Append($"{(e.Active ? 1 : 0)}, ")
-                   .Append($"{e.PhoneNumber}, ")
-                   .Append($"{e.PhoneNumber2}, ")
+                   .Append($"{e.PhoneNumber.Number}, ")
+                   .Append($"{num2}, ")
                    .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}', ")
                    .Append($"{e.UnixDate}, ")
                    .Append($"'{e.CancelDate:yyyy-MM-dd HH:mm:ss}', ")

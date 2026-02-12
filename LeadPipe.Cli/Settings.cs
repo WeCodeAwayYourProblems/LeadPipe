@@ -95,4 +95,5 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public double LibacionInterval { get; set; }
     public double PanInterval { get; set; }
     public double YellerInterval { get; set; }
+    public double LatherInterval { get; set; }
 }

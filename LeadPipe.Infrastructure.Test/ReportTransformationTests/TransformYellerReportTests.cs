@@ -149,8 +149,7 @@ public class TransformYellerReportTests
             .Returns(Result.Success(new List<PlumbingEntity>()));
 
         var transformer = new TransformYellerReport(
-            _repoFactory, _plumbToR, _caliperToR, _cornToR,
-            _cpLinkToR, _custCalToR, _custCornToR, _settings
+            _repoFactory, _cpLinkToR, _custCalToR, _custCornToR, _settings
         );
 
         // Act
@@ -162,55 +161,29 @@ public class TransformYellerReportTests
     }
 
     [Fact]
-    public async Task TransformAsync_NonCustardEntities_Translated()
+    public async Task TransformAsync_NoCustardLinks_ReturnsEmptyList()
     {
         // Arrange
-        long numb = 5551000001;
-        var calipers = new List<CaliperEntity>
-            {
-                new CaliperEntity { Id = 1, PhoneNumber = new PhoneNumber(numb), Note="note", Location="loc", Source="Cal1", Date = DateTime.Now }
-            };
-        var corns = new List<CornEntity>();
-        var plumbs = new List<PlumbingEntity>();
-
         _custardRepo.FindWithDetailsAsync(Arg.Any<Expression<Func<CustardEntity, bool>>>())
             .Returns(Result.Success(new List<CustardEntity>()));
-        _caliperRepo.FindAsync(Arg.Any<Expression<Func<CaliperEntity, bool>>>())
-            .Returns(Result.Success(calipers));
-        _cornRepo.FindAsync(Arg.Any<Expression<Func<CornEntity, bool>>>())
-            .Returns(Result.Success(corns));
-        _plumbRepo.FindAsync(Arg.Any<Expression<Func<PlumbingEntity, bool>>>())
-            .Returns(Result.Success(plumbs));
 
-        _caliperToR.Translate(Arg.Any<CaliperEntity>())
-            .Returns(ci => new ReportYeller
-            {
-                event_id = "evt",
-                event_time = 1,
-                user_data = new UserData { ph = new[] { $"{numb}" } },
-                custom_data = new CustomData { value = 1m, currency = "USD" }
-            });
+        _caliperRepo.FindAsync(Arg.Any<Expression<Func<CaliperEntity, bool>>>())
+            .Returns(Result.Success(new List<CaliperEntity>()));
+        _cornRepo.FindAsync(Arg.Any<Expression<Func<CornEntity, bool>>>())
+            .Returns(Result.Success(new List<CornEntity>()));
+        _plumbRepo.FindAsync(Arg.Any<Expression<Func<PlumbingEntity, bool>>>())
+            .Returns(Result.Success(new List<PlumbingEntity>()));
 
         var transformer = new TransformYellerReport(
-            _repoFactory, _plumbToR, _caliperToR, _cornToR,
-            _cpLinkToR, _custCalToR, _custCornToR, _settings
+            _repoFactory, _cpLinkToR, _custCalToR, _custCornToR, _settings
         );
 
         // Act
-        Result<List<ReportYeller>> result = await transformer.TransformAsync(
-        [
-            new Plumbing(1, 
-            new PhoneNumber(numb), 
-            DateTimeOffset.Now, 
-            null, 
-            null, 
-            "meta", 
-            Source.Yeller)
-        ]);
+        var result = await transformer.TransformAsync(new List<Plumbing>());
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Single(result.Value);
+        Assert.Empty(result.Value);
     }
 
     [Fact]
@@ -297,9 +270,6 @@ public class TransformYellerReportTests
 
         var transformer = new TransformYellerReport(
             _repoFactory,
-            _plumbToR,
-            _caliperToR,
-            _cornToR,
             _cpLinkToR,
             _custCalToR,
             _custCornToR,
@@ -315,16 +285,13 @@ public class TransformYellerReportTests
         var reports = result.Value;
 
         string cExpected = "caliper-1";
-        string eExpected = "entity-2";
-        
+
         List<ReportYeller> cReport = [.. reports.Where(r => r.event_id == cExpected)];
-        List<ReportYeller> eReport = [.. reports.Where(r => r.event_id == eExpected)];
 
-        Assert.Equal(2, reports.Count);
+        Assert.Single(reports);
         Assert.Equal(cExpected, cReport[0].event_id);
-        Assert.Equal(eExpected, eReport[0].event_id);
-    }
 
+    }
 
     [Fact]
     public async Task TransformAsync_SandDate_PreventsAttributable()
@@ -337,18 +304,26 @@ public class TransformYellerReportTests
             Id = 1,
             Date = new DateTime(2026, 1, 1),
             SandEntities = new List<SandEntity>
-                {
-                    new SandEntity { Id=1, CustardId=1, Offerman="1000" }
-                },
+            {
+                new SandEntity { Id=1, CustardId=1, Offerman="1000" }
+            },
             CustardCaliperLinks = new List<CustardCaliperLink>
-                {
-                    new CustardCaliperLink { CustardId=1, CaliperId=1, MatchingPhone=numb, UnixMatchDate=1000 }
-                }
+            {
+                new CustardCaliperLink { CustardId=1, CaliperId=1, MatchingPhone=numb, UnixMatchDate=1000 }
+            }
         };
         var calipers = new List<CaliperEntity>
+        {
+            new CaliperEntity
             {
-                new CaliperEntity { Id=1, PhoneNumber=new PhoneNumber(numb), Note="n1", Location="loc1", Source="Cal1", Date=new DateTime(2026,1,2) }
-            };
+                Id = 1,
+                PhoneNumber = new PhoneNumber(numb),
+                Note = "n1",
+                Location = "loc1",
+                Source = "Cal1",
+                Date = new DateTime(2026,1,2)
+            }
+        };
 
         _custardRepo.FindWithDetailsAsync(Arg.Any<Expression<Func<CustardEntity, bool>>>())
             .Returns(Result.Success(new List<CustardEntity> { custard }));
@@ -369,20 +344,16 @@ public class TransformYellerReportTests
             });
 
         var transformer = new TransformYellerReport(
-            _repoFactory, _plumbToR, _caliperToR, _cornToR,
-            _cpLinkToR, _custCalToR, _custCornToR, _settings
+            _repoFactory, _cpLinkToR, _custCalToR, _custCornToR, _settings
         );
 
         // Act
-        var result = await transformer.TransformAsync(new List<Plumbing>
-            {
-                new Plumbing(1, new PhoneNumber(numb), DateTimeOffset.Now, null, null, "meta", Source.Yeller)
-            });
+        await transformer.TransformAsync(new List<Plumbing>());
 
-        // Assert
-        // Sand date is later, so the caliper is non-attributable
-        Assert.True(result.IsSuccess);
-        Assert.Single(result.Value);
+        // Only custard links are translated
+        _custCalToR.Received(1).Translate(Arg.Any<CustardCaliperLink>());
+        _caliperToR.DidNotReceive().Translate(Arg.Any<CaliperEntity>());
+
     }
 
     [Fact]
@@ -427,8 +398,7 @@ public class TransformYellerReportTests
             .Returns(Result.Success<List<PlumbingEntity>>([]));
 
         var transformer = new TransformYellerReport(
-            _repoFactory, _plumbToR, _caliperToR, _cornToR,
-            _cpLinkToR, _custCalToR, _custCornToR, _settings
+            _repoFactory, _cpLinkToR, _custCalToR, _custCornToR, _settings
         );
 
         await transformer.TransformAsync([]);
@@ -489,14 +459,14 @@ public class TransformYellerReportTests
             .Returns(Result.Success<List<PlumbingEntity>>([]));
 
         var transformer = new TransformYellerReport(
-            _repoFactory, _plumbToR, _caliperToR, _cornToR,
-            _cpLinkToR, _custCalToR, _custCornToR, _settings
+            _repoFactory, _cpLinkToR, _custCalToR, _custCornToR, _settings
         );
 
-        await transformer.TransformAsync([]);
+        await transformer.TransformAsync(new List<Plumbing>());
 
         _custCalToR.DidNotReceive().Translate(Arg.Any<CustardCaliperLink>());
-        _caliperToR.Received(1).Translate(Arg.Any<CaliperEntity>());
+        _caliperToR.DidNotReceive().Translate(Arg.Any<CaliperEntity>());
+
     }
 
     [Fact]
@@ -562,8 +532,7 @@ public class TransformYellerReportTests
             .Returns(Result.Success<List<PlumbingEntity>>([]));
 
         var transformer = new TransformYellerReport(
-            _repoFactory, _plumbToR, _caliperToR, _cornToR,
-            _cpLinkToR, _custCalToR, _custCornToR, _settings
+            _repoFactory, _cpLinkToR, _custCalToR, _custCornToR, _settings
         );
 
         await transformer.TransformAsync([]);
@@ -641,8 +610,7 @@ public class TransformYellerReportTests
         _cpLinkToR.Translate(Arg.Any<CustardPlumbingLink>()).Returns(_ => CreateReport("custard"));
 
         var transformer = new TransformYellerReport(
-            _repoFactory, _plumbToR, _caliperToR, _cornToR,
-            _cpLinkToR, _custCalToR, _custCornToR, _settings
+            _repoFactory, _cpLinkToR, _custCalToR, _custCornToR, _settings
         );
 
         var inputPlumbings = new List<Plumbing>
@@ -656,13 +624,13 @@ public class TransformYellerReportTests
         // Assert
         Assert.True(result.IsSuccess);
 
-        // There should be:
-        // - Non-custard Caliper 3
-        // - Non-custard Corn 2
-        // - Non-custard Plumbing 2
-        // - Custard 1: Caliper 1 attributable, Corn 1 non-attributable, Plumbing 1 attributable
-        // - Custard 2: Caliper 2 attributable
-        Assert.Equal(7, result.Value.Count);
+        // Custard 1: Caliper 1 attributable, Corn 1 non-attributable, Plumbing 1 attributable
+        // Custard 2: Caliper 2 attributable
+        // Non-custard entities (Caliper 3, Corn 2, Plumbing 2) are ignored
+
+        // Expected: 4 reports
+        Assert.Equal(4, result.Value.Count);
+
     }
 
     #endregion

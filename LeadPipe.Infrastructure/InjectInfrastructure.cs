@@ -64,6 +64,8 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<LeasedDto>, LeasedFileDataSource>();
         services.AddScoped<IDataSourceAsync<LibacionDto>, LibacionFileDataSource>();
         services.AddScoped<IDataSourceAsync<PanDto>, PanFileDataSource>();
+        services.AddScoped<IDataSourceAsync<LatherDto>, LatherFileDataSource>();
+
         services.AddScoped<IDataSourceAsync<CaliperMySqlEntity>, CaliperMySqlDataSource>();
         services.AddScoped<IDataSourceAsync<SandMySqlEntity>, SandMySqlDataSource>();
         services.AddScoped<IDataSourceAsync<CustardMySqlEntity>, CustardMySqlDataSource>();
@@ -75,6 +77,9 @@ public static class InjectInfrastructure
         #region ADD SERVICES
 
         // Keyed update services
+        services.AddKeyedScoped<IUpdateService<Plumbing>, DummyUpdateService>(Source.Test);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, DummyUpdateService2>(Source.Test2);
+
         services.AddKeyedScoped<IUpdateService<Plumbing>, CalliUpdateFromFileService>(Source.Calli);
         services.AddKeyedScoped<IUpdateService<Plumbing>, LabUpdateService>(Source.Lab);
         services.AddKeyedScoped<IUpdateService<Plumbing>, LibacionUpdateService>(Source.Libacion);
@@ -82,8 +87,7 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, LeasedUpdateFromFileService>(Source.Leased);
         services.AddKeyedScoped<IUpdateService<Plumbing>, PanUpdateFromFileService>(Source.Pan);
         services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
-        services.AddKeyedScoped<IUpdateService<Plumbing>, DummyUpdateService>(Source.Test);
-        services.AddKeyedScoped<IUpdateService<Plumbing>, DummyUpdateService2>(Source.Test2);
+        services.AddKeyedScoped<IUpdateService<Plumbing>, LatherUpdateService>(Source.Lather);
 
         // Nonkeyed update services
         services.AddScoped<IUpdateService<Caliper>, CalipersUpdateService>();

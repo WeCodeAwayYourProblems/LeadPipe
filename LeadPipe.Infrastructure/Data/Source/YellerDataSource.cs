@@ -9,7 +9,7 @@ public class YellerDataSource(IYellerService yeller) : IDataSourceAsync<YellerDt
 {
     private readonly IYellerService _yeller = yeller;
 
-    public async Task<Result<List<YellerDto>>> LoadAsync()
+    public async Task<Result<List<YellerDto>>> LoadAsync(bool _)
     {
         Result<List<YellerDto>> get = await _yeller.GetAllAsync(false);
         if (get.IsFailure)
@@ -17,7 +17,7 @@ public class YellerDataSource(IYellerService yeller) : IDataSourceAsync<YellerDt
         return get;
     }
 
-    public async Task<Result<List<YellerDto>>> RefreshAsync()
+    public async Task<Result<List<YellerDto>>> RefreshAsync(bool _)
     {
         Result<List<YellerDto>> get = await _yeller.RefreshAsync();
         if (get.IsFailure)

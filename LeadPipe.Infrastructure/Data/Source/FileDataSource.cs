@@ -19,16 +19,21 @@ public abstract class FileDataSource<TDto, TSource>(FileInfo file, ICsvRwService
             await File.WriteAllTextAsync(_file.FullName, string.Empty);
         }
 
-        return _file.Extension switch
+        var result = _file.Extension switch
         {
             ".csv" => _csv.ReadFile<TDto>(_file),
             ".json" => _json.ReadFile<TDto>(_file),
             _ => Result.Failure<List<TDto>>("Unknown file type")
         };
+        Result<List<TDto>> flattened = FlattenInvalid(result);
+        return flattened;
     }
 
     public async Task<Result<List<TDto>>> RefreshAsync(bool _ = false)
     {
         return await LoadAsync();
     }
+
+    protected abstract Result<List<TDto>> FlattenInvalid(Result<List<TDto>> fileContents);
+
 }

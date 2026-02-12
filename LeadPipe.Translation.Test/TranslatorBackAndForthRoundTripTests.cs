@@ -150,7 +150,7 @@ public class TranslatorBackAndForthRoundTripTests
         Assert.Equal(e1.customerID, vo.Id);
         Assert.True(vo.Status);
         Assert.Equal(numb1, vo.Phone1.Number);
-        Assert.Equal(numb2, vo.Phone2.Number);
+        Assert.Equal(numb2, vo.Phone2?.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
         Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
     }

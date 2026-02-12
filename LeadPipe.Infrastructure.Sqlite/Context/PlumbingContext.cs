@@ -39,7 +39,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             ReferenceEquals(a, b) ||
             (a != null && b != null && a.Number == b.Number),
         p => p == null || p.Number == PhoneNumber.Default
-            ? 0 
+            ? 0
             : p.Number.GetHashCode(),
         p => p == null ? null! : new PhoneNumber(p.Number)
     );
@@ -48,7 +48,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             ReferenceEquals(a, b) ||
             (a != null && b != null && a.Number == b.Number),
         p => p == null || p.Number == PhoneNumber.Default
-            ? 0 
+            ? 0
             : p.Number.GetHashCode(),
         p => p == null ? null : new PhoneNumber(p.Number)
     );
@@ -92,7 +92,8 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         caliper.HasIndex(c => c.PhoneNumber);
         caliper.Property(c => c.Date).IsRequired();
         caliper.Property(c => c.UnixDate).IsRequired();
-        caliper.HasIndex(c => new { c.PhoneNumber, c.Date });
+        caliper.HasIndex(c => c.PhoneNumber); 
+        caliper.HasIndex(c => c.Date);
         caliper.Property(c => c.PhoneNumber)
             .HasConversion(PhoneNumberAndLongConversion)
             .Metadata.SetValueComparer(PhoneNumberComparer);

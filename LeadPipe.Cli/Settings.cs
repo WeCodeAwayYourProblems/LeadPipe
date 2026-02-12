@@ -83,7 +83,9 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
 
     public string? PanReportLoc { get; set; }
     public string? PanSourceLoc { get; set; }
-
+    
+    public string? LatherReportLoc { get; set; }
+    public string? LatherSourceLoc { get; set; }
 
     // SyncState
     public double DefaultInterval { get; set; }

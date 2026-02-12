@@ -7,7 +7,7 @@ namespace LeadPipe.Infrastructure.Service.Update;
 
 internal abstract class AbstractDummyUpdateService : IUpdateService<Plumbing>
 {
-    public Task<Result<List<Plumbing>>> GetDataAsync()
+    public Task<Result<List<Plumbing>>> GetDataAsync(bool _)
     {
         return Task.FromResult(Result.Success<List<Plumbing>>([]));
     }
@@ -17,7 +17,7 @@ internal abstract class AbstractDummyUpdateService : IUpdateService<Plumbing>
         return Task.FromResult(Result.Success());
     }
 
-    public Task<Result<List<Plumbing>>> UpdateDataAsync()
+    public Task<Result<List<Plumbing>>> UpdateDataAsync(bool _)
     {
         return Task.FromResult(Result.Success<List<Plumbing>>([]));
     }

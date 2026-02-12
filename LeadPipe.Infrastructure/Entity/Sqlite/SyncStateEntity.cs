@@ -1,5 +1,4 @@
-﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Interfaces.Core;
+﻿using LeadPipe.Infrastructure.Interfaces.Core;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
@@ -10,27 +9,4 @@ public class SyncStateEntity : IEntity
     public string? LastProcessedId { get; set; }
     public DateTime LastSyncUtc { get; set; }
     public long UnixLastSyncUtc { get; set; }
-}
-
-public readonly record struct BusinessId(string Value)
-{
-    public string Value { get; } = Value;
-    public static BusinessId From(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("BusinessId cannot be empty");
-
-        return new BusinessId(value);
-    }
-
-    public override string ToString() => Value;
-
-    public static BusinessId BuildBusinessId(Source? source, SyncKey entity)
-    {
-        string scope = source is null
-            ? "global"
-            : source.ToString()!.ToLowerInvariant();
-
-        return From($"{scope}:{entity}");
-    }
 }

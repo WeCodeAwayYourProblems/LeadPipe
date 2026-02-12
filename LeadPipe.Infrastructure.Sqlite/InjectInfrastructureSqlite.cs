@@ -48,7 +48,7 @@ public static class InjectInfrastructureSqlite
 
             options
                 .AddInterceptors(provider.GetRequiredService<SqlitePragmaInterceptor>())
-                .LogTo(Console.WriteLine, efLogLevel);
+                .LogTo(msg => System.Diagnostics.Debug.WriteLine(msg), efLogLevel);
 
             if (useInMemory)
             {

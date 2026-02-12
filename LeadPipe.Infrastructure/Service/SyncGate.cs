@@ -7,6 +7,7 @@ using LeadPipe.Infrastructure.Settings;
 using System.Collections.Immutable;
 
 namespace LeadPipe.Infrastructure.Service;
+
 public sealed class SyncGate(
     ISyncStateRepository repo,
     ISyncSettings settings
@@ -16,22 +17,30 @@ public sealed class SyncGate(
     private readonly TimeSpan _noSourceInterval = TimeSpan.FromHours(settings.DefaultInterval);
 
     private readonly TimeSpan _defaultSourceInterval = TimeSpan.FromHours(settings.DefaultSourceInterval);
-    private readonly ImmutableDictionary<Source, TimeSpan> _interval = ImmutableDictionary.CreateRange(
-    [
-        new KeyValuePair<Source, TimeSpan>(Source.Calli, TimeSpan.FromHours(settings.CalliInterval)),
-        new KeyValuePair<Source, TimeSpan>(Source.Lab, TimeSpan.FromHours(settings.LabInterval)),
-        new KeyValuePair<Source, TimeSpan>(Source.Leaf, TimeSpan.FromHours(settings.LeafInterval)),
-        new KeyValuePair<Source, TimeSpan>(Source.Leased, TimeSpan.FromHours(settings.LeasedInterval)),
-        new KeyValuePair<Source, TimeSpan>(Source.Libacion, TimeSpan.FromHours(settings.LibacionInterval)),
-        new KeyValuePair<Source, TimeSpan>(Source.Pan, TimeSpan.FromHours(settings.PanInterval)),
-        new KeyValuePair<Source, TimeSpan>(Source.Yeller, TimeSpan.FromHours(settings.YellerInterval)),
-    ]);
+    private readonly ImmutableDictionary<Source, TimeSpan> _interval =
+        Enum.GetValues<Source>().ToImmutableDictionary(
+            s => s,
+            s => GetTimeSpanFromSettings(s, settings));
 
-    public async Task<bool> ShouldRunAsync(Source source, SyncKey entity)
+    private static TimeSpan GetTimeSpanFromSettings(Source source, ISyncSettings settings) => source switch
     {
-        BusinessId id = BuildBusinessId(source, entity);
+        Source.Test or Source.Test2 => TimeSpan.FromHours(0),
 
-        Result<SyncStateEntity> found = await _repo.GetByIdAsync(id);
+        Source.Calli => TimeSpan.FromHours(settings.CalliInterval),
+        Source.Lab => TimeSpan.FromHours(settings.LabInterval),
+        Source.Leaf => TimeSpan.FromHours(settings.LeafInterval),
+        Source.Leased => TimeSpan.FromHours(settings.LeasedInterval),
+        Source.Libacion => TimeSpan.FromHours(settings.LibacionInterval),
+        Source.Pan => TimeSpan.FromHours(settings.PanInterval),
+        Source.Yeller => TimeSpan.FromHours(settings.YellerInterval),
+        Source.Lather => TimeSpan.FromHours(settings.LatherInterval),
+
+        _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+    };
+
+    public async Task<bool> ShouldRunAsync(Source source, SyncKey key)
+    {
+        Result<SyncStateEntity> found = await _repo.GetByKeyAsync(source, key);
 
         // First run: allow
         if (found.IsFailure)
@@ -49,11 +58,9 @@ public sealed class SyncGate(
         return run;
     }
 
-    public async Task<bool> ShouldRunAsync(SyncKey entity)
+    public async Task<bool> ShouldRunAsync(SyncKey key)
     {
-        BusinessId id = BuildBusinessId(null, entity);
-
-        Result<SyncStateEntity> found = await _repo.GetByIdAsync(id);
+        Result<SyncStateEntity> found = await _repo.GetByKeyAsync(null, key);
 
         if (found.IsFailure) return true;
 
@@ -93,7 +100,7 @@ public sealed class SyncGate(
 
         SyncStateEntity state = new()
         {
-            BusinessId = BuildBusinessId(source, entity),
+            BusinessId = BusinessId.BuildBusinessId(source, entity),
             LastSyncUtc = now.UtcDateTime,
             UnixLastSyncUtc = now.ToUnixTimeSeconds(),
             LastProcessedId = null
@@ -102,13 +109,6 @@ public sealed class SyncGate(
         await _repo.UpsertRangeAsync([state]);
     }
 
-    private static BusinessId BuildBusinessId(Source? source, SyncKey entity)
-    {
-        string scope = source is null
-            ? "global"
-            : source.ToString()!.ToLowerInvariant();
 
-        return BusinessId.From($"{scope}:{entity}");
-    }
 }
 

@@ -14,11 +14,13 @@ public abstract class LoadData<TVo, TEntity>(
     private readonly IRepository<TEntity> _repo = repo;
     private readonly IEntityToVo<TEntity, TVo> _eToVo = eToVo;
     private readonly Domain.ValueObjects.Source _source = source;
-    public async Task<Result<List<TVo>>> LoadAsync()
+    public async Task<Result<List<TVo>>> LoadAsync(bool withDetails)
     {
         try
         {
-            Result<List<TEntity>> found = await _repo.FindAsync(e => e.Source == _source);
+            Result<List<TEntity>> found = withDetails
+                ? await _repo.FindAsync(e => e.Source == _source)
+                : await _repo.FindWithDetailsAsync(e => e.Source == _source);
 
             Result<List<TVo>> result = found.IsSuccess
                 ? Result.Success<List<TVo>>([.. found.Value.Select(_eToVo.Translate)])

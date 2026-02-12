@@ -14,23 +14,23 @@ public sealed class CaliperMySqlDataSource(
 {
     private readonly ICaliperMySqlRepository _repo = repo;
     private readonly IRepository<CaliperEntity> _caliper = factory.GetRepository<CaliperEntity>();
-    public async Task<Result<List<CaliperMySqlEntity>>> LoadAsync()
+    public async Task<Result<List<CaliperMySqlEntity>>> LoadAsync(bool withDetails)
     {
         DateTime dateFilter = new(DateTime.UtcNow.Year - 1, 1, 1);
-        Result<List<CaliperMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= dateFilter, true);
+        Result<List<CaliperMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= dateFilter, withDetails);
         return found;
     }
 
-    public async Task<Result<List<CaliperMySqlEntity>>> RefreshAsync()
+    public async Task<Result<List<CaliperMySqlEntity>>> RefreshAsync(bool withDetails)
     {
         // Find the most recent caliper date in the caliper repository
         Result<List<CaliperEntity>> calipersResult = await _caliper.GetAllAsync();
         if (calipersResult.IsFailure || calipersResult.Value.Count == 0)
-            return await LoadAsync();
+            return await LoadAsync(withDetails);
 
         DateOnly mostRecent = DateOnly.FromDateTime(calipersResult.Value.Max(m => m.Date));
         DateTime mostRecentDate = new DateTime(mostRecent, new TimeOnly(0)) - TimeSpan.FromDays(7);
-        Result<List<CaliperMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= mostRecentDate, includeDetails: true);
+        Result<List<CaliperMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= mostRecentDate, withDetails);
         return found;
     }
 }

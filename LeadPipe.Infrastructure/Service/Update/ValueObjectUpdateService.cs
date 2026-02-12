@@ -14,10 +14,10 @@ internal abstract class ValueObjectUpdateService<TEntity, TVo>(
     private readonly IDataSourceAsync<TEntity> _source = source;
     private readonly IEntityToVo<TEntity, TVo> _eToVo = eToVo;
     private readonly IDataPersistence<TVo> _persistence = persistence;
-    public async Task<Result<List<TVo>>> GetDataAsync()
+    public async Task<Result<List<TVo>>> GetDataAsync(bool withDetails)
     {
         // Retrieve all data from source
-        Result<List<TEntity>> result = await _source.LoadAsync();
+        Result<List<TEntity>> result = await _source.LoadAsync(withDetails);
         if (result.IsFailure)
             return Result.Failure<List<TVo>>(result.Error);
 
@@ -33,9 +33,9 @@ internal abstract class ValueObjectUpdateService<TEntity, TVo>(
         return saved;
     }
 
-    public async Task<Result<List<TVo>>> UpdateDataAsync()
+    public async Task<Result<List<TVo>>> UpdateDataAsync(bool withDetails)
     {
-        Result<List<TEntity>> refresh = await _source.RefreshAsync();
+        Result<List<TEntity>> refresh = await _source.RefreshAsync(withDetails);
 
         Result<List<TVo>> result = refresh.IsSuccess
             ? Result.Success(refresh.Value.Select(_eToVo.Translate).ToList())

@@ -16,16 +16,16 @@ internal sealed class ReportBothYeller(
     private readonly IReportService<Plumbing> _twoDays = twoDays;
     private List<Plumbing>? DailyData { get; set; }
     private List<Plumbing>? TwoDaysData { get; set; }
-    public async Task<Result<List<Plumbing>>> GetDataAsync()
+    public async Task<Result<List<Plumbing>>> GetDataAsync(bool withDetails = false)
     {
         // Daily Data
-        Result<List<Plumbing>> dailyData = await _daily.GetDataAsync();
+        Result<List<Plumbing>> dailyData = await _daily.GetDataAsync(false);
         if (dailyData.IsFailure)
             return dailyData;
         DailyData = dailyData.Value;
 
         // Two Days Data
-        Result<List<Plumbing>> twoDaysData = await _twoDays.GetDataAsync();
+        Result<List<Plumbing>> twoDaysData = await _twoDays.GetDataAsync(false);
         if (twoDaysData.IsFailure)
             return twoDaysData;
         TwoDaysData = twoDaysData.Value;

@@ -143,7 +143,7 @@ public sealed class SandwichToSandEntityTests
         Assert.Equal(vo.SandId, current.SandId);
         Assert.Equal(vo.CustardId, current.CustardId);
         Assert.Equal(5551002000, current.Custard.Phone1.Number);
-        Assert.Equal(5551003000, current.Custard.Phone2.Number);
+        Assert.Equal(5551003000, current.Custard.Phone2?.Number);
         Assert.Equal(TimeSpan.Zero, current.Date.Offset);
         Assert.Equal(TimeSpan.Zero, current.DateCancelled.Offset);
     }

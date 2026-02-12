@@ -11,7 +11,7 @@ public class LeafDataSource(ILeafService leaf, IVoToDto<Plumbing, LeafDto> voToD
 {
     private readonly ILeafService _leaf = leaf;
     private readonly IVoToDto<Plumbing, LeafDto> _voToDto = voToDto;
-    public async Task<Result<List<LeafDto>>> LoadAsync()
+    public async Task<Result<List<LeafDto>>> LoadAsync(bool _ = false)
     {
         Result<List<Plumbing>> get = await _leaf.GetAllAsync();
         if (get.IsFailure)
@@ -20,7 +20,7 @@ public class LeafDataSource(ILeafService leaf, IVoToDto<Plumbing, LeafDto> voToD
         return result;
     }
 
-    public async Task<Result<List<LeafDto>>> RefreshAsync()
+    public async Task<Result<List<LeafDto>>> RefreshAsync(bool _ = false)
     {
         Result<List<Plumbing>> get = await _leaf.RefreshAsync();
         if (get.IsFailure)

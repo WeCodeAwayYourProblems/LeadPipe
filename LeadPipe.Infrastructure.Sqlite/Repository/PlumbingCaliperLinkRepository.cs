@@ -23,7 +23,7 @@ public sealed class PlumbingCaliperLinkRepository
     public override async Task<Result<List<PlumbingCaliperLink>>> UpsertRangeAsync(List<PlumbingCaliperLink> entities, CancellationToken ct = default)
     {
         if (entities.Count == 0)
-            return Result.Failure<List<PlumbingCaliperLink>>("No entities added");
+            return Result.Success<List<PlumbingCaliperLink>>([]);
 
         AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.PlumbingId));
         AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.CaliperId));

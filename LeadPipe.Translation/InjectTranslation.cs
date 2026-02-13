@@ -39,9 +39,11 @@ public static class InjectTranslation
         services.AddScoped<IVoToEntity<Custard, CustardEntity>, CustardToCustardEntity>();
         services.AddScoped<IEntityToVo<SandEntity, Sandwich>, SandEntityToSandwich>();
         services.AddScoped<IEntityToVo<PlumbingEntity, Plumbing>, PlumbingEntityToPlumbing>();
+
         services.AddScoped<IEntityToVo<CaliperMySqlEntity, Caliper>, CaliperMySqlEntityToCaliper>();
         services.AddScoped<IEntityToVo<SandMySqlEntity, Sandwich>, SandMySqlEntityToSandwich>();
         services.AddScoped<IEntityToVo<CustardMySqlEntity, Custard>, CustardMySqlEntityToCustard>();
+        services.AddScoped<IEntityToVo<CornMySqlEntity, CornFormula>,CornMySqlEntityToCornFormula>();
 
         // IVoToDto
         services.AddScoped<IVoToDto<Plumbing, LabDto>, PlumbingToLabDto>();
@@ -52,6 +54,7 @@ public static class InjectTranslation
         services.AddScoped<IVoToEntity<Caliper, CaliperEntity>, CaliperToCaliperEntity>();
         services.AddScoped<IVoToEntity<Plumbing, PlumbingEntity>, PlumbingToPlumbingEntity>();
         services.AddScoped<IVoToEntity<Sandwich, SandEntity>, SandwichToSandEntity>();
+        services.AddScoped<IVoToEntity<CornFormula, CornEntity>, CornFormulaToCornEntity>();
 
         // IEntityToReport
         services.AddScoped<IEntityToReport<SandPlumbingLink, ReportPlumbing>, SandPlumbingLinkToReportPlumbing>();

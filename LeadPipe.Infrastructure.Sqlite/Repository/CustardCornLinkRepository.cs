@@ -29,11 +29,13 @@ public sealed class CustardCornLinkRepository
         AssertNotString<CustardCornLink>(nameof(CustardCornLink.CustardId));
         AssertNotString<CustardCornLink>(nameof(CustardCornLink.CornId));
         AssertNotString<CustardCornLink>(nameof(CustardCornLink.MatchingPhone));
+        AssertNotString<CustardCornLink>(nameof(CustardCornLink.UnixMatchDate));
 
-        // Deduplicate by (CornId, PlumbingId)
+        // Deduplicate by (CustardId, CornId)
         List<CustardCornLink> uniqueEntities =
         [
             .. entities
+                .Where(e => e.MatchingPhone != 0)
                 .GroupBy(e => (e.CustardId, e.CornId))
                 .Select(g => g.Last())
         ];
@@ -42,7 +44,7 @@ public sealed class CustardCornLinkRepository
         const int minBatchSize = 1;
         int stagedCount = 0;
         int skipped = 0;
-        const string tempTable = "temp_corn_plumbing_links";
+        const string tempTable = "temp_custard_corn_links";
 
         try
         {
@@ -53,7 +55,8 @@ public sealed class CustardCornLinkRepository
                 CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
                     {nameof(CustardCornLink.CustardId)} INTEGER NOT NULL,
                     {nameof(CustardCornLink.CornId)} INTEGER NOT NULL,
-                    {nameof(CustardCornLink.MatchingPhone)} INTEGER NOT NULL,
+                    {nameof(CustardCornLink.MatchingPhone)} INTEGER NOT NULL CHECK({nameof(CustardCornLink.MatchingPhone)} <> 0),
+                    {nameof(CustardCornLink.UnixMatchDate)} INTEGER NOT NULL,
                     PRIMARY KEY ({nameof(CustardCornLink.CustardId)}, {nameof(CustardCornLink.CornId)})
                 ) WITHOUT ROWID;
             """, ct);
@@ -87,7 +90,7 @@ public sealed class CustardCornLinkRepository
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "{Entity} row insert failed: CornId={CornId}, PlumbingId={PlumbingId}",
+                            "{Entity} row insert failed: CustardId={CustardId}, CornId={CornId}",
                             nameof(CustardCornLink),
                             row.CustardId,
                             row.CornId);
@@ -111,6 +114,13 @@ public sealed class CustardCornLinkRepository
                     FROM {tempTable} t
                     WHERE t.{nameof(CustardCornLink.CustardId)} = {TableNames.CustardCornLinksName}.{nameof(CustardCornLink.CustardId)}
                       AND t.{nameof(CustardCornLink.CornId)} = {TableNames.CustardCornLinksName}.{nameof(CustardCornLink.CornId)}
+                ),
+                    {nameof(CustardCornLink.UnixMatchDate)} = (
+                    SELECT t.{nameof(CustardCornLink.UnixMatchDate)}
+                    FROM {tempTable} t
+                    WHERE t.{nameof(CustardCornLink.CustardId)} = {TableNames.CustardCornLinksName}.{nameof(CustardCornLink.CustardId)}
+                        AND t.{nameof(CustardCornLink.CornId)} = {TableNames.CustardCornLinksName}.{nameof(CustardCornLink.CornId)}
+                    LIMIT 1
                 )
                 WHERE EXISTS (
                     SELECT 1
@@ -123,18 +133,29 @@ public sealed class CustardCornLinkRepository
             // ---- INSERT missing ----
             int inserted = await _context.Database.ExecuteSqlRawAsync($"""
                 INSERT INTO {TableNames.CustardCornLinksName}
-                    ({nameof(CustardCornLink.CustardId)}, {nameof(CustardCornLink.CornId)}, {nameof(CustardCornLink.MatchingPhone)})
+                    ({nameof(CustardCornLink.CustardId)}, {nameof(CustardCornLink.CornId)}, {nameof(CustardCornLink.MatchingPhone)}, {nameof(CustardCornLink.UnixMatchDate)})
                 SELECT
                     t.{nameof(CustardCornLink.CustardId)},
                     t.{nameof(CustardCornLink.CornId)},
-                    t.{nameof(CustardCornLink.MatchingPhone)}
+                    t.{nameof(CustardCornLink.MatchingPhone)},
+                    t.{nameof(CustardCornLink.UnixMatchDate)}
                 FROM {tempTable} t
                 WHERE NOT EXISTS (
                     SELECT 1
                     FROM {TableNames.CustardCornLinksName} c
                     WHERE c.{nameof(CustardCornLink.CustardId)} = t.{nameof(CustardCornLink.CustardId)}
                       AND c.{nameof(CustardCornLink.CornId)} = t.{nameof(CustardCornLink.CornId)}
-                );
+                )
+                    AND EXISTS (
+                        SELECT 1 
+                        FROM {TableNames.CustardEntitiesName} p 
+                        WHERE p.{nameof(CustardEntity.Id)} = t.{nameof(CustardCornLink.CustardId)}
+                    )
+                    AND EXISTS (
+                        SELECT 1 
+                        FROM {TableNames.CornEntitiesName} p 
+                        WHERE p.{nameof(CornEntity.Id)} = t.{nameof(CustardCornLink.CornId)}
+                    );
             """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
@@ -171,7 +192,7 @@ public sealed class CustardCornLinkRepository
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append($"({e.CustardId}, {e.CornId}, {e.MatchingPhone})");
+                sql.Append($"({e.CustardId}, {e.CornId}, {e.MatchingPhone}, {e.UnixMatchDate})");
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");

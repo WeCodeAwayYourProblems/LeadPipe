@@ -34,14 +34,18 @@ public static class InjectInfrastructure
         // Data Persistence
         services.AddScoped<IDataPersistence<CaliperEntity>, CaliperEntityPersistence>();
         services.AddScoped<IDataPersistence<CustardEntity>, CustardEntityPersistence>();
-        services.AddScoped<IDataPersistence<PlumbingCaliperLink>, PlumbingCaliperLinkPersistence>();
         services.AddScoped<IDataPersistence<PlumbingEntity>, PlumbingPersistence>();
-        services.AddScoped<IDataPersistence<SandCaliperLink>, SandCaliperLinkPersistence>();
         services.AddScoped<IDataPersistence<SandEntity>, SandEntityPersistence>();
+        services.AddScoped<IDataPersistence<CornEntity>, CornEntityPersistence>();
+
+        services.AddScoped<IDataPersistence<PlumbingCaliperLink>, PlumbingCaliperLinkPersistence>();
+        services.AddScoped<IDataPersistence<SandCaliperLink>, SandCaliperLinkPersistence>();
         services.AddScoped<IDataPersistence<SandPlumbingLink>, SandPlumbingLinkPersistence>();
+
         services.AddScoped<IDataPersistence<Caliper>, CaliperPersistence>();
         services.AddScoped<IDataPersistence<Sandwich>, SandwichPersistence>();
         services.AddScoped<IDataPersistence<Custard>, CustardPersistence>();
+        services.AddScoped<IDataPersistence<CornFormula>, CornFormulaPersistence>();
 
         // Transformers
         services.AddScoped<ITransform<Plumbing, ReportYeller>, TransformYellerReport>();
@@ -69,6 +73,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<CaliperMySqlEntity>, CaliperMySqlDataSource>();
         services.AddScoped<IDataSourceAsync<SandMySqlEntity>, SandMySqlDataSource>();
         services.AddScoped<IDataSourceAsync<CustardMySqlEntity>, CustardMySqlDataSource>();
+        services.AddScoped<IDataSourceAsync<CornMySqlEntity>, CornMySqlDataSource>();
 
         #endregion
         // *****************************************
@@ -93,6 +98,7 @@ public static class InjectInfrastructure
         services.AddScoped<IUpdateService<Caliper>, CalipersUpdateService>();
         services.AddScoped<IUpdateService<Sandwich>, SandwichUpdateService>();
         services.AddScoped<IUpdateService<Custard>, CustardUpdateService>();
+        services.AddScoped<IUpdateService<CornFormula>, CornUpdateService>();
 
         // Keyed Report services
         services.AddKeyedScoped<IReportService<Plumbing>, CalliReportService>(Source.Calli);

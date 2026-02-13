@@ -26,7 +26,7 @@ public class CornMySqlRepository(MySqlSchema3Context context)
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<CornMySqlEntity>>(ex.Message);
+            return Result.Failure<List<CornMySqlEntity>>(ex.ToString());
         }
     }
 

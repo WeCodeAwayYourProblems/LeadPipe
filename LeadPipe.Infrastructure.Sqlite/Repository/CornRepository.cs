@@ -104,12 +104,12 @@ public sealed class CornRepository(
             string updateSql = $"""
                 UPDATE {TableNames.CornEntitiesName}
                 SET 
-                    {TableNames.CornEntitiesName}.{nameof(CornEntity.PhoneNumber)} = temp.{nameof(CornEntity.PhoneNumber)},
-                    {TableNames.CornEntitiesName}.{nameof(CornEntity.Date)} = temp.{nameof(CornEntity.Date)},
-                    {TableNames.CornEntitiesName}.{nameof(CornEntity.UnixDate)} = temp.{nameof(CornEntity.UnixDate)},
-                    {TableNames.CornEntitiesName}.{nameof(CornEntity.Payload)} = temp.{nameof(CornEntity.Payload)},
-                    {TableNames.CornEntitiesName}.{nameof(CornEntity.MetaData)} = temp.{nameof(CornEntity.MetaData)},
-                    {TableNames.CornEntitiesName}.{nameof(CornEntity.Source)} = temp.{nameof(CornEntity.Source)}
+                    {nameof(CornEntity.PhoneNumber)} = temp.{nameof(CornEntity.PhoneNumber)},
+                    {nameof(CornEntity.Date)} = temp.{nameof(CornEntity.Date)},
+                    {nameof(CornEntity.UnixDate)} = temp.{nameof(CornEntity.UnixDate)},
+                    {nameof(CornEntity.Payload)} = temp.{nameof(CornEntity.Payload)},
+                    {nameof(CornEntity.MetaData)} = temp.{nameof(CornEntity.MetaData)},
+                    {nameof(CornEntity.Source)} = temp.{nameof(CornEntity.Source)}
                 FROM {tempTable} temp
                 WHERE {TableNames.CornEntitiesName}.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)};
             """;

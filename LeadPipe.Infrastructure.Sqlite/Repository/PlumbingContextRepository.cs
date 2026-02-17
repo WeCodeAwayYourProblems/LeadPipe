@@ -119,6 +119,10 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
         List<T> links,
         CancellationToken ct) where T : class
     {
+        // Empty check
+        if (links.Count == 0)
+            return Result.Success(links);
+
         // Mapping check
         IEntityType entityType = _context.Model.FindEntityType(typeof(T))
             ?? throw new InvalidOperationException($"{typeof(T).Name} is not mapped");
@@ -138,12 +142,6 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
             ?? nameof(CornCaliperLink.MatchingPhone); // Standard across links
         var dateCol = entityType.FindProperty(nameof(CornCaliperLink.UnixMatchDate))?.GetColumnName(storeId)
             ?? nameof(CornCaliperLink.UnixMatchDate); // Standard across links
-
-        // Use reflection to be reactive to property names
-        var id1Prop = typeof(T).GetProperty(id1Key.Name);
-        var id2Prop = typeof(T).GetProperty(id2Key.Name);
-        var dateProp = typeof(T).GetProperty(dateCol);
-        var phoneProp = typeof(T).GetProperty(phoneCol);
 
         // Get parent table names 
         var parentTable1 = GetParentTable(entityType, id1Key);
@@ -168,11 +166,10 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
         string tempTable = $"temp_{tableName}";
 
         // Debug info
-        _logger.LogInformation(
+        _logger.LogDebug(
         "Resolved parent table keys: {Parent1}.{Key1}, {Parent2}.{Key2}",
             parentTable1Name, parentTable1KeyCol, parentTable2Name, parentTable2KeyCol
         );
-
 
         try
         {
@@ -180,59 +177,72 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
 
             // Dynamic Temp Table
             string createTemp = $"""
-                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
-                    id1 INTEGER, id2 INTEGER, phone INTEGER, matchDate INTEGER
+                DROP TABLE IF EXISTS {tempTable};                
+                CREATE TEMP TABLE {tempTable} (
+                    id1 INTEGER, 
+                    id2 INTEGER, 
+                    phone INTEGER, 
+                    matchDate INTEGER
                 );
-                DELETE FROM {tempTable};
             """;
             await _context.Database.ExecuteSqlRawAsync(createTemp, ct);
 
             // Parameterized batching
             // SQLite default paramter limit is 999 for version < 3.32.0.
             // 4 params per row * 240 rows = 960 params.
-            int index = 0;
             int batchSize = 240;
-            while (index < links.Count)
+            for (int i = 0; i < links.Count; i += batchSize)
             {
-                int take = Math.Min(batchSize, links.Count - index);
-                var batch = links.GetRange(index, take);
+                var batch = links.GetRange(i, Math.Min(batchSize, links.Count - i));
 
                 var values = new List<object>();
                 var rows = new List<string>();
-                for (int i = 0; i < batch.Count; i++)
+                for (int j = 0; j < batch.Count; j++)
                 {
-                    int o = i * 4;
+                    int o = j * 4;
                     rows.Add($"({{{o}}}, {{{o + 1}}}, {{{o + 2}}}, {{{o + 3}}})");
-                    values.Add(id1Getter(batch[i]));
-                    values.Add(id2Getter(batch[i]));
-                    values.Add(phoneGetter(batch[i]));
-                    values.Add(dateGetter(batch[i]));
+                    values.Add(id1Getter(batch[j]));
+                    values.Add(id2Getter(batch[j]));
+                    values.Add(phoneGetter(batch[j]));
+                    values.Add(dateGetter(batch[j]));
                 }
 
                 string joined = $"INSERT INTO {tempTable} VALUES {string.Join(",", rows)}";
                 await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
-                index += take;
             }
 
+            // Keep in mind that deduplication here is exactly the way we want.
+            // Deduplication in this way is much faster here than in memory, especially for hundreds of thousands of upserts
             string updateSql = $"""
                 UPDATE {tableName}
                 SET {phoneCol} = (
-                        SELECT MIN(temp.phone)
-                        FROM {tempTable} temp
-                        WHERE temp.id1 = t.{id1Col} AND temp.id2 = {id2Col}
+                        SELECT t.phone
+                        FROM {tempTable} t
+                        WHERE t.id1 = {tableName}.{id1Col}
+                          AND t.id2 = {tableName}.{id2Col}
+                          AND t.phone <> 0
+                        ORDER BY t.matchDate ASC
+                        LIMIT 1
                     ),
                     {dateCol} = (
-                        SELECT MIN(temp.matchDate)
-                        FROM {tempTable} temp
-                        WHERE temp.id1 = {id1Col} AND temp.id2 = {id2Col}
+                        SELECT t.matchDate
+                        FROM {tempTable} t
+                        WHERE t.id1 = {tableName}.{id1Col}
+                          AND t.id2 = {tableName}.{id2Col}
+                          AND t.phone <> 0
+                        ORDER BY t.matchDate ASC
+                        LIMIT 1
                     )
                 WHERE EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM {tempTable} temp
-                    WHERE temp.id1 = {id1Col} AND temp.id2 = {id2Col} AND temp.phone <> 0
+                    WHERE temp.id1 = {tableName}.{id1Col}
+                      AND temp.id2 = {tableName}.{id2Col}
+                      AND temp.phone <> 0
                 );
             """;
-            await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
+            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
+
 
             string insertSql = $"""
                 INSERT INTO {tableName} ({id1Col}, {id2Col}, {phoneCol}, {dateCol})
@@ -247,8 +257,14 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
                   )
                 GROUP BY temp.id1, temp.id2;
             """;
-            await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
+            int totalInserted = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
 
+            _logger.LogInformation(
+                "{Entity} upsert complete: Incoming={Incoming}, Updated={Updated}, Inserted={Inserted}",
+                typeof(T).Name,
+                links.Count,
+                totalUpdated,
+                totalInserted);
 
             await transaction.CommitAsync(ct);
             return Result.Success(links);

@@ -104,47 +104,47 @@ public sealed class CaliperRepository
                     {nameof(CaliperEntity.PhoneNumber)} = (
                         SELECT temp.{nameof(CaliperEntity.PhoneNumber)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     ),
                     {nameof(CaliperEntity.Date)} = (
                         SELECT temp.{nameof(CaliperEntity.Date)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     ),
                     {nameof(CaliperEntity.UnixDate)} = (
                         SELECT temp.{nameof(CaliperEntity.UnixDate)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     ),
                     {nameof(CaliperEntity.Note)} = (
                         SELECT temp.{nameof(CaliperEntity.Note)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     ),
                     {nameof(CaliperEntity.Source)} = (
                         SELECT temp.{nameof(CaliperEntity.Source)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     ),
                     {nameof(CaliperEntity.Location)} = (
                         SELECT temp.{nameof(CaliperEntity.Location)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     ),
                     {nameof(CaliperEntity.Duration)} = (
                         SELECT temp.{nameof(CaliperEntity.Duration)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     ),
                     {nameof(CaliperEntity.Billable)} = (
                         SELECT temp.{nameof(CaliperEntity.Billable)}
                         FROM {tempTable} temp
-                        WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                        WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                     )
                 WHERE EXISTS (
                     SELECT 1
                     FROM {tempTable} temp
-                    WHERE temp.{nameof(CaliperEntity.Id)} = {nameof(CaliperEntity.Id)}
+                    WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
                 );
             """;
             int updatedCount = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);

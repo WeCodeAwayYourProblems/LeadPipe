@@ -114,13 +114,13 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             string updateSql = $"""
                 UPDATE {TableNames.PlumbingEntitiesName}
                 SET
-                    {nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)},
-                    {nameof(PlumbingEntity.Contents)} = temp.{nameof(PlumbingEntity.Contents)},
-                    {nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
+                    {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)},
+                    {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Contents)} = temp.{nameof(PlumbingEntity.Contents)},
+                    {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
                 FROM {tempTable} temp
-                WHERE {nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
-                  AND {nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
-                  AND {nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
+                WHERE {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
+                  AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
+                  AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
             """;
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 

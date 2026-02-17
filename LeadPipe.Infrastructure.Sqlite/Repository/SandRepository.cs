@@ -153,21 +153,21 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
             string updateSql = $"""
                 UPDATE {TableNames.SandEntitiesName}
                 SET
-                    {nameof(SandEntity.CustardId)} = temp.{nameof(SandEntity.CustardId)},
-                    {nameof(SandEntity.Date)} = temp.{nameof(SandEntity.Date)},
-                    {nameof(SandEntity.UnixDate)} = temp.{nameof(SandEntity.UnixDate)},
-                    {nameof(SandEntity.CancelDate)} = temp.{nameof(SandEntity.CancelDate)},
-                    {nameof(SandEntity.UnixCancelDate)} = temp.{nameof(SandEntity.UnixCancelDate)},
-                    {nameof(SandEntity.Active)} = temp.{nameof(SandEntity.Active)},
-                    {nameof(SandEntity.Complete)} = temp.{nameof(SandEntity.Complete)},
-                    {nameof(SandEntity.Value)} = temp.{nameof(SandEntity.Value)},
-                    {nameof(SandEntity.Type)} = temp.{nameof(SandEntity.Type)},
-                    {nameof(SandEntity.Seller)} = temp.{nameof(SandEntity.Seller)},
-                    {nameof(SandEntity.Seller2)} = temp.{nameof(SandEntity.Seller2)},
-                    {nameof(SandEntity.Seller3)} = temp.{nameof(SandEntity.Seller3)},
-                    {nameof(SandEntity.Offerman)} = temp.{nameof(SandEntity.Offerman)}
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.CustardId)} = temp.{nameof(SandEntity.CustardId)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Date)} = temp.{nameof(SandEntity.Date)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.UnixDate)} = temp.{nameof(SandEntity.UnixDate)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.CancelDate)} = temp.{nameof(SandEntity.CancelDate)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.UnixCancelDate)} = temp.{nameof(SandEntity.UnixCancelDate)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Active)} = temp.{nameof(SandEntity.Active)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Complete)} = temp.{nameof(SandEntity.Complete)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Value)} = temp.{nameof(SandEntity.Value)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Type)} = temp.{nameof(SandEntity.Type)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Seller)} = temp.{nameof(SandEntity.Seller)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Seller2)} = temp.{nameof(SandEntity.Seller2)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Seller3)} = temp.{nameof(SandEntity.Seller3)},
+                    {TableNames.SandEntitiesName}.{nameof(SandEntity.Offerman)} = temp.{nameof(SandEntity.Offerman)}
                 FROM {tempTable} temp
-                WHERE {nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)};
+                WHERE {TableNames.SandEntitiesName}.{nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)};
             """;
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 

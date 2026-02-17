@@ -127,7 +127,7 @@ public sealed class CustardRepository
                     {nameof(CustardEntity.CancelDate)} = temp.{nameof(CustardEntity.CancelDate)},
                     {nameof(CustardEntity.UnixCancelDate)} = temp.{nameof(CustardEntity.UnixCancelDate)}
                 FROM {tempTable} temp
-                WHERE {nameof(CustardEntity.Id)} = temp.{nameof(CustardEntity.Id)};
+                WHERE temp.{nameof(CustardEntity.Id)} = {TableNames.CustardEntitiesName}.{nameof(CustardEntity.Id)};
             """;
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 

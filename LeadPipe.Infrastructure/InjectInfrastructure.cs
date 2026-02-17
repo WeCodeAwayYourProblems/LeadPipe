@@ -125,8 +125,13 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReport<ReportPlumbing>, LibacionReporter>(Source.Libacion);
         services.AddKeyedScoped<IReport<ReportPlumbing>, PanReporter>(Source.Pan);
         services.AddKeyedScoped<IReport<ReportPlumbing>, YellerCsvReporter>(Source.Yeller);
-        //services.AddScoped<IReport<ReportYeller>, YellerClientReporter>();
-        services.AddScoped<IReport<ReportYeller>, YellerJsonReporter>();
+
+        // Make sure we're using the correct reporter, depending on whether we're doing testing
+        bool useClientReporter = config.GetSection("YellerReporter").GetValue("UseClient", false);
+        if (useClientReporter)
+            services.AddScoped<IReport<ReportYeller>, YellerClientReporter>();
+        else
+            services.AddScoped<IReport<ReportYeller>, YellerJsonReporter>();
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();
@@ -147,6 +152,7 @@ public static class InjectInfrastructure
         #region ADD CLIENTS
 
         bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
+        bool useYellerGetterTestClient = settings.HttpClients?.Yeller?.Getter?.UseTestClients ?? useTestClientsGlobal;
         string accept = "application/json";
 
         // Add Leaf Client
@@ -158,7 +164,6 @@ public static class InjectInfrastructure
         RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
 
         // Add Yeller Getter Client
-        bool useYellerGetterTestClient = settings.HttpClients?.Yeller?.Getter?.UseTestClients ?? useTestClientsGlobal;
         RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
         // Add Yeller Reporter Client

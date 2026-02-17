@@ -53,11 +53,11 @@ internal sealed class TransformYellerReport(
                 c.Source == Domain.ValueObjects.Source.Yeller); // This source is an enum with db conversion to string
         if (plumbs.IsFailure) return Result.Failure<List<ReportYeller>>(plumbs.Error);
 
-        // Load CustardEntities --> getting them with details is less expensive than getting the details separately
         HashSet<long> plumbLookup = [.. data.Select(x => x.Id)];
         HashSet<long> caliperLookup = [.. calipers.Value.Select(x => x.Id)];
         HashSet<long> cornLookup = [.. corns.Value.Select(x => x.Id)];
 
+        // Load CustardEntities --> getting them with details is less expensive than getting the details separately
         Result<List<CustardEntity>> custards = await _custardRepo.FindWithDetailsAsync(c =>
                 c.CustardPlumbingLinks.Any(link => plumbLookup.Contains(link.PlumbingId)) ||
                 c.CustardCaliperLinks.Any(link => caliperLookup.Contains(link.CaliperId)) ||

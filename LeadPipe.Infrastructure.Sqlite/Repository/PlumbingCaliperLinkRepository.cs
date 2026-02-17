@@ -25,6 +25,6 @@ public sealed class PlumbingCaliperLinkRepository
 
     public override async Task<Result<List<PlumbingCaliperLink>>> UpsertRangeAsync(
         List<PlumbingCaliperLink> entities, 
-        CancellationToken ct = default) => await LinkUpsertAsync(entities, ct);
+        CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
 
 }

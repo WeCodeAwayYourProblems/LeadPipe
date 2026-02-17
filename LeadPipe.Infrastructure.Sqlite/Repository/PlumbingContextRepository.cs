@@ -115,7 +115,7 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
         CancellationToken ct = default);
     #endregion
 
-    internal async Task<Result<List<T>>> LinkUpsertAsync<T>(
+    internal async Task<Result<List<T>>> UpsertLinkRangeAsync<T>(
         List<T> links,
         CancellationToken ct) where T : class
     {

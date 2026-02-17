@@ -21,6 +21,6 @@ public sealed class SandCornLinkRepository(
 
     public override async Task<Result<List<SandCornLink>>> UpsertRangeAsync(
         List<SandCornLink> entities, 
-        CancellationToken ct = default) => await LinkUpsertAsync(entities, ct);
+        CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
 
 }

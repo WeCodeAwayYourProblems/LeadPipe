@@ -20,6 +20,6 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
 
     public override async Task<Result<List<SandCaliperLink>>> UpsertRangeAsync(
         List<SandCaliperLink> entities, 
-        CancellationToken ct = default) => await LinkUpsertAsync(entities, ct);
+        CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
 
 }

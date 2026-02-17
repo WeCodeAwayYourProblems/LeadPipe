@@ -23,6 +23,6 @@ public sealed class CustardPlumbingLinkRepository
 
     public override async Task<Result<List<CustardPlumbingLink>>> UpsertRangeAsync(
         List<CustardPlumbingLink> entities, 
-        CancellationToken ct = default) => await LinkUpsertAsync(entities, ct);
+        CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
 
 }

@@ -23,6 +23,6 @@ public sealed class CustardCornLinkRepository
 
     public override async Task<Result<List<CustardCornLink>>> UpsertRangeAsync(
         List<CustardCornLink> entities, 
-        CancellationToken ct = default) => await LinkUpsertAsync(entities, ct);
+        CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
 
 }

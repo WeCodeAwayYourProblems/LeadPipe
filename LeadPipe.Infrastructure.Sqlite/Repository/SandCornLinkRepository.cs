@@ -27,12 +27,13 @@ public sealed class SandCornLinkRepository(
         AssertNotString<SandCornLink>(nameof(SandCornLink.SandId));
         AssertNotString<SandCornLink>(nameof(SandCornLink.CornId));
         AssertNotString<SandCornLink>(nameof(SandCornLink.MatchingPhone));
+        AssertNotString<SandCornLink>(nameof(SandCornLink.UnixMatchDate));
 
-        // Deduplicate in-memory by (SubsId, CornId)
+        // Deduplicate in-memory by (Sand, CornId)
         List<SandCornLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.SandId, e.CornId))
+                .GroupBy(e => (e.SandId, e.CornId)) // Order matters here
                 .Select(g => g.Last())
         ];
 
@@ -51,8 +52,10 @@ public sealed class SandCornLinkRepository(
                     {nameof(SandCornLink.SandId)} INTEGER NOT NULL,
                     {nameof(SandCornLink.CornId)} INTEGER NOT NULL,
                     {nameof(SandCornLink.MatchingPhone)} INTEGER NOT NULL,
+                    {nameof(SandCornLink.UnixMatchDate)} INTEGER NOT NULL,
                     PRIMARY KEY ({nameof(SandCornLink.SandId)}, {nameof(SandCornLink.CornId)})
                 ) WITHOUT ROWID;
+                DELETE FROM {tempTable};
             """, ct);
 
             int index = 0;
@@ -75,20 +78,18 @@ public sealed class SandCornLinkRepository(
                 {
                     _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                         nameof(SandCornLink),
-                        batchSize,
-                        ex.Message);
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "{Entity} row insert failed: SandId={SandId}, CornId={CornId}, MatchingPhone={MatchingPhone}",
+                            "{Entity} row insert failed: SandId={SandId}, CornId={CornId}",
                             nameof(SandCornLink),
                             row.SandId,
-                            row.CornId,
-                            row.MatchingPhone);
+                            row.CornId);
 
                         index++;
                         batchSize = 100;
@@ -102,78 +103,59 @@ public sealed class SandCornLinkRepository(
             }
 
             // Update existing rows
-            int updated = await _context.Database.ExecuteSqlRawAsync($"""
-                UPDATE {TableNames.SandCornLinksName}
-                SET {nameof(SandCornLink.MatchingPhone)} = (
-                    SELECT t.{nameof(SandCornLink.MatchingPhone)}
-                    FROM {tempTable} t
-                    WHERE t.{nameof(SandCornLink.SandId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.SandId)}
-                      AND t.{nameof(SandCornLink.CornId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.CornId)}
-                )
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM {tempTable} t
-                    WHERE t.{nameof(SandCornLink.SandId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.SandId)}
-                      AND t.{nameof(SandCornLink.CornId)} = {TableNames.SandCornLinksName}.{nameof(SandCornLink.CornId)}
-                );
-            """, cancellationToken: ct);
-
-            // Insert missing rows
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.SandCornLinksName} ({nameof(SandCornLink.SandId)}, {nameof(SandCornLink.CornId)}, {nameof(SandCornLink.MatchingPhone)})
-                SELECT t.{nameof(SandCornLink.SandId)}, t.{nameof(SandCornLink.CornId)}, t.{nameof(SandCornLink.MatchingPhone)}
-                FROM {tempTable} t
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {TableNames.SandCornLinksName} s
-                    WHERE s.{nameof(SandCornLink.SandId)} = t.{nameof(SandCornLink.SandId)}
-                      AND s.{nameof(SandCornLink.CornId)} = t.{nameof(SandCornLink.CornId)}
-                );
-            """, cancellationToken: ct);
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.SandCornLinksName}
+                    ({nameof(SandCornLink.SandId)}, {nameof(SandCornLink.CornId)}, {nameof(SandCornLink.MatchingPhone)}, {nameof(SandCornLink.UnixMatchDate)})
+                SELECT 
+                    {nameof(SandCornLink.SandId)}, {nameof(SandCornLink.CornId)}, {nameof(SandCornLink.MatchingPhone)}, {nameof(SandCornLink.UnixMatchDate)}
+                FROM {tempTable}
+                ON CONFLICT({nameof(SandCornLink.SandId)}, {nameof(SandCornLink.CornId)}) DO UPDATE SET
+                    {nameof(SandCornLink.MatchingPhone)} = excluded.{nameof(SandCornLink.MatchingPhone)},
+                    {nameof(SandCornLink.UnixMatchDate)} = excluded.{nameof(SandCornLink.UnixMatchDate)};
+            """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(SandCornLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
-                updated,
-                inserted,
+                totalAffected,
                 skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
-                nameof(SandCornLink),
-                ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.",
+                nameof(SandCornLink));
             return Result.Failure<List<SandCornLink>>(ex.ToString());
         }
 
         void InsertBatch(List<SandCornLink> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append($"INSERT INTO {tempTable} VALUES ");
+            var values = new List<object>();
+            var rows = new List<string>();
 
             for (int i = 0; i < batch.Count; i++)
             {
-                var e = batch[i];
-                sql.Append($"({e.SandId}, {e.CornId}, {e.MatchingPhone})");
+                int offset = i * 4;
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}})");
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                var e = batch[i];
+                values.Add(e.SandId);
+                values.Add(e.CornId);
+                values.Add(e.MatchingPhone);
+                values.Add(e.UnixMatchDate);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(", ", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
     }
+
 }

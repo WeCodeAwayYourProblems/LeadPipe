@@ -55,19 +55,20 @@ public sealed class CustardRepository
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
-            // Temp table
+            // Temp table; create it and clear it
             await _context.Database.ExecuteSqlRawAsync($"""
-            CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
-                {nameof(CustardEntity.Id)} INTEGER PRIMARY KEY,
-                {nameof(CustardEntity.Active)} INTEGER,
-                {nameof(CustardEntity.PhoneNumber)} INTEGER,
-                {nameof(CustardEntity.PhoneNumber2)} INTEGER,
-                {nameof(CustardEntity.Date)} TEXT,
-                {nameof(CustardEntity.UnixDate)} INTEGER,
-                {nameof(CustardEntity.CancelDate)} TEXT,
-                {nameof(CustardEntity.UnixCancelDate)} INTEGER
-            ) WITHOUT ROWID;
-        """, ct);
+                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(CustardEntity.Id)} INTEGER PRIMARY KEY,
+                    {nameof(CustardEntity.Active)} INTEGER,
+                    {nameof(CustardEntity.PhoneNumber)} INTEGER,
+                    {nameof(CustardEntity.PhoneNumber2)} INTEGER,
+                    {nameof(CustardEntity.Date)} TEXT,
+                    {nameof(CustardEntity.UnixDate)} INTEGER,
+                    {nameof(CustardEntity.CancelDate)} TEXT,
+                    {nameof(CustardEntity.UnixCancelDate)} INTEGER
+                ) WITHOUT ROWID;
+                DELETE FROM {tempTable};
+            """, ct);
 
             int index = 0;
 
@@ -91,10 +92,9 @@ public sealed class CustardRepository
                 {
                     _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                         nameof(CustardEntity),
-                        batchSize,
-                        ex.Message);
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
@@ -115,101 +115,86 @@ public sealed class CustardRepository
                 }
             }
 
-            // ---- UPDATE existing ----
-            int updated = await _context.Database.ExecuteSqlRawAsync($"""
-            UPDATE {TableNames.CustardEntitiesName}
-            SET
-                {nameof(CustardEntity.Active)} = t.{nameof(CustardEntity.Active)},
-                {nameof(CustardEntity.PhoneNumber)} = t.{nameof(CustardEntity.PhoneNumber)},
-                {nameof(CustardEntity.PhoneNumber2)} = t.{nameof(CustardEntity.PhoneNumber2)},
-                {nameof(CustardEntity.Date)} = t.{nameof(CustardEntity.Date)},
-                {nameof(CustardEntity.UnixDate)} = t.{nameof(CustardEntity.UnixDate)},
-                {nameof(CustardEntity.CancelDate)} = t.{nameof(CustardEntity.CancelDate)},
-                {nameof(CustardEntity.UnixCancelDate)} = t.{nameof(CustardEntity.UnixCancelDate)}
-            FROM {tempTable} t
-            WHERE t.{nameof(CustardEntity.Id)} = {TableNames.CustardEntitiesName}.{nameof(CustardEntity.Id)};
-        """, ct);
-
-            // ---- INSERT missing ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-            INSERT INTO {TableNames.CustardEntitiesName} (
-                {nameof(CustardEntity.Id)},
-                {nameof(CustardEntity.Active)},
-                {nameof(CustardEntity.PhoneNumber)},
-                {nameof(CustardEntity.PhoneNumber2)},
-                {nameof(CustardEntity.Date)},
-                {nameof(CustardEntity.UnixDate)},
-                {nameof(CustardEntity.CancelDate)},
-                {nameof(CustardEntity.UnixCancelDate)}
-            )
-            SELECT
-                t.{nameof(CustardEntity.Id)},
-                t.{nameof(CustardEntity.Active)},
-                t.{nameof(CustardEntity.PhoneNumber)},
-                t.{nameof(CustardEntity.PhoneNumber2)},
-                t.{nameof(CustardEntity.Date)},
-                t.{nameof(CustardEntity.UnixDate)},
-                t.{nameof(CustardEntity.CancelDate)},
-                t.{nameof(CustardEntity.UnixCancelDate)}
-            FROM {tempTable} t
-            WHERE NOT EXISTS (
-                SELECT 1
-                FROM {TableNames.CustardEntitiesName} c
-                WHERE c.{nameof(CustardEntity.Id)} = t.{nameof(CustardEntity.Id)}
-            );
-        """, ct);
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.CustardEntitiesName} (
+                    {nameof(CustardEntity.Id)},
+                    {nameof(CustardEntity.Active)}, 
+                    {nameof(CustardEntity.PhoneNumber)}, 
+                    {nameof(CustardEntity.PhoneNumber2)}, 
+                    {nameof(CustardEntity.Date)}, 
+                    {nameof(CustardEntity.UnixDate)}, 
+                    {nameof(CustardEntity.CancelDate)}, 
+                    {nameof(CustardEntity.UnixCancelDate)}
+                )
+                SELECT 
+                    {nameof(CustardEntity.Id)},
+                    {nameof(CustardEntity.Active)}, 
+                    {nameof(CustardEntity.PhoneNumber)}, 
+                    {nameof(CustardEntity.PhoneNumber2)}, 
+                    {nameof(CustardEntity.Date)}, 
+                    {nameof(CustardEntity.UnixDate)}, 
+                    {nameof(CustardEntity.CancelDate)}, 
+                    {nameof(CustardEntity.UnixCancelDate)}
+                FROM {tempTable}
+                ON CONFLICT({nameof(CustardEntity.Id)}) DO UPDATE SET
+                    {nameof(CustardEntity.Active)} = excluded.{nameof(CustardEntity.Active)},
+                    {nameof(CustardEntity.PhoneNumber)} = excluded.{nameof(CustardEntity.PhoneNumber)},
+                    {nameof(CustardEntity.PhoneNumber2)} = excluded.{nameof(CustardEntity.PhoneNumber2)},
+                    {nameof(CustardEntity.Date)} = excluded.{nameof(CustardEntity.Date)},
+                    {nameof(CustardEntity.UnixDate)} = excluded.{nameof(CustardEntity.UnixDate)},
+                    {nameof(CustardEntity.CancelDate)} = excluded.{nameof(CustardEntity.CancelDate)},
+                    {nameof(CustardEntity.UnixCancelDate)} = excluded.{nameof(CustardEntity.UnixCancelDate)};
+            """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(CustardEntity),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
-                updated,
-                inserted,
+                totalAffected,
                 skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", nameof(CustardEntity), ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.", 
+                nameof(CustardEntity));
             return Result.Failure<List<CustardEntity>>(ex.ToString());
         }
 
         void InsertBatch(List<CustardEntity> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append($"INSERT INTO {tempTable} VALUES ");
+            var values = new List<object>();
+            var rows = new List<string>();
+            const int colsPerRow = 8;
 
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                long num2 = e.PhoneNumber2 is null ? 0 : e.PhoneNumber2.Number;
-                sql.Append('(')
-                   .Append($"{e.Id}, ")
-                   .Append($"{(e.Active ? 1 : 0)}, ")
-                   .Append($"{e.PhoneNumber.Number}, ")
-                   .Append($"{num2}, ")
-                   .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}', ")
-                   .Append($"{e.UnixDate}, ")
-                   .Append($"'{e.CancelDate:yyyy-MM-dd HH:mm:ss}', ")
-                   .Append($"{e.UnixCancelDate}")
-                   .Append(')');
+                int offset = i * colsPerRow;
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}}, {{{offset + 7}}})");
+
+                values.Add(e.Id);
+                values.Add(e.Active ? 1 : 0);
+                values.Add(e.PhoneNumber.Number);
+                values.Add(e.PhoneNumber2?.Number ?? (object)DBNull.Value); // Safe null handling
+                values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
+                values.Add(e.UnixDate);
+
+                // Handle potentially uninitialized or null DateTime
+                values.Add(e.CancelDate == default ? (object)DBNull.Value : e.CancelDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                values.Add(e.UnixCancelDate);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(",", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
     }
 

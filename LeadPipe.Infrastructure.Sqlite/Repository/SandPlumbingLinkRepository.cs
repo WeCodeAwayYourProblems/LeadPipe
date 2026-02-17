@@ -17,16 +17,22 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
             .Include(c => c.SandEntity)
             .Include(c => c.PlumbingEntity);
     }
+    
     public override async Task<Result<List<SandPlumbingLink>>> UpsertRangeAsync(List<SandPlumbingLink> entities, CancellationToken ct = default)
     {
         if (entities.Count == 0)
             return Result.Success(new List<SandPlumbingLink>());
 
+        AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.SandId));
+        AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.PlumbingId));
+        AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.MatchingPhone));
+        AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.UnixMatchDate));
+
         // Deduplicate in-memory
         List<SandPlumbingLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.SandId, e.PlumbingId))
+                .GroupBy(e => (e.SandId, e.PlumbingId)) // Order matters here
                 .Select(g => g.Last())
         ];
 
@@ -46,9 +52,11 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
                     {nameof(SandPlumbingLink.SandId)} INTEGER NOT NULL,
                     {nameof(SandPlumbingLink.PlumbingId)} INTEGER NOT NULL,
                     {nameof(SandPlumbingLink.MatchingPhone)} INTEGER NOT NULL,
+                    {nameof(SandPlumbingLink.UnixMatchDate)} INTEGER NOT NULL,
                     PRIMARY KEY ({nameof(SandPlumbingLink.SandId)}, {nameof(SandPlumbingLink.PlumbingId)})
                 ) WITHOUT ROWID;
-            """, cancellationToken: ct);
+                DELETE FROM {tempTable};
+            """, ct);
 
             int index = 0;
 
@@ -70,20 +78,18 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
                 {
                     _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                        nameof(SandPlumbingLink),
-                       batchSize,
-                       ex.Message);
+                       batchSize);
 
                     if (batchSize == minBatchSize)
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "{Entity} row insert failed: SandId={SandId}, PlumbingId={PlumbingId}, MatchingPhone={MatchingPhone}",
+                            "{Entity} row insert failed: SandId={SandId}, PlumbingId={PlumbingId}",
                             nameof(SandPlumbingLink),
                             row.SandId,
-                            row.PlumbingId,
-                            row.MatchingPhone);
+                            row.PlumbingId);
 
                         index++;
                         batchSize = 100;
@@ -97,82 +103,58 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
             }
 
             // ---- Phase 1: UPDATE existing rows ----
-            int updated = await _context.Database.ExecuteSqlRawAsync($"""
-                UPDATE {TableNames.SandPlumbingLinksName}
-                SET MatchingPhone = (
-                    SELECT t.{nameof(SandPlumbingLink.MatchingPhone)}
-                    FROM {tempTable} t
-                    WHERE t.{nameof(SandPlumbingLink.SandId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.SandId)}
-                      AND t.{nameof(SandPlumbingLink.PlumbingId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.PlumbingId)}
-                )
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM {tempTable} t
-                    WHERE t.{nameof(SandPlumbingLink.SandId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.SandId)}
-                      AND t.{nameof(SandPlumbingLink.PlumbingId)} = {TableNames.SandPlumbingLinksName}.{nameof(SandPlumbingLink.PlumbingId)}
-                );
-            """, cancellationToken: ct);
-
-            // ---- Phase 2: INSERT missing rows ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.SandPlumbingLinksName} ({nameof(SandPlumbingLink.SandId)}, {nameof(SandPlumbingLink.PlumbingId)}, {nameof(SandPlumbingLink.MatchingPhone)})
-                SELECT t.{nameof(SandPlumbingLink.SandId)}, t.{nameof(SandPlumbingLink.PlumbingId)}, t.{nameof(SandPlumbingLink.MatchingPhone)}
-                FROM {tempTable} t
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {TableNames.SandPlumbingLinksName} s
-                    WHERE s.{nameof(SandPlumbingLink.SandId)} = t.{nameof(SandPlumbingLink.SandId)}
-                      AND s.{nameof(SandPlumbingLink.PlumbingId)} = t.{nameof(SandPlumbingLink.PlumbingId)}
-                );
-            """, cancellationToken: ct);
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.SandPlumbingLinksName}
+                    ({nameof(SandPlumbingLink.SandId)}, {nameof(SandPlumbingLink.PlumbingId)}, {nameof(SandPlumbingLink.MatchingPhone)}, {nameof(SandPlumbingLink.UnixMatchDate)})
+                SELECT 
+                    {nameof(SandPlumbingLink.SandId)}, {nameof(SandPlumbingLink.PlumbingId)}, {nameof(SandPlumbingLink.MatchingPhone)}, {nameof(SandPlumbingLink.UnixMatchDate)}
+                FROM {tempTable}
+                ON CONFLICT({nameof(SandPlumbingLink.SandId)}, {nameof(SandPlumbingLink.PlumbingId)}) DO UPDATE SET
+                    {nameof(SandPlumbingLink.MatchingPhone)} = excluded.{nameof(SandPlumbingLink.MatchingPhone)},
+                    {nameof(SandPlumbingLink.UnixMatchDate)} = excluded.{nameof(SandPlumbingLink.UnixMatchDate)};
+            """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(SandPlumbingLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
-                updated,
-                inserted,
+                totalAffected,
                 skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
-                nameof(SandPlumbingLink),
-                ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.",
+                nameof(SandPlumbingLink));
             return Result.Failure<List<SandPlumbingLink>>(ex.Message);
         }
 
         void InsertBatch(List<SandPlumbingLink> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append($"INSERT INTO {tempTable} VALUES ");
-
-            AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.SandId));
-            AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.PlumbingId));
-            AssertNotString<SandPlumbingLink>(nameof(SandPlumbingLink.MatchingPhone));
+            var values = new List<object>();
+            var rows = new List<string>();
 
             for (int i = 0; i < batch.Count; i++)
             {
-                var e = batch[i];
-                sql.Append($"({e.SandId}, {e.PlumbingId}, {e.MatchingPhone})");
+                int offset = i * 4;
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}})");
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                var e = batch[i];
+                values.Add(e.SandId);
+                values.Add(e.PlumbingId);
+                values.Add(e.MatchingPhone);
+                values.Add(e.UnixMatchDate);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(", ", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
     }
 

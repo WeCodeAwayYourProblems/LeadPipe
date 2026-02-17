@@ -3,7 +3,9 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
@@ -20,6 +22,7 @@ public sealed class PlumbingCaliperLinkRepository
             .Include(c => c.PlumbingEntity)
             .Include(c => c.CaliperEntity);
     }
+
     public override async Task<Result<List<PlumbingCaliperLink>>> UpsertRangeAsync(List<PlumbingCaliperLink> entities, CancellationToken ct = default)
     {
         if (entities.Count == 0)
@@ -27,6 +30,8 @@ public sealed class PlumbingCaliperLinkRepository
 
         AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.PlumbingId));
         AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.CaliperId));
+        AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.MatchingPhone));
+        AssertNotString<PlumbingCaliperLink>(nameof(PlumbingCaliperLink.UnixMatchDate));
 
         // Deduplicate in-memory by (PlumbingId, CaliperId)
         List<PlumbingCaliperLink> uniqueEntities =
@@ -47,12 +52,15 @@ public sealed class PlumbingCaliperLinkRepository
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             await _context.Database.ExecuteSqlRawAsync($"""
-            CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
-                {nameof(PlumbingCaliperLink.PlumbingId)} INTEGER NOT NULL,
-                {nameof(PlumbingCaliperLink.CaliperId)} INTEGER NOT NULL,
-                PRIMARY KEY ({nameof(PlumbingCaliperLink.PlumbingId)}, {nameof(PlumbingCaliperLink.CaliperId)})
-            ) WITHOUT ROWID;
-        """, ct);
+                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
+                    {nameof(PlumbingCaliperLink.PlumbingId)} INTEGER NOT NULL,
+                    {nameof(PlumbingCaliperLink.CaliperId)} INTEGER NOT NULL,
+                    {nameof(PlumbingCaliperLink.MatchingPhone)} INTEGER NOT NULL,
+                    {nameof(PlumbingCaliperLink.UnixMatchDate)} INTEGER NOT NULL,
+                    PRIMARY KEY ({nameof(PlumbingCaliperLink.PlumbingId)}, {nameof(PlumbingCaliperLink.CaliperId)})
+                ) WITHOUT ROWID;
+                DELETE FROM {tempTable};
+            """, ct);
 
             int index = 0;
 
@@ -74,10 +82,9 @@ public sealed class PlumbingCaliperLinkRepository
                 {
                     _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                         nameof(PlumbingCaliperLink),
-                        batchSize,
-                        ex.Message);
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
@@ -99,57 +106,36 @@ public sealed class PlumbingCaliperLinkRepository
                 }
             }
 
-            // Update existing rows
-            await _context.Database.ExecuteSqlRawAsync($"""
-            UPDATE {TableNames.PlumbingCaliperLinksName}
-            SET {nameof(PlumbingCaliperLink.MatchingPhone)} = (
-                SELECT 1
-                FROM {tempTable} t
-                WHERE t.{nameof(PlumbingCaliperLink.PlumbingId)} = {TableNames.PlumbingCaliperLinksName}.{nameof(PlumbingCaliperLink.PlumbingId)}
-                  AND t.{nameof(PlumbingCaliperLink.CaliperId)} = {TableNames.PlumbingCaliperLinksName}.{nameof(PlumbingCaliperLink.CaliperId)}
-            )
-            WHERE EXISTS (
-                SELECT 1
-                FROM {tempTable} t
-                WHERE t.{nameof(PlumbingCaliperLink.PlumbingId)} = {TableNames.PlumbingCaliperLinksName}.{nameof(PlumbingCaliperLink.PlumbingId)}
-                  AND t.{nameof(PlumbingCaliperLink.CaliperId)} = {TableNames.PlumbingCaliperLinksName}.{nameof(PlumbingCaliperLink.CaliperId)}
-            );
-        """, cancellationToken: ct);
-
-            // Insert missing rows
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-            INSERT INTO {TableNames.PlumbingCaliperLinksName} ({nameof(PlumbingCaliperLink.PlumbingId)}, {nameof(PlumbingCaliperLink.CaliperId)})
-            SELECT t.{nameof(PlumbingCaliperLink.PlumbingId)}, t.{nameof(PlumbingCaliperLink.CaliperId)}
-            FROM {tempTable} t
-            WHERE NOT EXISTS (
-                SELECT 1
-                FROM {TableNames.PlumbingCaliperLinksName} p
-                WHERE p.{nameof(PlumbingCaliperLink.PlumbingId)} = t.{nameof(PlumbingCaliperLink.PlumbingId)}
-                  AND p.{nameof(PlumbingCaliperLink.CaliperId)} = t.{nameof(PlumbingCaliperLink.CaliperId)}
-            );
-        """, cancellationToken: ct);
+            // Target index: plumbCaliper.HasIndex(l => new { l.PlumbingId, l.CaliperId }).IsUnique();
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.PlumbingCaliperLinksName}
+                    ({nameof(PlumbingCaliperLink.PlumbingId)}, {nameof(PlumbingCaliperLink.CaliperId)}, {nameof(PlumbingCaliperLink.MatchingPhone)}, {nameof(PlumbingCaliperLink.UnixMatchDate)})
+                SELECT 
+                    {nameof(PlumbingCaliperLink.PlumbingId)}, {nameof(PlumbingCaliperLink.CaliperId)}, {nameof(PlumbingCaliperLink.MatchingPhone)}, {nameof(PlumbingCaliperLink.UnixMatchDate)}
+                FROM {tempTable}
+                ON CONFLICT({nameof(PlumbingCaliperLink.PlumbingId)}, {nameof(PlumbingCaliperLink.CaliperId)}) DO UPDATE SET
+                    {nameof(PlumbingCaliperLink.MatchingPhone)} = excluded.{nameof(PlumbingCaliperLink.MatchingPhone)},
+                    {nameof(PlumbingCaliperLink.UnixMatchDate)} = excluded.{nameof(PlumbingCaliperLink.UnixMatchDate)};
+            """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(PlumbingCaliperLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
-                inserted,
+                totalAffected,
                 skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", 
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
                 nameof(PlumbingCaliperLink),
                 ex.Message);
             return Result.Failure<List<PlumbingCaliperLink>>(ex.Message);
@@ -157,20 +143,23 @@ public sealed class PlumbingCaliperLinkRepository
 
         void InsertBatch(List<PlumbingCaliperLink> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append($"INSERT INTO {tempTable} VALUES ");
+            var values = new List<object>();
+            var rows = new List<string>();
 
             for (int i = 0; i < batch.Count; i++)
             {
-                var e = batch[i];
-                sql.Append($"({e.PlumbingId}, {e.CaliperId}, {e.MatchingPhone})");
+                int offset = i * 4;
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}})");
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                var e = batch[i];
+                values.Add(e.PlumbingId);
+                values.Add(e.CaliperId);
+                values.Add(e.MatchingPhone);
+                values.Add(e.UnixMatchDate);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(", ", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
     }
 

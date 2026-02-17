@@ -4,7 +4,6 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -31,16 +30,9 @@ public sealed class CornCaliperLinkRepository
         AssertNotString<CornCaliperLink>(nameof(CornCaliperLink.CornId));
         AssertNotString<CornCaliperLink>(nameof(CornCaliperLink.CaliperId));
         AssertNotString<CornCaliperLink>(nameof(CornCaliperLink.MatchingPhone));
+        AssertNotString<CornCaliperLink>(nameof(CornCaliperLink.UnixMatchDate));
 
-        // Deduplicate by (CornId, CaliperId)
-        List<CornCaliperLink> uniqueEntities =
-        [
-            .. entities
-                .GroupBy(e => (e.CornId, e.CaliperId))
-                .Select(g => g.Last())
-        ];
-
-        int batchSize = 200;
+        int batchSize = 1000;
         const int minBatchSize = 1;
         int stagedCount = 0;
         int skipped = 0;
@@ -50,22 +42,25 @@ public sealed class CornCaliperLinkRepository
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
-            // Temp table
+            // 1. Create staging table WITHOUT a Primary Key to allow duplicates initially
             await _context.Database.ExecuteSqlRawAsync($"""
                 CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
-                    {nameof(CornCaliperLink.CornId)} INTEGER NOT NULL,
-                    {nameof(CornCaliperLink.CaliperId)} INTEGER NOT NULL,
-                    {nameof(CornCaliperLink.MatchingPhone)} INTEGER NOT NULL,
-                    PRIMARY KEY ({nameof(CornCaliperLink.CornId)}, {nameof(CornCaliperLink.CaliperId)})
-                ) WITHOUT ROWID;
+                    {nameof(CornCaliperLink.CornId)} INTEGER,
+                    {nameof(CornCaliperLink.CaliperId)} INTEGER,
+                    {nameof(CornCaliperLink.MatchingPhone)} INTEGER,
+                    {nameof(CornCaliperLink.UnixMatchDate)} INTEGER
+                );
+                CREATE INDEX IF NOT EXISTS idx_temp_sync ON {tempTable} 
+                    ({nameof(CornCaliperLink.CornId)}, {nameof(CornCaliperLink.CaliperId)}, {nameof(CornCaliperLink.MatchingPhone)});
+                DELETE FROM {tempTable};
             """, ct);
 
             int index = 0;
 
-            while (index < uniqueEntities.Count)
+            while (index < entities.Count)
             {
-                int take = Math.Min(batchSize, uniqueEntities.Count - index);
-                var batch = uniqueEntities.GetRange(index, take);
+                int take = Math.Min(batchSize, entities.Count - index);
+                var batch = entities.GetRange(index, take);
 
                 try
                 {
@@ -73,17 +68,16 @@ public sealed class CornCaliperLinkRepository
                     stagedCount += batch.Count;
                     index += take;
 
-                    if (batchSize < 200)
-                        batchSize = Math.Min(batchSize * 2, 200);
+                    if (batchSize < 1000)
+                        batchSize = Math.Min(batchSize * 2, 1000);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                         nameof(CornCaliperLink),
-                        batchSize, 
-                        ex.Message);
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
@@ -105,53 +99,48 @@ public sealed class CornCaliperLinkRepository
                 }
             }
 
-            // ---- UPDATE existing ----
-            await _context.Database.ExecuteSqlRawAsync($"""
-                UPDATE {TableNames.CornCaliperLinksName}
-                SET {nameof(CornCaliperLink.MatchingPhone)} = (
-                    SELECT t.{nameof(CornCaliperLink.MatchingPhone)}
-                    FROM {tempTable} t
-                    WHERE t.{nameof(CornCaliperLink.CornId)} = {TableNames.CornCaliperLinksName}.{nameof(CornCaliperLink.CornId)}
-                      AND t.{nameof(CornCaliperLink.CaliperId)} = {TableNames.CornCaliperLinksName}.{nameof(CornCaliperLink.CaliperId)}
+            // Perform single-pass bulk UPSERT
+            // Groups by the IDs and Phone, then picks the earliest Date
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.CornCaliperLinksName} 
+                (
+                    {nameof(CornCaliperLink.CornId)}, 
+                    {nameof(CornCaliperLink.CaliperId)}, 
+                    {nameof(CornCaliperLink.MatchingPhone)}, 
+                    {nameof(CornCaliperLink.UnixMatchDate)}
                 )
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM {tempTable} t
-                    WHERE t.{nameof(CornCaliperLink.CornId)} = {TableNames.CornCaliperLinksName}.{nameof(CornCaliperLink.CornId)}
-                      AND t.{nameof(CornCaliperLink.CaliperId)} = {TableNames.CornCaliperLinksName}.{nameof(CornCaliperLink.CaliperId)}
-                );
-            """, ct);
-
-            // ---- INSERT missing ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.CornCaliperLinksName}
-                    ({nameof(CornCaliperLink.CornId)}, {nameof(CornCaliperLink.CaliperId)}, {nameof(CornCaliperLink.MatchingPhone)})
-                SELECT
-                    t.{nameof(CornCaliperLink.CornId)},
-                    t.{nameof(CornCaliperLink.CaliperId)},
-                    t.{nameof(CornCaliperLink.MatchingPhone)}
-                FROM {tempTable} t
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {TableNames.CornCaliperLinksName} c
-                    WHERE c.{nameof(CornCaliperLink.CornId)} = t.{nameof(CornCaliperLink.CornId)}
-                      AND c.{nameof(CornCaliperLink.CaliperId)} = t.{nameof(CornCaliperLink.CaliperId)}
-                );
+                SELECT 
+                    {nameof(CornCaliperLink.CornId)}, 
+                    {nameof(CornCaliperLink.CaliperId)}, 
+                    {nameof(CornCaliperLink.MatchingPhone)}, 
+                    MIN({nameof(CornCaliperLink.UnixMatchDate)})
+                FROM {tempTable}
+                WHERE {nameof(CornCaliperLink.MatchingPhone)} <> 0
+                GROUP BY 
+                    {nameof(CornCaliperLink.CornId)}, 
+                    {nameof(CornCaliperLink.CaliperId)}, 
+                    {nameof(CornCaliperLink.MatchingPhone)}
+                ON CONFLICT({nameof(CornCaliperLink.CornId)}, {nameof(CornCaliperLink.CaliperId)}) DO UPDATE SET
+                    {nameof(CornCaliperLink.MatchingPhone)} = excluded.{nameof(CornCaliperLink.MatchingPhone)},
+                    {nameof(CornCaliperLink.UnixMatchDate)} = CASE 
+                        WHEN excluded.{nameof(CornCaliperLink.UnixMatchDate)} < {TableNames.CornCaliperLinksName}.{nameof(CornCaliperLink.UnixMatchDate)} 
+                        THEN excluded.{nameof(CornCaliperLink.UnixMatchDate)} 
+                        ELSE {TableNames.CornCaliperLinksName}.{nameof(CornCaliperLink.UnixMatchDate)} 
+                    END;
             """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(CornCaliperLink),
                 entities.Count,
-                uniqueEntities.Count,
                 stagedCount,
-                inserted,
+                totalAffected,
                 skipped);
 
-            return Result.Success(uniqueEntities);
+            return Result.Success(entities);
         }
         catch (OperationCanceledException)
         {
@@ -159,28 +148,32 @@ public sealed class CornCaliperLinkRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", 
-                nameof(CornCaliperLink),
-                ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.",
+                nameof(CornCaliperLink));
             return Result.Failure<List<CornCaliperLink>>(ex.Message);
         }
 
         void InsertBatch(List<CornCaliperLink> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append($"INSERT INTO {tempTable} VALUES ");
+            var values = new List<object>();
+            var rows = new List<string>();
 
             for (int i = 0; i < batch.Count; i++)
             {
-                var e = batch[i];
-                sql.Append($"({e.CornId}, {e.CaliperId}, {e.MatchingPhone})");
+                int offset = i * 4;
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}})");
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                var e = batch[i];
+                values.Add(e.CornId);
+                values.Add(e.CaliperId);
+                values.Add(e.MatchingPhone);
+                values.Add(e.UnixMatchDate);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(", ", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
+
     }
+
 }

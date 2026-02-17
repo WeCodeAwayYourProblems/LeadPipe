@@ -29,12 +29,13 @@ public sealed class CustardPlumbingLinkRepository
         AssertNotString<CustardPlumbingLink>(nameof(CustardPlumbingLink.CustardId));
         AssertNotString<CustardPlumbingLink>(nameof(CustardPlumbingLink.PlumbingId));
         AssertNotString<CustardPlumbingLink>(nameof(CustardPlumbingLink.MatchingPhone));
+        AssertNotString<CustardPlumbingLink>(nameof(CustardPlumbingLink.UnixMatchDate));
 
         // Deduplicate by (CustardId, PlumbingId)
         List<CustardPlumbingLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.CustardId, e.PlumbingId))
+                .GroupBy(e => (e.CustardId, e.PlumbingId)) // order matters
                 .Select(g => g.Last())
         ];
 
@@ -54,8 +55,10 @@ public sealed class CustardPlumbingLinkRepository
                     {nameof(CustardPlumbingLink.CustardId)} INTEGER NOT NULL,
                     {nameof(CustardPlumbingLink.PlumbingId)} INTEGER NOT NULL,
                     {nameof(CustardPlumbingLink.MatchingPhone)} INTEGER NOT NULL,
+                    {nameof(CustardPlumbingLink.UnixMatchDate)} INTEGER NOT NULL,
                     PRIMARY KEY ({nameof(CustardPlumbingLink.CustardId)}, {nameof(CustardPlumbingLink.PlumbingId)})
                 ) WITHOUT ROWID;
+                DELETE FROM {tempTable};
             """, ct);
 
             int index = 0;
@@ -78,16 +81,15 @@ public sealed class CustardPlumbingLinkRepository
                 {
                     _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                         nameof(CustardPlumbingLink),
-                        batchSize,
-                        ex.Message);
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "{Entity} row insert failed: PlumbingId={PlumbingId}, PlumbingId={PlumbingId}",
+                            "{Entity} row insert failed: CustardId={CustardId}, PlumbingId={PlumbingId}",
                             nameof(CustardPlumbingLink),
                             row.CustardId,
                             row.PlumbingId);
@@ -103,50 +105,28 @@ public sealed class CustardPlumbingLinkRepository
                 }
             }
 
-            // ---- UPDATE existing ----
-            await _context.Database.ExecuteSqlRawAsync($"""
-                UPDATE {TableNames.CustardPlumbingLinksName}
-                SET {nameof(CustardPlumbingLink.MatchingPhone)} = (
-                    SELECT t.{nameof(CustardPlumbingLink.MatchingPhone)}
-                    FROM {tempTable} t
-                    WHERE t.{nameof(CustardPlumbingLink.CustardId)} = {TableNames.CustardPlumbingLinksName}.{nameof(CustardPlumbingLink.CustardId)}
-                      AND t.{nameof(CustardPlumbingLink.PlumbingId)} = {TableNames.CustardPlumbingLinksName}.{nameof(CustardPlumbingLink.PlumbingId)}
-                )
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM {tempTable} t
-                    WHERE t.{nameof(CustardPlumbingLink.CustardId)} = {TableNames.CustardPlumbingLinksName}.{nameof(CustardPlumbingLink.CustardId)}
-                      AND t.{nameof(CustardPlumbingLink.PlumbingId)} = {TableNames.CustardPlumbingLinksName}.{nameof(CustardPlumbingLink.PlumbingId)}
-                );
-            """, ct);
-
-            // ---- INSERT missing ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
+            // Targets: custardPlumbing.HasIndex(l => new { l.CustardId, l.PlumbingId }).IsUnique();
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
                 INSERT INTO {TableNames.CustardPlumbingLinksName}
-                    ({nameof(CustardPlumbingLink.CustardId)}, {nameof(CustardPlumbingLink.PlumbingId)}, {nameof(CustardPlumbingLink.MatchingPhone)})
-                SELECT
-                    t.{nameof(CustardPlumbingLink.CustardId)},
-                    t.{nameof(CustardPlumbingLink.PlumbingId)},
-                    t.{nameof(CustardPlumbingLink.MatchingPhone)}
-                FROM {tempTable} t
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {TableNames.CustardPlumbingLinksName} c
-                    WHERE c.{nameof(CustardPlumbingLink.CustardId)} = t.{nameof(CustardPlumbingLink.CustardId)}
-                      AND c.{nameof(CustardPlumbingLink.PlumbingId)} = t.{nameof(CustardPlumbingLink.PlumbingId)}
-                );
+                    ({nameof(CustardPlumbingLink.CustardId)}, {nameof(CustardPlumbingLink.PlumbingId)}, {nameof(CustardPlumbingLink.MatchingPhone)}, {nameof(CustardPlumbingLink.UnixMatchDate)})
+                SELECT 
+                    {nameof(CustardPlumbingLink.CustardId)}, {nameof(CustardPlumbingLink.PlumbingId)}, {nameof(CustardPlumbingLink.MatchingPhone)}, {nameof(CustardPlumbingLink.UnixMatchDate)}
+                FROM {tempTable}
+                ON CONFLICT({nameof(CustardPlumbingLink.CustardId)}, {nameof(CustardPlumbingLink.PlumbingId)}) DO UPDATE SET
+                    {nameof(CustardPlumbingLink.MatchingPhone)} = excluded.{nameof(CustardPlumbingLink.MatchingPhone)},
+                    {nameof(CustardPlumbingLink.UnixMatchDate)} = excluded.{nameof(CustardPlumbingLink.UnixMatchDate)};
             """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(CustardPlumbingLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
-                inserted,
+                totalAffected,
                 skipped);
 
             return Result.Success(uniqueEntities);
@@ -157,28 +137,30 @@ public sealed class CustardPlumbingLinkRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
-                nameof(CustardPlumbingLink),
-                ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.",
+                nameof(CustardPlumbingLink));
             return Result.Failure<List<CustardPlumbingLink>>(ex.Message);
         }
 
         void InsertBatch(List<CustardPlumbingLink> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append($"INSERT INTO {tempTable} VALUES ");
+            var values = new List<object>();
+            var rows = new List<string>();
 
             for (int i = 0; i < batch.Count; i++)
             {
-                var e = batch[i];
-                sql.Append($"({e.CustardId}, {e.PlumbingId}, {e.MatchingPhone})");
+                int offset = i * 4;
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}})");
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                var e = batch[i];
+                values.Add(e.CustardId);
+                values.Add(e.PlumbingId);
+                values.Add(e.MatchingPhone);
+                values.Add(e.UnixMatchDate);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(", ", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
     }
 

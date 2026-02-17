@@ -29,12 +29,13 @@ public sealed class CornPlumbingLinkRepository
         AssertNotString<CornPlumbingLink>(nameof(CornPlumbingLink.CornId));
         AssertNotString<CornPlumbingLink>(nameof(CornPlumbingLink.PlumbingId));
         AssertNotString<CornPlumbingLink>(nameof(CornPlumbingLink.MatchingPhone));
+        AssertNotString<CornPlumbingLink>(nameof(CornPlumbingLink.UnixMatchDate));
 
         // Deduplicate by (CornId, PlumbingId)
         List<CornPlumbingLink> uniqueEntities =
         [
             .. entities
-                .GroupBy(e => (e.CornId, e.PlumbingId))
+                .GroupBy(e => (e.CornId, e.PlumbingId)) // Order matters here
                 .Select(g => g.Last())
         ];
 
@@ -54,8 +55,10 @@ public sealed class CornPlumbingLinkRepository
                     {nameof(CornPlumbingLink.CornId)} INTEGER NOT NULL,
                     {nameof(CornPlumbingLink.PlumbingId)} INTEGER NOT NULL,
                     {nameof(CornPlumbingLink.MatchingPhone)} INTEGER NOT NULL,
+                    {nameof(CornPlumbingLink.UnixMatchDate)} INTEGER NOT NULL,
                     PRIMARY KEY ({nameof(CornPlumbingLink.CornId)}, {nameof(CornPlumbingLink.PlumbingId)})
                 ) WITHOUT ROWID;
+                DELETE FROM {tempTable};
             """, ct);
 
             int index = 0;
@@ -78,10 +81,9 @@ public sealed class CornPlumbingLinkRepository
                 {
                     _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                         nameof(CornPlumbingLink),
-                        batchSize,
-                        ex.Message);
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
@@ -103,82 +105,60 @@ public sealed class CornPlumbingLinkRepository
                 }
             }
 
-            // ---- UPDATE existing ----
-            await _context.Database.ExecuteSqlRawAsync($"""
-                UPDATE {TableNames.CornPlumbingLinksName}
-                SET {nameof(CornPlumbingLink.MatchingPhone)} = (
-                    SELECT t.{nameof(CornPlumbingLink.MatchingPhone)}
-                    FROM {tempTable} t
-                    WHERE t.{nameof(CornPlumbingLink.CornId)} = {TableNames.CornPlumbingLinksName}.{nameof(CornPlumbingLink.CornId)}
-                      AND t.{nameof(CornPlumbingLink.PlumbingId)} = {TableNames.CornPlumbingLinksName}.{nameof(CornPlumbingLink.PlumbingId)}
-                )
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM {tempTable} t
-                    WHERE t.{nameof(CornPlumbingLink.CornId)} = {TableNames.CornPlumbingLinksName}.{nameof(CornPlumbingLink.CornId)}
-                      AND t.{nameof(CornPlumbingLink.PlumbingId)} = {TableNames.CornPlumbingLinksName}.{nameof(CornPlumbingLink.PlumbingId)}
-                );
-            """, ct);
-
-            // ---- INSERT missing ----
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.CornPlumbingLinksName}
-                    ({nameof(CornPlumbingLink.CornId)}, {nameof(CornPlumbingLink.PlumbingId)}, {nameof(CornPlumbingLink.MatchingPhone)})
-                SELECT
-                    t.{nameof(CornPlumbingLink.CornId)},
-                    t.{nameof(CornPlumbingLink.PlumbingId)},
-                    t.{nameof(CornPlumbingLink.MatchingPhone)}
-                FROM {tempTable} t
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {TableNames.CornPlumbingLinksName} c
-                    WHERE c.{nameof(CornPlumbingLink.CornId)} = t.{nameof(CornPlumbingLink.CornId)}
-                      AND c.{nameof(CornPlumbingLink.PlumbingId)} = t.{nameof(CornPlumbingLink.PlumbingId)}
-                );
+            // perform single-pass bulk upsert
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+            INSERT INTO {TableNames.CornPlumbingLinksName}
+                ({nameof(CornPlumbingLink.CornId)}, {nameof(CornPlumbingLink.PlumbingId)}, {nameof(CornPlumbingLink.MatchingPhone)}, {nameof(CornPlumbingLink.UnixMatchDate)})
+            SELECT 
+                {nameof(CornPlumbingLink.CornId)}, {nameof(CornPlumbingLink.PlumbingId)}, {nameof(CornPlumbingLink.MatchingPhone)}, {nameof(CornPlumbingLink.UnixMatchDate)}
+            FROM {tempTable}
+            ON CONFLICT({nameof(CornPlumbingLink.CornId)}, {nameof(CornPlumbingLink.PlumbingId)}) DO UPDATE SET
+                {nameof(CornPlumbingLink.MatchingPhone)} = excluded.{nameof(CornPlumbingLink.MatchingPhone)},
+                {nameof(CornPlumbingLink.UnixMatchDate)} = excluded.{nameof(CornPlumbingLink.UnixMatchDate)};
             """, ct);
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(CornPlumbingLink),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
-                inserted,
+                totalAffected,
                 skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", 
-                nameof(CornPlumbingLink),
-                ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.", 
+                nameof(CornPlumbingLink));
             return Result.Failure<List<CornPlumbingLink>>(ex.Message);
         }
 
         void InsertBatch(List<CornPlumbingLink> batch)
         {
-            var sql = new StringBuilder();
-            sql.Append($"INSERT INTO {tempTable} VALUES ");
+            var values = new List<object>();
+            var rows = new List<string>();
 
             for (int i = 0; i < batch.Count; i++)
             {
-                var e = batch[i];
-                sql.Append($"({e.CornId}, {e.PlumbingId}, {e.MatchingPhone})");
+                int offset = i * 4;
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}})");
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                var e = batch[i];
+                values.Add(e.CornId);
+                values.Add(e.PlumbingId);
+                values.Add(e.MatchingPhone);
+                values.Add(e.UnixMatchDate);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(", ", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
     }
+
 }

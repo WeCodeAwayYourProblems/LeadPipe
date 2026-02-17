@@ -46,9 +46,10 @@ public sealed class CaliperRepository
             await using var transaction =
                 await _context.Database.BeginTransactionAsync(ct);
 
+            // Use TEXT for Date to match SQLite's date string preference, or INTEGER if storing ticks
             await _context.Database.ExecuteSqlRawAsync($"""
                 CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
-                    {nameof(CaliperEntity.Id)} INTEGER NOT NULL,
+                    {nameof(CaliperEntity.Id)} INTEGER PRIMARY KEY,
                     {nameof(CaliperEntity.PhoneNumber)} INTEGER NOT NULL,
                     {nameof(CaliperEntity.Date)} TEXT NOT NULL,
                     {nameof(CaliperEntity.UnixDate)} INTEGER NOT NULL,
@@ -56,9 +57,9 @@ public sealed class CaliperRepository
                     {nameof(CaliperEntity.Source)} TEXT,
                     {nameof(CaliperEntity.Location)} TEXT,
                     {nameof(CaliperEntity.Duration)} INTEGER,
-                    {nameof(CaliperEntity.Billable)} INTEGER,
-                    PRIMARY KEY ({nameof(CaliperEntity.Id)})
+                    {nameof(CaliperEntity.Billable)} INTEGER
                 ) WITHOUT ROWID;
+                DELETE FROM {tempTable};
             """, ct);
 
             int index = 0;
@@ -98,38 +99,21 @@ public sealed class CaliperRepository
                 }
             }
 
-            int updated = await _context.Database.ExecuteSqlRawAsync($"""
-                UPDATE {TableNames.CaliperEntitiesName}
-                SET
-                    {nameof(CaliperEntity.UnixDate)} = t.{nameof(CaliperEntity.UnixDate)},
-                    {nameof(CaliperEntity.Note)} = t.{nameof(CaliperEntity.Note)},
-                    {nameof(CaliperEntity.Source)} = t.{nameof(CaliperEntity.Source)},
-                    {nameof(CaliperEntity.Location)} = t.{nameof(CaliperEntity.Location)},
-                    {nameof(CaliperEntity.Duration)} = t.{nameof(CaliperEntity.Duration)},
-                    {nameof(CaliperEntity.Billable)} = t.{nameof(CaliperEntity.Billable)}
-                FROM {tempTable} t
-                WHERE t.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)};
-            """, ct);
-
-            int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.CaliperEntitiesName}
+            // Target index is the Primary Key (Id)
+            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+                INSERT INTO {TableNames.CaliperEntitiesName} 
                     ({nameof(CaliperEntity.Id)}, {nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)}, {nameof(CaliperEntity.UnixDate)}, {nameof(CaliperEntity.Note)}, {nameof(CaliperEntity.Source)}, {nameof(CaliperEntity.Location)}, {nameof(CaliperEntity.Duration)}, {nameof(CaliperEntity.Billable)})
-                SELECT
-                    t.{nameof(CaliperEntity.Id)},
-                    t.{nameof(CaliperEntity.PhoneNumber)},
-                    t.{nameof(CaliperEntity.Date)},
-                    t.{nameof(CaliperEntity.UnixDate)},
-                    t.{nameof(CaliperEntity.Note)},
-                    t.{nameof(CaliperEntity.Source)},
-                    t.{nameof(CaliperEntity.Location)},
-                    t.{nameof(CaliperEntity.Duration)},
-                    t.{nameof(CaliperEntity.Billable)}
-                FROM {tempTable} t
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {TableNames.CaliperEntitiesName} c
-                    WHERE c.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
-                );
+                SELECT {nameof(CaliperEntity.Id)}, {nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)}, {nameof(CaliperEntity.UnixDate)}, {nameof(CaliperEntity.Note)}, {nameof(CaliperEntity.Source)}, {nameof(CaliperEntity.Location)}, {nameof(CaliperEntity.Duration)}, {nameof(CaliperEntity.Billable)}
+                FROM {tempTable}
+                ON CONFLICT(Id) DO UPDATE SET
+                    {nameof(CaliperEntity.PhoneNumber)} = excluded.{nameof(CaliperEntity.PhoneNumber)},
+                    {nameof(CaliperEntity.Date)} = excluded.{nameof(CaliperEntity.Date)},
+                    {nameof(CaliperEntity.UnixDate)} = excluded.{nameof(CaliperEntity.UnixDate)},
+                    {nameof(CaliperEntity.Note)} = excluded.{nameof(CaliperEntity.Note)},
+                    {nameof(CaliperEntity.Source)} = excluded.{nameof(CaliperEntity.Source)},
+                    {nameof(CaliperEntity.Location)} = excluded.{nameof(CaliperEntity.Location)},
+                    {nameof(CaliperEntity.Duration)} = excluded.{nameof(CaliperEntity.Duration)},
+                    {nameof(CaliperEntity.Billable)} = excluded.{nameof(CaliperEntity.Billable)};
             """, ct);
 
             await _context.Database.ExecuteSqlRawAsync(
@@ -138,56 +122,51 @@ public sealed class CaliperRepository
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
                 nameof(CaliperEntity),
                 entities.Count,
                 stagedCount,
-                updated,
-                inserted,
+                totalAffected,
                 skipped);
 
             return Result.Success(entities);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", nameof(CaliperEntity), ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.", 
+                nameof(CaliperEntity));
             return Result.Failure<List<CaliperEntity>>(ex.ToString());
         }
 
-        // --------------------
-        // Local helper
-        // --------------------
         void InsertBatch(List<CaliperEntity> batch)
         {
-            var sql = new StringBuilder($"INSERT INTO {tempTable} VALUES ");
+            var values = new List<object>();
+            var rows = new List<string>();
+            const int colsPerRow = 9;
 
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append('(')
-                    .Append(e.Id).Append(',')
-                    .Append(e.PhoneNumber.Number).Append(',')
-                    .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}',")
-                    .Append($"{e.UnixDate},")
-                    .Append($"'{Clean(e.Note)}',")
-                    .Append($"'{Clean(e.Source)}',")
-                    .Append($"'{Clean(e.Location)}',")
-                    .Append($"{e.Duration},")
-                    .Append($"{(e.Billable ? 1 : 0)}")
-                    .Append(')');
-                sql.AppendLine();
+                int offset = i * colsPerRow;
 
+                // Build placeholder string: ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})
+                rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}}, {{{offset + 7}}}, {{{offset + 8}}})");
 
-                if (i < batch.Count - 1)
-                    sql.Append(", ");
+                values.Add(e.Id);
+                values.Add(e.PhoneNumber.Number); // Extract long from PhoneNumber object
+                values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss")); // ISO String for SQLite
+                values.Add(e.UnixDate);
+                values.Add(e.Note ?? (object)DBNull.Value);
+                values.Add(e.Source ?? (object)DBNull.Value);
+                values.Add(e.Location ?? (object)DBNull.Value);
+                values.Add(e.Duration);
+                values.Add(e.Billable ? 1 : 0);
             }
 
-            sql.Append(';');
-            _context.Database.ExecuteSqlRaw(sql.ToString());
+            string sql = $"INSERT INTO {tempTable} VALUES {string.Join(",", rows)};";
+            _context.Database.ExecuteSqlRaw(sql, [.. values]);
         }
     }
+
 }

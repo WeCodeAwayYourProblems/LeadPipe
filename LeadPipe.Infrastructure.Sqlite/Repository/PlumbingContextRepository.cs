@@ -146,16 +146,18 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
         // Get parent table names 
         var parentTable1 = GetParentTable(entityType, id1Key);
         var parentTable2 = GetParentTable(entityType, id2Key);
-        var parentTable1Name = parentTable1.Name;
-        var parentTable2Name = parentTable2.Name;
+        var parentTable1Name = parentTable1.GetTableName() ?? throw new InvalidOperationException("Parent Table 1 not found");
+        var parentTable2Name = parentTable2.GetTableName() ?? throw new InvalidOperationException("Parent Table 2 not found");
         var parentTable1NameIdentifier = StoreObjectIdentifier.Table(parentTable1Name, null);
         var parentTable2NameIdentifier = StoreObjectIdentifier.Table(parentTable2Name, null);
         var parentTable1KeyCol = parentTable1
             .FindPrimaryKey()!.Properties[0]
-            .GetColumnName(parentTable1NameIdentifier);
+            .GetColumnName(parentTable1NameIdentifier)
+            ?? throw new InvalidOperationException($"Primary key column name not found for {parentTable1.Name}");
         var parentTable2KeyCol = parentTable2
             .FindPrimaryKey()!.Properties[0]
-            .GetColumnName(parentTable2NameIdentifier);
+            .GetColumnName(parentTable2NameIdentifier)
+            ?? throw new InvalidOperationException($"Primary key column name not found for {parentTable2.Name}");
 
         // Compile once
         var id1Getter = CreateGetter(typeof(T).GetProperty(id1Key.Name)!);

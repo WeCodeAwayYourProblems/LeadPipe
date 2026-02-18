@@ -93,7 +93,9 @@ public class UpsertLinkRangeAsyncTests
 
         Assert.True(updateResult.IsSuccess);
 
-        var updated = await context.Set<CornCaliperLink>().AsNoTracking().SingleAsync();
+        var updated = await context.Set<CornCaliperLink>()
+            .AsNoTracking() // This must be here or the test will fail because of how upsert works on this puppy
+            .SingleAsync();
 
         Assert.Equal(999, updated.MatchingPhone);
         Assert.Equal(10, updated.UnixMatchDate);

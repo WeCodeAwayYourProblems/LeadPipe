@@ -20,7 +20,7 @@ public sealed class PlumbingCaliperLinkRepository
             .Include(c => c.CaliperEntity);
     }
 
-    protected override UpsertFields UpsertFieldValues { get; } = new(
+    protected override UpsertFields LinkDetails { get; } = new(
         TableName: TableNames.PlumbingCaliperLinksName,
         TempTable: $"temp_{TableNames.PlumbingCaliperLinksName}",
         Id1: nameof(PlumbingCaliperLink.PlumbingId),
@@ -50,7 +50,7 @@ public sealed class PlumbingCaliperLinkRepository
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

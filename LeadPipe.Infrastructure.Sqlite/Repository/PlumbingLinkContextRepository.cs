@@ -15,7 +15,7 @@ public abstract class PlumbingLinkContextRepository<TEntity, TRepo>
 {
     protected record UpsertFields(string TableName, string TempTable, string Id1, string Id2, string PhoneCol, string DateCol, string EntityName);
     protected abstract Task AddLinks(List<TEntity> links, int batchSize, CancellationToken ct);
-    protected abstract UpsertFields UpsertFieldValues { get; }
+    protected abstract UpsertFields LinkDetails { get; }
     internal async Task<Result<List<TEntity>>> UpsertLinkRangeAsync(
         List<TEntity> links,
         CancellationToken ct) 
@@ -24,7 +24,7 @@ public abstract class PlumbingLinkContextRepository<TEntity, TRepo>
         {
             _logger.LogInformation(
                 "{Entity} upsert reverted. No entities entered. Returning success state.",
-                UpsertFieldValues.EntityName
+                LinkDetails.EntityName
             );
             return Result.Success(links);
         }
@@ -35,8 +35,8 @@ public abstract class PlumbingLinkContextRepository<TEntity, TRepo>
 
             // Create temp table with id1/id2
             string createTemp = $"""
-                DROP TABLE IF EXISTS {UpsertFieldValues.TempTable};
-                CREATE TEMP TABLE {UpsertFieldValues.TempTable} (
+                DROP TABLE IF EXISTS {LinkDetails.TempTable};
+                CREATE TEMP TABLE {LinkDetails.TempTable} (
                     id1 INTEGER,
                     id2 INTEGER,
                     phone INTEGER,
@@ -51,34 +51,34 @@ public abstract class PlumbingLinkContextRepository<TEntity, TRepo>
 
             // Update existing rows (earliest match date wins)
             string updateSql = $"""
-            UPDATE {UpsertFieldValues.TableName}
-            SET {UpsertFieldValues.PhoneCol} = (
+            UPDATE {LinkDetails.TableName}
+            SET {LinkDetails.PhoneCol} = (
                     SELECT t.phone
-                    FROM {UpsertFieldValues.TempTable} t
-                    WHERE t.id1 = {UpsertFieldValues.TableName}.{UpsertFieldValues.Id1}
-                      AND t.id2 = {UpsertFieldValues.TableName}.{UpsertFieldValues.Id2}
+                    FROM {LinkDetails.TempTable} t
+                    WHERE t.id1 = {LinkDetails.TableName}.{LinkDetails.Id1}
+                      AND t.id2 = {LinkDetails.TableName}.{LinkDetails.Id2}
                       AND t.phone <> 0
-                      AND t.matchDate < {UpsertFieldValues.TableName}.{UpsertFieldValues.DateCol}
+                      AND t.matchDate < {LinkDetails.TableName}.{LinkDetails.DateCol}
                     ORDER BY t.matchDate ASC
                     LIMIT 1
                 ),
-                {UpsertFieldValues.DateCol} = (
+                {LinkDetails.DateCol} = (
                     SELECT t.matchDate
-                    FROM {UpsertFieldValues.TempTable} t
-                    WHERE t.id1 = {UpsertFieldValues.TableName}.{UpsertFieldValues.Id1}
-                      AND t.id2 = {UpsertFieldValues.TableName}.{UpsertFieldValues.Id2}
+                    FROM {LinkDetails.TempTable} t
+                    WHERE t.id1 = {LinkDetails.TableName}.{LinkDetails.Id1}
+                      AND t.id2 = {LinkDetails.TableName}.{LinkDetails.Id2}
                       AND t.phone <> 0
-                      AND t.matchDate < {UpsertFieldValues.TableName}.{UpsertFieldValues.DateCol}
+                      AND t.matchDate < {LinkDetails.TableName}.{LinkDetails.DateCol}
                     ORDER BY t.matchDate ASC
                     LIMIT 1
                 )
             WHERE EXISTS (
                 SELECT 1
-                FROM {UpsertFieldValues.TempTable} t
-                WHERE t.id1 = {UpsertFieldValues.TableName}.{UpsertFieldValues.Id1}
-                  AND t.id2 = {UpsertFieldValues.TableName}.{UpsertFieldValues.Id2}
+                FROM {LinkDetails.TempTable} t
+                WHERE t.id1 = {LinkDetails.TableName}.{LinkDetails.Id1}
+                  AND t.id2 = {LinkDetails.TableName}.{LinkDetails.Id2}
                   AND t.phone <> 0
-                  AND t.matchDate < {UpsertFieldValues.TableName}.{UpsertFieldValues.DateCol}
+                  AND t.matchDate < {LinkDetails.TableName}.{LinkDetails.DateCol}
             );
         """;
 
@@ -86,13 +86,19 @@ public abstract class PlumbingLinkContextRepository<TEntity, TRepo>
 
             // Insert new rows
             string insertSql = $"""
-            INSERT INTO {UpsertFieldValues.TableName} ({UpsertFieldValues.Id1}, {UpsertFieldValues.Id2}, {UpsertFieldValues.PhoneCol}, {UpsertFieldValues.DateCol})
+            INSERT INTO {LinkDetails.TableName} 
+            (
+                {LinkDetails.Id1}, 
+                {LinkDetails.Id2}, 
+                {LinkDetails.PhoneCol}, 
+                {LinkDetails.DateCol}
+            )
             SELECT t.id1, t.id2, t.phone, MIN(t.matchDate)
-            FROM {UpsertFieldValues.TempTable} t
+            FROM {LinkDetails.TempTable} t
             WHERE t.phone <> 0
               AND NOT EXISTS (
-                  SELECT 1 FROM {UpsertFieldValues.TableName} ccl
-                  WHERE ccl.{UpsertFieldValues.Id1} = t.id1 AND ccl.{UpsertFieldValues.Id2} = t.id2
+                  SELECT 1 FROM {LinkDetails.TableName} ccl
+                  WHERE ccl.{LinkDetails.Id1} = t.id1 AND ccl.{LinkDetails.Id2} = t.id2
               )
             GROUP BY t.id1, t.id2;
         """;
@@ -101,7 +107,7 @@ public abstract class PlumbingLinkContextRepository<TEntity, TRepo>
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Updated={Updated}, Inserted={Inserted}",
-                UpsertFieldValues.EntityName, links.Count, totalUpdated, totalInserted
+                LinkDetails.EntityName, links.Count, totalUpdated, totalInserted
             );
 
             await transaction.CommitAsync(ct);
@@ -113,7 +119,7 @@ public abstract class PlumbingLinkContextRepository<TEntity, TRepo>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed for table {Table}", UpsertFieldValues.EntityName, UpsertFieldValues.TableName);
+            _logger.LogError(ex, "{Entity} upsert failed for table {Table}", LinkDetails.EntityName, LinkDetails.TableName);
             return Result.Failure<List<TEntity>>(ex.ToString());
         }
     }

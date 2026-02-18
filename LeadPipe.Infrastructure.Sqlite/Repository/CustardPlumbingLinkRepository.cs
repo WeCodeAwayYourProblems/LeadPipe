@@ -4,7 +4,6 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -21,7 +20,7 @@ public sealed class CustardPlumbingLinkRepository
             .Include(q => q.Plumbing);
     }
 
-    protected override UpsertFields UpsertFieldValues { get; } = new(
+    protected override UpsertFields LinkDetails { get; } = new(
         TableName: TableNames.CustardPlumbingLinksName,
         TempTable: $"temp_{TableNames.CustardPlumbingLinksName}",
         Id1: nameof(CustardPlumbingLink.CustardId),
@@ -51,7 +50,7 @@ public sealed class CustardPlumbingLinkRepository
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

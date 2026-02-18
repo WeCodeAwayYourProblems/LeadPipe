@@ -21,7 +21,7 @@ public sealed class CustardCaliperLinkRepository
             .Include(q => q.Caliper);
     }
 
-    protected override UpsertFields UpsertFieldValues { get; } = new(
+    protected override UpsertFields LinkDetails { get; } = new(
         TableName: TableNames.CustardCaliperLinksName,
         TempTable: $"temp_{TableNames.CustardCaliperLinksName}",
         Id1: nameof(CustardCaliperLink.CustardId),
@@ -51,7 +51,7 @@ public sealed class CustardCaliperLinkRepository
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

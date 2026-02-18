@@ -17,7 +17,7 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
             .Include(c => c.PlumbingEntity);
     }
 
-    protected override UpsertFields UpsertFieldValues { get; } = new(
+    protected override UpsertFields LinkDetails { get; } = new(
         TableName: TableNames.SandPlumbingLinksName,
         TempTable: $"temp_{TableNames.SandPlumbingLinksName}",
         Id1: nameof(SandPlumbingLink.SandId),
@@ -47,7 +47,7 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

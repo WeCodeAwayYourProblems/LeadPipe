@@ -4,7 +4,6 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -18,7 +17,7 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
             .Include(c => c.CaliperEntity);
     }
 
-    protected override UpsertFields UpsertFieldValues { get; } = new(
+    protected override UpsertFields LinkDetails { get; } = new(
         TableName: TableNames.SandCaliperLinksName,
         TempTable: $"temp_{TableNames.SandCaliperLinksName}",
         Id1: nameof(SandCaliperLink.SandId),
@@ -48,7 +47,7 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

@@ -21,7 +21,7 @@ public sealed class CustardCornLinkRepository
             .Include(q => q.Corn);
     }
 
-    protected override UpsertFields UpsertFieldValues { get; } = new(
+    protected override UpsertFields LinkDetails { get; } = new(
         TableName: TableNames.CustardCornLinksName,
         TempTable: $"temp_{TableNames.CustardCornLinksName}",
         Id1: nameof(CustardCornLink.CustardId),
@@ -51,7 +51,7 @@ public sealed class CustardCornLinkRepository
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

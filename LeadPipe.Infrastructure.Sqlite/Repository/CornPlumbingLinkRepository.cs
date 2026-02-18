@@ -21,7 +21,7 @@ public sealed class CornPlumbingLinkRepository
             .Include(q => q.PlumbingEntity);
     }
 
-    protected override UpsertFields UpsertFieldValues { get; } = new(
+    protected override UpsertFields LinkDetails { get; } = new(
         TableName: TableNames.CornPlumbingLinksName,
         TempTable: $"temp_{TableNames.CornPlumbingLinksName}",
         Id1: nameof(CornPlumbingLink.CornId),
@@ -51,7 +51,7 @@ public sealed class CornPlumbingLinkRepository
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

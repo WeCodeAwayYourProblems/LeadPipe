@@ -7,8 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingRepository> logger)
-    : PlumbingContextRepository<PlumbingEntity, PlumbingRepository>(context, logger), IRepository<PlumbingEntity>
+public class PlumbingRepository
+    (
+        PlumbingContext context,
+        ILogger<PlumbingRepository> logger
+    ) : PlumbingEntityContextRepository<PlumbingEntity, PlumbingRepository>(context, logger), IRepository<PlumbingEntity>
 {
     protected override IQueryable<PlumbingEntity> WithIncludes(IQueryable<PlumbingEntity> q)
     {
@@ -18,185 +21,86 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             .Include(c => c.PlumbingCaliperLinks)
             .Include(c => c.CornPlumbingLinks);
     }
-
-    public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(List<PlumbingEntity> entities, CancellationToken ct = default)
+    
+    protected override void InsertBatch(List<PlumbingEntity> batch)
     {
-        if (entities == null || entities.Count == 0)
-            return Result.Success(new List<PlumbingEntity>());
+        var values = new List<object>();
+        var rows = new List<string>();
+        const int cols = 6;
 
-        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.PhoneNumber));
-        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.Date));
-        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.UnixDate));
-        AssertNotString<PlumbingEntity>(nameof(PlumbingEntity.Source));
-
-        // We take the FIRST chronological record for each unique touch
-        List<PlumbingEntity> uniqueEntities =
-        [
-            .. entities
-            .OrderBy(e => e.Date)
-            .GroupBy(e => (e.PhoneNumber.Number, e.Date, e.Source))
-            .Select(g => g.First())
-        ];
-
-        int batchSize = 200;
-        const int minBatchSize = 1;
-        int skipped = 0;
-        int stagedCount = 0;
-        const string tempTable = "temp_plumbings";
-
-        try
+        for (int i = 0; i < batch.Count; i++)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+            var e = batch[i];
+            int o = i * cols;
+            rows.Add($"({{{o}}},{{{o + 1}}},{{{o + 2}}},{{{o + 3}}},{{{o + 4}}},{{{o + 5}}})");
 
-            // Temp table for staging
-            await _context.Database.ExecuteSqlRawAsync($"""
-                CREATE TEMP TABLE IF NOT EXISTS {tempTable} (
-                    {nameof(PlumbingEntity.PhoneNumber)} INTEGER NOT NULL,
-                    {nameof(PlumbingEntity.Date)} TEXT NOT NULL,
-                    {nameof(PlumbingEntity.UnixDate)} INTEGER NOT NULL,
-                    {nameof(PlumbingEntity.Contents)} TEXT,
-                    {nameof(PlumbingEntity.Source)} TEXT NOT NULL,
-                    {nameof(PlumbingEntity.MetaData)} TEXT NOT NULL,
-                    PRIMARY KEY ({nameof(PlumbingEntity.PhoneNumber)}, {nameof(PlumbingEntity.Date)}, {nameof(PlumbingEntity.Source)})
-                ) WITHOUT ROWID;
-                DELETE FROM {tempTable};
-            """, cancellationToken: ct);
-
-            int index = 0;
-
-            while (index < uniqueEntities.Count)
-            {
-                int take = Math.Min(batchSize, uniqueEntities.Count - index);
-                var batch = uniqueEntities.GetRange(index, take);
-
-                try
-                {
-                    InsertBatch(batch);
-                    stagedCount += batch.Count;
-                    index += take;
-
-                    // Gradually scale back up after success
-                    if (batchSize < 200)
-                        batchSize = Math.Min(batchSize * 2, 200);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(
-                        ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
-                        nameof(PlumbingEntity),
-                        batchSize);
-
-                    if (batchSize == minBatchSize)
-                    {
-                        var row = batch[0];
-                        _logger.LogError(
-                            "{Entity} row insert failed: Phone={Phone}, Date={Date}, Contents={Contents}, Source={Source}, MetaData={MetaData}",
-                            nameof(PlumbingEntity),
-                            row.PhoneNumber,
-                            row.Date,
-                            row.Contents,
-                            row.Source,
-                            row.MetaData);
-
-                        index++;
-                        skipped++;
-                        batchSize = 100;
-                    }
-                    else
-                    {
-                        batchSize = Math.Max(minBatchSize, batchSize / 2);
-                    }
-                }
-            }
-
-            // Update existing rows
-            string updateSql = $"""
-                UPDATE {TableNames.PlumbingEntitiesName}
-                SET
-                    {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)},
-                    {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Contents)} = temp.{nameof(PlumbingEntity.Contents)},
-                    {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
-                FROM {tempTable} temp
-                WHERE {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
-                  AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
-                  AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
-            """;
-            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
-
-            // Insert new rows
-            string insertSql = $"""
-                INSERT INTO {TableNames.PlumbingEntitiesName} (
-                    {nameof(PlumbingEntity.PhoneNumber)},
-                    {nameof(PlumbingEntity.Date)},
-                    {nameof(PlumbingEntity.UnixDate)},
-                    {nameof(PlumbingEntity.Contents)},
-                    {nameof(PlumbingEntity.Source)},
-                    {nameof(PlumbingEntity.MetaData)}
-                )
-                SELECT
-                    temp.{nameof(PlumbingEntity.PhoneNumber)},
-                    temp.{nameof(PlumbingEntity.Date)},
-                    temp.{nameof(PlumbingEntity.UnixDate)},
-                    temp.{nameof(PlumbingEntity.Contents)},
-                    temp.{nameof(PlumbingEntity.Source)},
-                    temp.{nameof(PlumbingEntity.MetaData)}
-                FROM {tempTable} temp
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {TableNames.PlumbingEntitiesName} t
-                    WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
-                      AND t.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
-                      AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)}
-                );
-            """;
-            int totalInserted = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
-
-
-            await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
-            await transaction.CommitAsync(ct);
-
-            _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
-                nameof(PlumbingEntity),
-                entities.Count,
-                stagedCount,
-                totalUpdated,
-                totalInserted,
-                skipped);
-
-            return Result.Success(entities);
+            values.Add(e.PhoneNumber.Number);
+            values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
+            values.Add(e.UnixDate);
+            values.Add(e.Contents ?? (object)DBNull.Value);
+            values.Add(e.Source.ToString()); // Ensure Enum is passed as string
+            values.Add(e.MetaData ?? string.Empty);
         }
-        catch (OperationCanceledException) { throw; }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "{Entity} upsert failed.",
-                nameof(PlumbingEntity));
-            return Result.Failure<List<PlumbingEntity>>(ex.ToString());
-        }
-
-        void InsertBatch(List<PlumbingEntity> batch)
-        {
-            var values = new List<object>();
-            var rows = new List<string>();
-            const int cols = 6;
-
-            for (int i = 0; i < batch.Count; i++)
-            {
-                var e = batch[i];
-                int o = i * cols;
-                rows.Add($"({{{o}}},{{{o + 1}}},{{{o + 2}}},{{{o + 3}}},{{{o + 4}}},{{{o + 5}}})");
-
-                values.Add(e.PhoneNumber.Number);
-                values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-                values.Add(e.UnixDate);
-                values.Add(e.Contents ?? (object)DBNull.Value);
-                values.Add(e.Source.ToString()); // Ensure Enum is passed as string
-                values.Add(e.MetaData ?? string.Empty);
-            }
-            string joined = $"INSERT INTO {tempTable} VALUES {string.Join(",", rows)}";
-            _context.Database.ExecuteSqlRaw(joined, [.. values]);
-        }
+        string joined = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)}";
+        _context.Database.ExecuteSqlRaw(joined, [.. values]);
     }
+
+    protected override UpsertFields EntityDetails => throw new NotImplementedException();
+
+    protected override string CreateTempTable => $"""
+        CREATE TEMP TABLE IF NOT EXISTS {EntityDetails.TempTable} (
+            {nameof(PlumbingEntity.PhoneNumber)} INTEGER NOT NULL,
+            {nameof(PlumbingEntity.Date)} TEXT NOT NULL,
+            {nameof(PlumbingEntity.UnixDate)} INTEGER NOT NULL,
+            {nameof(PlumbingEntity.Contents)} TEXT,
+            {nameof(PlumbingEntity.Source)} TEXT NOT NULL,
+            {nameof(PlumbingEntity.MetaData)} TEXT NOT NULL,
+            PRIMARY KEY ({nameof(PlumbingEntity.PhoneNumber)}, {nameof(PlumbingEntity.Date)}, {nameof(PlumbingEntity.Source)})
+        ) WITHOUT ROWID;
+        DELETE FROM {EntityDetails.TempTable};
+    """;
+
+    protected override string UpdateSql => $"""
+        UPDATE {TableNames.PlumbingEntitiesName}
+        SET
+            {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)},
+            {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Contents)} = temp.{nameof(PlumbingEntity.Contents)},
+            {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
+        FROM {EntityDetails.TempTable} temp
+        WHERE {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
+          AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
+          AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
+    """;
+
+    protected override string InsertSql => $"""
+        INSERT INTO {TableNames.PlumbingEntitiesName} (
+            {nameof(PlumbingEntity.PhoneNumber)},
+            {nameof(PlumbingEntity.Date)},
+            {nameof(PlumbingEntity.UnixDate)},
+            {nameof(PlumbingEntity.Contents)},
+            {nameof(PlumbingEntity.Source)},
+            {nameof(PlumbingEntity.MetaData)}
+        )
+        SELECT
+            temp.{nameof(PlumbingEntity.PhoneNumber)},
+            temp.{nameof(PlumbingEntity.Date)},
+            temp.{nameof(PlumbingEntity.UnixDate)},
+            temp.{nameof(PlumbingEntity.Contents)},
+            temp.{nameof(PlumbingEntity.Source)},
+            temp.{nameof(PlumbingEntity.MetaData)}
+        FROM {EntityDetails.TempTable} temp
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM {TableNames.PlumbingEntitiesName} t
+            WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
+              AND t.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
+              AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)}
+        );
+    """;
+
+
+    public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(
+        List<PlumbingEntity> entities,
+        CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);
 
 }

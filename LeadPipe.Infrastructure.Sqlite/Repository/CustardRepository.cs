@@ -115,7 +115,7 @@ public sealed class CustardRepository
         );
     """;
 
-
+    protected override bool IsUpdatable => true;
     public override async Task<Result<List<CustardEntity>>> UpsertRangeAsync(
         List<CustardEntity> entities,
         CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);

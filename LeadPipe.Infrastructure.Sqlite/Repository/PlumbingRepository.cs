@@ -63,54 +63,16 @@ public class PlumbingRepository
             {nameof(PlumbingEntity.Contents)} TEXT,
             {nameof(PlumbingEntity.Source)} TEXT NOT NULL,
             {nameof(PlumbingEntity.MetaData)} TEXT NOT NULL,
-            {nameof(PlumbingEntity.Branch)} TEXT,
-            PRIMARY KEY ({nameof(PlumbingEntity.PhoneNumber)}, {nameof(PlumbingEntity.Date)}, {nameof(PlumbingEntity.Source)})
-        ) WITHOUT ROWID;
+            {nameof(PlumbingEntity.Branch)} TEXT
+        );
         DELETE FROM {EntityDetails.TempTable};
     """;
 
-    protected override string UpdateSql => $"""
-        UPDATE {TableNames.PlumbingEntitiesName}
-        SET
-            {nameof(PlumbingEntity.UnixDate)} = (
-                SELECT temp.{nameof(PlumbingEntity.UnixDate)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
-                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
-                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
-            ),
-            {nameof(PlumbingEntity.Contents)} = (
-                SELECT temp.{nameof(PlumbingEntity.Contents)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
-                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
-                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
-            ),
-            {nameof(PlumbingEntity.MetaData)} = (
-                SELECT temp.{nameof(PlumbingEntity.MetaData)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
-                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
-                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
-            ),
-            {nameof(PlumbingEntity.Branch)} = (
-                SELECT temp.{nameof(PlumbingEntity.Branch)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
-                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
-                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
-            )
-        WHERE EXISTS (
-            SELECT 1
-            FROM {EntityDetails.TempTable} temp
-            WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
-              AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
-              AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
-        );
-    """;
+    protected override string UpdateSql => "";
 
     protected override string InsertSql => $"""
-        INSERT INTO {TableNames.PlumbingEntitiesName} (
+        INSERT INTO {TableNames.PlumbingEntitiesName} 
+        (
             {nameof(PlumbingEntity.PhoneNumber)},
             {nameof(PlumbingEntity.Date)},
             {nameof(PlumbingEntity.UnixDate)},
@@ -120,23 +82,17 @@ public class PlumbingRepository
             {nameof(PlumbingEntity.Branch)}
         )
         SELECT
-            temp.{nameof(PlumbingEntity.PhoneNumber)},
-            temp.{nameof(PlumbingEntity.Date)},
-            temp.{nameof(PlumbingEntity.UnixDate)},
-            temp.{nameof(PlumbingEntity.Contents)},
-            temp.{nameof(PlumbingEntity.Source)},
-            temp.{nameof(PlumbingEntity.MetaData)},
-            temp.{nameof(PlumbingEntity.Branch)}
-        FROM {EntityDetails.TempTable} temp
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM {TableNames.PlumbingEntitiesName} t
-            WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
-              AND t.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
-              AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)}
-        );
+            {nameof(PlumbingEntity.PhoneNumber)},
+            {nameof(PlumbingEntity.Date)},
+            {nameof(PlumbingEntity.UnixDate)},
+            {nameof(PlumbingEntity.Contents)},
+            {nameof(PlumbingEntity.Source)},
+            {nameof(PlumbingEntity.MetaData)},
+            {nameof(PlumbingEntity.Branch)}
+        FROM {EntityDetails.TempTable};
     """;
 
+    protected override bool IsUpdatable => false;
     public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(
         List<PlumbingEntity> entities,
         CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);

@@ -18,6 +18,7 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
     protected abstract string CreateTempTable { get; }
     protected abstract string UpdateSql { get; }
     protected abstract string InsertSql { get; }
+    protected abstract bool IsUpdatable { get; }
     protected abstract void InsertBatch(List<TEntity> batch);
 
     internal async Task<Result<List<TEntity>>> UpsertEntityRangeAsync(
@@ -44,7 +45,7 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
 
             await _context.Database.ExecuteSqlRawAsync(CreateTempTable, ct);
 
-            for (int index = 0; index < entities.Count; index++)
+            for (int index = 0; index < entities.Count;)
             {
                 int take = Math.Min(batchSize, entities.Count - index);
                 var batch = entities.GetRange(index, take);
@@ -53,7 +54,7 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
                 {
                     InsertBatch(batch);
                     stagedCount += batch.Count;
-                    index += take;
+                    index += take; // manual increment only
 
                     if (batchSize < 200)
                         batchSize = Math.Min(batchSize * 2, 200);
@@ -79,8 +80,10 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
                 }
             }
 
-            // Target index is the Primary Key (Id)
-            int updatedCount = await _context.Database.ExecuteSqlRawAsync(UpdateSql, ct);
+            // Update
+            int updatedCount = IsUpdatable
+                ? await _context.Database.ExecuteSqlRawAsync(UpdateSql, ct)
+                : 0;
 
             // Insert new rows
             int insertedCount = await _context.Database.ExecuteSqlRawAsync(InsertSql, ct);
@@ -91,8 +94,9 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: IsUpdatable={IsUpdatable}, Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 EntityDetails.EntityName,
+                IsUpdatable,
                 entities.Count,
                 stagedCount,
                 updatedCount,

@@ -122,17 +122,17 @@ public sealed class CaliperRepository
             WHERE t.{nameof(CaliperEntity.Id)} = temp.{nameof(CaliperEntity.Id)}
         );
     """;
+    protected override bool IsUpdatable => true;
 
     protected override void InsertBatch(List<CaliperEntity> batch)
     {
         var values = new List<object>();
         var rows = new List<string>();
-        const int colsPerRow = 9;
 
         for (int i = 0; i < batch.Count; i++)
         {
             var e = batch[i];
-            int offset = i * colsPerRow;
+            int offset = i * EntityDetails.ColumnCount;
 
             // Build placeholder string: ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})
             rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}}, {{{offset + 7}}}, {{{offset + 8}}})");
@@ -141,9 +141,9 @@ public sealed class CaliperRepository
             values.Add(e.PhoneNumber.Number); // Extract long from PhoneNumber object
             values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss")); // ISO String for SQLite
             values.Add(e.UnixDate);
-            values.Add(e.Note ?? (object)DBNull.Value);
-            values.Add(e.Source ?? (object)DBNull.Value);
-            values.Add(e.Location ?? (object)DBNull.Value);
+            values.Add(e.Note);
+            values.Add(e.Source);
+            values.Add(e.Location);
             values.Add(e.Duration);
             values.Add(e.Billable ? 1 : 0);
         }

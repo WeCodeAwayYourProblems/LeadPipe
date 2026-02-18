@@ -24,26 +24,26 @@ public sealed class SandRepository
 
     protected override void InsertBatch(List<SandEntity> batch)
     {
+#pragma warning disable CS8604
         var values = new List<object>();
         var rows = new List<string>();
-        const int cols = 14;
 
         for (int i = 0; i < batch.Count; i++)
         {
             var e = batch[i];
-            int o = i * cols;
+            int o = i * EntityDetails.ColumnCount;
             rows.Add($"({{{o}}},{{{o + 1}}},{{{o + 2}}},{{{o + 3}}},{{{o + 4}}},{{{o + 5}}},{{{o + 6}}},{{{o + 7}}},{{{o + 8}}},{{{o + 9}}},{{{o + 10}}},{{{o + 11}}},{{{o + 12}}},{{{o + 13}}})");
 
             values.Add(e.Id);
             values.Add(e.CustardId);
             values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
             values.Add(e.UnixDate);
-            values.Add(e.CancelDate == default ? DBNull.Value : e.CancelDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            values.Add(e.CancelDate == default ? null : e.CancelDate.ToString("yyyy-MM-dd HH:mm:ss"));
             values.Add(e.UnixCancelDate);
             values.Add(e.Active ? 1 : 0);
             values.Add(e.Complete ? 1 : 0);
             values.Add(e.Value.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            values.Add(e.Type ?? (object)DBNull.Value);
+            values.Add(e.Type);
             values.Add(e.Seller);
             values.Add(e.Seller2);
             values.Add(e.Seller3);
@@ -52,6 +52,7 @@ public sealed class SandRepository
 
         string joined = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)};";
         _context.Database.ExecuteSqlRaw(joined, [.. values]);
+#pragma warning restore CS8604
     }
 
     protected override UpsertFields EntityDetails => new(
@@ -140,7 +141,7 @@ public sealed class SandRepository
             WHERE t.{nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)}
         );
     """;
-
+    protected override bool IsUpdatable => true;
     public override async Task<Result<List<SandEntity>>> UpsertRangeAsync(
         List<SandEntity> entities,
         CancellationToken ct = default)

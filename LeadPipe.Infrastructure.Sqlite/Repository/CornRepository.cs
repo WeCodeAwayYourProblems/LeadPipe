@@ -25,12 +25,11 @@ public sealed class CornRepository(
     {
         var values = new List<object>();
         var rows = new List<string>();
-        const int colsPerRow = 7;
 
         for (int i = 0; i < batch.Count; i++)
         {
             var e = batch[i];
-            int offset = i * colsPerRow;
+            int offset = i * EntityDetails.ColumnCount;
 
             // Build placeholder string: ({0}, {1}, {2}, {3}, {4}, {5}, {6})
             rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}})");
@@ -102,7 +101,7 @@ public sealed class CornRepository(
             WHERE t.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)}
         );
     """;
-
+    protected override bool IsUpdatable => true;
     public override async Task<Result<List<CornEntity>>> UpsertRangeAsync(
         List<CornEntity> entities,
         CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);

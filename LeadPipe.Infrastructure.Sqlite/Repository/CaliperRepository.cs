@@ -11,7 +11,7 @@ public sealed class CaliperRepository
     (
         PlumbingContext context,
         ILogger<CaliperRepository> logger
-    ) : PlumbingEntityContextRepository<CaliperEntity, CaliperRepository>(context, logger), IRepository<CaliperEntity>
+    ) : PlumbingContextEntityRepository<CaliperEntity, CaliperRepository>(context, logger), IRepository<CaliperEntity>
 {
     protected override IQueryable<CaliperEntity> WithIncludes(IQueryable<CaliperEntity> q)
     {

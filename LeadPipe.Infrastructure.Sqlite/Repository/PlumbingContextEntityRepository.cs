@@ -6,11 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public abstract class PlumbingEntityContextRepository<TEntity, TRepo>
+public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
     (
         PlumbingContext context,
         ILogger<TRepo> logger
-    ) : PlumbingContextRepository<TEntity, TRepo>(context, logger)
+    ) : PlumbingContextBaseRepository<TEntity, TRepo>(context, logger)
     where TEntity : class, IEntity
 {
     protected record UpsertFields(string TableName, string TempTable, string EntityName, int ColumnCount);

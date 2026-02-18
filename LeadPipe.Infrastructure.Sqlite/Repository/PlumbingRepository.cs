@@ -11,7 +11,7 @@ public class PlumbingRepository
     (
         PlumbingContext context,
         ILogger<PlumbingRepository> logger
-    ) : PlumbingEntityContextRepository<PlumbingEntity, PlumbingRepository>(context, logger), IRepository<PlumbingEntity>
+    ) : PlumbingContextEntityRepository<PlumbingEntity, PlumbingRepository>(context, logger), IRepository<PlumbingEntity>
 {
     protected override IQueryable<PlumbingEntity> WithIncludes(IQueryable<PlumbingEntity> q)
     {
@@ -21,31 +21,39 @@ public class PlumbingRepository
             .Include(c => c.PlumbingCaliperLinks)
             .Include(c => c.CornPlumbingLinks);
     }
-    
+
     protected override void InsertBatch(List<PlumbingEntity> batch)
     {
+#pragma warning disable CS8604
         var values = new List<object>();
         var rows = new List<string>();
-        const int cols = 6;
 
         for (int i = 0; i < batch.Count; i++)
         {
             var e = batch[i];
-            int o = i * cols;
-            rows.Add($"({{{o}}},{{{o + 1}}},{{{o + 2}}},{{{o + 3}}},{{{o + 4}}},{{{o + 5}}})");
+            int o = i * EntityDetails.ColumnCount;
+            rows.Add($"({{{o}}},{{{o + 1}}},{{{o + 2}}},{{{o + 3}}},{{{o + 4}}},{{{o + 5}}},{{{o + 6}}})");
 
             values.Add(e.PhoneNumber.Number);
             values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
             values.Add(e.UnixDate);
-            values.Add(e.Contents ?? (object)DBNull.Value);
+            values.Add(e.Contents);
             values.Add(e.Source.ToString()); // Ensure Enum is passed as string
             values.Add(e.MetaData ?? string.Empty);
+            values.Add(e.Branch);
         }
         string joined = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)}";
         _context.Database.ExecuteSqlRaw(joined, [.. values]);
+#pragma warning restore CS8604
     }
 
-    protected override UpsertFields EntityDetails => throw new NotImplementedException();
+    protected override UpsertFields EntityDetails => new
+    (
+        TableName: TableNames.PlumbingEntitiesName,
+        TempTable: $"temp_{TableNames.PlumbingEntitiesName}",
+        EntityName: nameof(PlumbingEntity),
+        ColumnCount: 7
+    );
 
     protected override string CreateTempTable => $"""
         CREATE TEMP TABLE IF NOT EXISTS {EntityDetails.TempTable} (
@@ -55,6 +63,7 @@ public class PlumbingRepository
             {nameof(PlumbingEntity.Contents)} TEXT,
             {nameof(PlumbingEntity.Source)} TEXT NOT NULL,
             {nameof(PlumbingEntity.MetaData)} TEXT NOT NULL,
+            {nameof(PlumbingEntity.Branch)} TEXT,
             PRIMARY KEY ({nameof(PlumbingEntity.PhoneNumber)}, {nameof(PlumbingEntity.Date)}, {nameof(PlumbingEntity.Source)})
         ) WITHOUT ROWID;
         DELETE FROM {EntityDetails.TempTable};
@@ -63,13 +72,41 @@ public class PlumbingRepository
     protected override string UpdateSql => $"""
         UPDATE {TableNames.PlumbingEntitiesName}
         SET
-            {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)},
-            {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Contents)} = temp.{nameof(PlumbingEntity.Contents)},
-            {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
-        FROM {EntityDetails.TempTable} temp
-        WHERE {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
-          AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
-          AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
+            {nameof(PlumbingEntity.UnixDate)} = (
+                SELECT temp.{nameof(PlumbingEntity.UnixDate)}
+                FROM {EntityDetails.TempTable} temp
+                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
+                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
+                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
+            ),
+            {nameof(PlumbingEntity.Contents)} = (
+                SELECT temp.{nameof(PlumbingEntity.Contents)}
+                FROM {EntityDetails.TempTable} temp
+                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
+                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
+                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
+            ),
+            {nameof(PlumbingEntity.MetaData)} = (
+                SELECT temp.{nameof(PlumbingEntity.MetaData)}
+                FROM {EntityDetails.TempTable} temp
+                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
+                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
+                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
+            ),
+            {nameof(PlumbingEntity.Branch)} = (
+                SELECT temp.{nameof(PlumbingEntity.Branch)}
+                FROM {EntityDetails.TempTable} temp
+                WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
+                  AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
+                  AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
+            )
+        WHERE EXISTS (
+            SELECT 1
+            FROM {EntityDetails.TempTable} temp
+            WHERE temp.{nameof(PlumbingEntity.PhoneNumber)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)}
+              AND temp.{nameof(PlumbingEntity.Date)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)}
+              AND temp.{nameof(PlumbingEntity.Source)} = {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)}
+        );
     """;
 
     protected override string InsertSql => $"""
@@ -79,7 +116,8 @@ public class PlumbingRepository
             {nameof(PlumbingEntity.UnixDate)},
             {nameof(PlumbingEntity.Contents)},
             {nameof(PlumbingEntity.Source)},
-            {nameof(PlumbingEntity.MetaData)}
+            {nameof(PlumbingEntity.MetaData)},
+            {nameof(PlumbingEntity.Branch)}
         )
         SELECT
             temp.{nameof(PlumbingEntity.PhoneNumber)},
@@ -87,7 +125,8 @@ public class PlumbingRepository
             temp.{nameof(PlumbingEntity.UnixDate)},
             temp.{nameof(PlumbingEntity.Contents)},
             temp.{nameof(PlumbingEntity.Source)},
-            temp.{nameof(PlumbingEntity.MetaData)}
+            temp.{nameof(PlumbingEntity.MetaData)},
+            temp.{nameof(PlumbingEntity.Branch)}
         FROM {EntityDetails.TempTable} temp
         WHERE NOT EXISTS (
             SELECT 1
@@ -97,7 +136,6 @@ public class PlumbingRepository
               AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)}
         );
     """;
-
 
     public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(
         List<PlumbingEntity> entities,

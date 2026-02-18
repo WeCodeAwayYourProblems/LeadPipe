@@ -11,7 +11,7 @@ public sealed class PlumbingCaliperLinkRepository
     (
         PlumbingContext context,
         ILogger<PlumbingCaliperLinkRepository> logger
-    ) : PlumbingLinkContextRepository<PlumbingCaliperLink, PlumbingCaliperLinkRepository>(context, logger), IRepository<PlumbingCaliperLink>
+    ) : PlumbingContextLinkRepository<PlumbingCaliperLink, PlumbingCaliperLinkRepository>(context, logger), IRepository<PlumbingCaliperLink>
 {
     protected override IQueryable<PlumbingCaliperLink> WithIncludes(IQueryable<PlumbingCaliperLink> q)
     {

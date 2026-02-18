@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public abstract class PlumbingContextRepository<TEntity, TRepo>
+public abstract class PlumbingContextBaseRepository<TEntity, TRepo>
     (
         PlumbingContext context,
         ILogger<TRepo> logger

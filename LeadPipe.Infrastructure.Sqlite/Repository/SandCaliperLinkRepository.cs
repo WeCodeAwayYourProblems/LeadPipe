@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
 public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<SandCaliperLinkRepository> logger)
-    : PlumbingLinkContextRepository<SandCaliperLink, SandCaliperLinkRepository>(context, logger), IRepository<SandCaliperLink>
+    : PlumbingContextLinkRepository<SandCaliperLink, SandCaliperLinkRepository>(context, logger), IRepository<SandCaliperLink>
 {
     protected override IQueryable<SandCaliperLink> WithIncludes(IQueryable<SandCaliperLink> q)
     {

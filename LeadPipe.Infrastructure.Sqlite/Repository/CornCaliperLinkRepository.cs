@@ -11,7 +11,7 @@ public sealed class CornCaliperLinkRepository
     (
         PlumbingContext context,
         ILogger<CornCaliperLinkRepository> logger
-    ) : PlumbingLinkContextRepository<CornCaliperLink, CornCaliperLinkRepository>(context, logger), IRepository<CornCaliperLink>
+    ) : PlumbingContextLinkRepository<CornCaliperLink, CornCaliperLinkRepository>(context, logger), IRepository<CornCaliperLink>
 {
     
     protected override IQueryable<CornCaliperLink> WithIncludes(IQueryable<CornCaliperLink> q)

@@ -12,7 +12,7 @@ public sealed class CustardCaliperLinkRepository
     (
         PlumbingContext context,
         ILogger<CustardCaliperLinkRepository> logger
-    ) : PlumbingLinkContextRepository<CustardCaliperLink, CustardCaliperLinkRepository>(context, logger), IRepository<CustardCaliperLink>
+    ) : PlumbingContextLinkRepository<CustardCaliperLink, CustardCaliperLinkRepository>(context, logger), IRepository<CustardCaliperLink>
 {
     protected override IQueryable<CustardCaliperLink> WithIncludes(IQueryable<CustardCaliperLink> q)
     {

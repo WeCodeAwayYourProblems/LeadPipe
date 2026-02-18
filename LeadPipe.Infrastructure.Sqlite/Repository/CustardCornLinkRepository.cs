@@ -12,7 +12,7 @@ public sealed class CustardCornLinkRepository
     (
         PlumbingContext context,
         ILogger<CustardCornLinkRepository> logger
-    ) : PlumbingLinkContextRepository<CustardCornLink, CustardCornLinkRepository>(context, logger), IRepository<CustardCornLink>
+    ) : PlumbingContextLinkRepository<CustardCornLink, CustardCornLinkRepository>(context, logger), IRepository<CustardCornLink>
 {
     protected override IQueryable<CustardCornLink> WithIncludes(IQueryable<CustardCornLink> q)
     {

@@ -10,7 +10,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public sealed class SandCornLinkRepository(
     PlumbingContext context,
     ILogger<SandCornLinkRepository> logger)
-        : PlumbingLinkContextRepository<SandCornLink, SandCornLinkRepository>(context, logger), IRepository<SandCornLink>
+        : PlumbingContextLinkRepository<SandCornLink, SandCornLinkRepository>(context, logger), IRepository<SandCornLink>
 {
     protected override IQueryable<SandCornLink> WithIncludes(IQueryable<SandCornLink> q)
     {

@@ -11,7 +11,7 @@ public sealed class SandRepository
     (
         PlumbingContext context,
         ILogger<SandRepository> logger
-    ) : PlumbingEntityContextRepository<SandEntity, SandRepository>(context, logger), IRepository<SandEntity>
+    ) : PlumbingContextEntityRepository<SandEntity, SandRepository>(context, logger), IRepository<SandEntity>
 {
     protected override IQueryable<SandEntity> WithIncludes(IQueryable<SandEntity> q)
     {

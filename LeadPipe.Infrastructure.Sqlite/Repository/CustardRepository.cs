@@ -11,7 +11,7 @@ public sealed class CustardRepository
     (
         PlumbingContext context,
         ILogger<CustardRepository> logger
-    ) : PlumbingEntityContextRepository<CustardEntity, CustardRepository>(context, logger), IRepository<CustardEntity>
+    ) : PlumbingContextEntityRepository<CustardEntity, CustardRepository>(context, logger), IRepository<CustardEntity>
 {
     protected override IQueryable<CustardEntity> WithIncludes(IQueryable<CustardEntity> q)
     {
@@ -23,31 +23,35 @@ public sealed class CustardRepository
     }
     protected override void InsertBatch(List<CustardEntity> batch)
     {
+#pragma warning disable CS8604
         var values = new List<object>();
         var rows = new List<string>();
-        const int colsPerRow = 8;
 
         for (int i = 0; i < batch.Count; i++)
         {
             var e = batch[i];
-            int offset = i * colsPerRow;
+            int offset = i * EntityDetails.ColumnCount;
 
             rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}}, {{{offset + 7}}})");
 
             values.Add(e.Id);
             values.Add(e.Active ? 1 : 0);
             values.Add(e.PhoneNumber.Number);
-            values.Add(e.PhoneNumber2?.Number ?? (object)DBNull.Value); // Safe null handling
+            values.Add(e.PhoneNumber2?.Number); // Null is fine because we're executing Sql. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
             values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
             values.Add(e.UnixDate);
 
             // Handle potentially uninitialized or null DateTime
-            values.Add(e.CancelDate == default ? (object)DBNull.Value : e.CancelDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            values.Add(
+                e.CancelDate == default
+                ? null // Null is fine because we're executing Sql. EF core understands how to convert null. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
+                : e.CancelDate.ToString("yyyy-MM-dd HH:mm:ss"));
             values.Add(e.UnixCancelDate);
         }
 
         string sql = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)};";
         _context.Database.ExecuteSqlRaw(sql, [.. values]);
+#pragma warning restore CS8604
     }
     protected override UpsertFields EntityDetails => new(
         TableName: TableNames.CustardEntitiesName,

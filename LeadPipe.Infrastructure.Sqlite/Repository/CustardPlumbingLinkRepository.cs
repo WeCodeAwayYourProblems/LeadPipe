@@ -11,7 +11,7 @@ public sealed class CustardPlumbingLinkRepository
     (
         PlumbingContext context,
         ILogger<CustardPlumbingLinkRepository> logger
-    ) : PlumbingLinkContextRepository<CustardPlumbingLink, CustardPlumbingLinkRepository>(context, logger), IRepository<CustardPlumbingLink>
+    ) : PlumbingContextLinkRepository<CustardPlumbingLink, CustardPlumbingLinkRepository>(context, logger), IRepository<CustardPlumbingLink>
 {
     protected override IQueryable<CustardPlumbingLink> WithIncludes(IQueryable<CustardPlumbingLink> q)
     {

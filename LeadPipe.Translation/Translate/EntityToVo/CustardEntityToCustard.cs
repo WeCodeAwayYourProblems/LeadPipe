@@ -9,14 +9,12 @@ internal sealed class CustardEntityToCustard : IEntityToVo<CustardEntity, Custar
     public Custard Translate(CustardEntity entity)
     {
         PhoneNumber number1 = new(entity.PhoneNumber);
-        PhoneNumber number2 = new(entity.PhoneNumber);
-        
-        DateTime d = DateTime.SpecifyKind(entity.Date, DateTimeKind.Utc);
-        DateTimeOffset date = new(d, TimeSpan.Zero);
-        
-        DateTime cxl = DateTime.SpecifyKind(entity.CancelDate, DateTimeKind.Utc);
-        DateTimeOffset cxlDate = new(cxl, TimeSpan.Zero);
-        
+        PhoneNumber? number2 = entity.PhoneNumber2 is not null ? new(entity.PhoneNumber2) : null;
+
+        DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(entity.UnixDate);
+
+        DateTimeOffset cxlDate = DateTimeOffset.FromUnixTimeSeconds(entity.UnixCancelDate);
+
         Custard result = new
             (
                 Id: entity.Id,

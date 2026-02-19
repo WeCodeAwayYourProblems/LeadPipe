@@ -10,7 +10,7 @@ public class CustardEntity : IEntity
     public required PhoneNumber PhoneNumber { get; set; }
     public PhoneNumber? PhoneNumber2 { get; set; }
     public DateTime Date { get; set; }
-    public long UnixDate { get; set; }
+    public required long UnixDate { get; set; }
     public DateTime CancelDate { get; set; }
     public long UnixCancelDate { get; set; }
 

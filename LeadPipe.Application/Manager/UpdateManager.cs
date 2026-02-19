@@ -30,7 +30,7 @@ public sealed class UpdateManager(
         Result globals = await RunGlobals(refresh);
         if (globals.IsFailure) return globals;
 
-        //Result sources = await RunSource(source, refresh);
+        Result sources = await RunSource(source, refresh);
 
         // Associate
         Result associated = await AssociateIfDue();
@@ -107,8 +107,8 @@ public sealed class UpdateManager(
     {
         var key = SyncKey.Associate;
         bool shouldRun = await _syncGate.ShouldRunAsync(key);
-        if (!shouldRun)
-            return Result.Success();
+        //if (!shouldRun)
+        //    return Result.Success();
 
         Result result = await _associate.AssociateAsync();
         if (result.IsSuccess)
@@ -138,8 +138,8 @@ public sealed class UpdateManager(
     private async Task<Result> RunIfDue<T>(SyncKey key, bool refresh, bool withDetails, IUpdateService<T> service)
     {
         bool shouldRun = await _syncGate.ShouldRunAsync(key);
-        if (!shouldRun)
-            return Result.Success();
+        //if (!shouldRun)
+        //    return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, withDetails, service);
 

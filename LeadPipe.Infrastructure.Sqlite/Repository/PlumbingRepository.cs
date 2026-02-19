@@ -113,7 +113,7 @@ public class PlumbingRepository
             FROM {TableNames.PlumbingEntitiesName} t
             WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.PhoneNumber
               AND t.{nameof(PlumbingEntity.Date)} = temp.Date
-              AND t.{nameof(PlumbingEntity.Contents)} = temp.Contents
+              AND t.{nameof(PlumbingEntity.UnixDate)} = temp.UnixDate
               AND t.{nameof(PlumbingEntity.Source)} = temp.Source
               AND t.{nameof(PlumbingEntity.MetaData)} = temp.MetaData
         );

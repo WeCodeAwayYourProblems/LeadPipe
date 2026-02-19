@@ -36,7 +36,7 @@ public sealed class UpdateManager(
         Result associated = await AssociateIfDue();
 
         return Result.Combine(" | ", 
-            //sources, 
+            sources,
             associated);
     }
 

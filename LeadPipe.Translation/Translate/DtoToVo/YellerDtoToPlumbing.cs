@@ -68,6 +68,7 @@ internal class LatherDtoToPlumbing(IDateTimeTranslate translate) : IDtoToVo<Lath
     {
         long id = long.TryParse(data.LeadId, out long i) ? i : 0;
         PhoneNumber phoneNumber = PhoneNumber.TryParse(data.Phone, out PhoneNumber p) ? p : new(PhoneNumber.Default);
+
         DateTime dt = DateTime.TryParse(string.Join(" ", [data.Date, data.Time]), out DateTime d) ? d : DateTime.MinValue;
         ETimeZone zone = data.TimeZone?.ToLowerInvariant() switch
         {
@@ -75,7 +76,7 @@ internal class LatherDtoToPlumbing(IDateTimeTranslate translate) : IDtoToVo<Lath
             "pst" or "pdt" => ETimeZone.Pacific,
             "cst" or "cdt" => ETimeZone.Central,
             "utc" => ETimeZone.Utc,
-            _ => ETimeZone.Mountain,
+            _ => ETimeZone.Mountain, // Default to mountain
 
         };
         DateTimeOffset date = _translate.Convert(dt, zone);

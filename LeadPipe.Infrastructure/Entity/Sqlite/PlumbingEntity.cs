@@ -3,7 +3,6 @@ using LeadPipe.Infrastructure.Interfaces.Core;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-// Deduplication is based on PhoneNumber and Date, not PhoneNumber, Date, and Source. That way, there is one Source that stands as the initial contact point
 public class PlumbingEntity : ISourceEntity 
 {
     public required long Id { get; set; }

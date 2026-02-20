@@ -67,13 +67,12 @@ internal sealed class TransformYellerReport(
         // Any entity matching the custard is non-attributable when ANY sand or custard date is before the entity date
         custards = Result.Success(
             custards.Value
-                .Where(c => c.SandEntities != null && c.SandEntities.Count != 0 && c.SandEntities.Any(s => s.Complete)) // filter out null/empty sands and remove any with all incomplete sands
+                .Where(c => c.SandEntities != null && c.SandEntities.Count != 0) // filter out null/empty sands
                 .Select(c =>
                 {
                     // .OrderBy().First() = O(n log n)
                     // This is effectively O(n) + O(n)
                     long minDate = c.SandEntities
-                        .Where(s => s.Complete)
                         .Min(s => s.UnixDate);
                     SandEntity firstSand = c.SandEntities
                         .First(s => s.UnixDate == minDate);
@@ -94,122 +93,88 @@ internal sealed class TransformYellerReport(
             from custard in custards.Value
             from link in custard.CustardCaliperLinks
             let caliper = caliperById[link.CaliperId]
-            select new CustardAssociation<CaliperEntity, CustardCaliperLink>(link, caliper, custard, caliper.UnixDate);
+            select new CustardAssociation<CaliperEntity>(caliper, custard, caliper.PhoneNumber.Number, caliper.UnixDate);
 
         var custardCornAssociations =
             from custard in custards.Value
             from link in custard.CustardCornLinks
             let corn = cornById[link.CornId]
-            select new CustardAssociation<CornEntity, CustardCornLink>(link, corn, custard, corn.UnixDate);
+            select new CustardAssociation<CornEntity>(corn, custard, corn.PhoneNumber.Number, corn.UnixDate);
 
         var custardPlumbAssociations =
             from custard in custards.Value
             from link in custard.CustardPlumbingLinks
             let plumb = plumbById[link.PlumbingId]
-            select new CustardAssociation<PlumbingEntity, CustardPlumbingLink>(link, plumb, custard, plumb.UnixDate);
+            select new CustardAssociation<PlumbingEntity>(plumb, custard, plumb.PhoneNumber.Number, plumb.UnixDate);
 
-        var caliperAttributable = Attributable(custardCaliperAssociations);
-        var cornAttributable = Attributable(custardCornAssociations);
-        var plumbAttributable = Attributable(custardPlumbAssociations);
+        List<CustardAssociation<CaliperEntity>> caliperAttributable = Attributable(custardCaliperAssociations);
+        List<CustardAssociation<CornEntity>> cornAttributable = Attributable(custardCornAssociations);
+        List<CustardAssociation<PlumbingEntity>> plumbAttributable = Attributable(custardPlumbAssociations);
 
         //*********************************************************************************
         // Cross-entity first-touch filter
         //*********************************************************************************
 
-        IEnumerable<(long MatchingPhone, long UnixMatchDate, CustardEntity Custard)> allTouches =
+        List<(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, AttributionSource Source)> allTouches =
         [
-            .. plumbAttributable.Select(a => (a.Link.MatchingPhone, a.Link.UnixMatchDate, a.Custard)),
-            .. cornAttributable.Select(a => (a.Link.MatchingPhone, a.Link.UnixMatchDate, a.Custard)),
-            .. caliperAttributable.Select(a => (a.Link.MatchingPhone, a.Link.UnixMatchDate, a.Custard))
+            .. plumbAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Plumbing)),
+            .. cornAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Corn)),
+            .. caliperAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Caliper))
         ];
 
         // For each custard, earliest effective date = min(link.UnixMatchDate, custard.UnixDate, firstSandDate)
-        IEnumerable<EffectiveDateAssociated> touchesWithEffectiveDate = allTouches.Select(t =>
+        List<EffectiveDateAssociated> touchesWithEffectiveDate = allTouches.Select(t =>
         {
             long firstSandDate = t.Custard.SandEntities?.Min(s => s.UnixDate) ?? long.MaxValue;
             long effectiveDate = Math.Min(t.UnixMatchDate, Math.Min(firstSandDate, t.Custard.UnixDate));
-            return new EffectiveDateAssociated(t.MatchingPhone, t.UnixMatchDate, t.Custard, EffectiveDate: effectiveDate);
-        });
+            return new EffectiveDateAssociated(t.MatchingPhone, t.UnixMatchDate, t.Custard, EffectiveDate: effectiveDate, t.Source);
+        }).ToList();
 
-        Dictionary<long, List<CustardEntity>> firstTouchesByPhone = touchesWithEffectiveDate
+        Dictionary<long, List<EffectiveDateAssociated>> firstTouchesByPhone = touchesWithEffectiveDate
             .GroupBy(t => t.MatchingPhone)
             .ToDictionary(
                 g => g.Key,
                 g =>
                 {
-                    long earliest = g.Min(t => t.EffectiveDate);
-                    List<CustardEntity> result = [.. g.Where(t => t.EffectiveDate == earliest).Select(t => t.Custard)];
+                    // Step 1: find the minimum effective date
+                    long earliestEffective = g.Min(t => t.EffectiveDate);
+
+                    // Step 2: filter only entities with that earliest effective date
+                    IEnumerable<EffectiveDateAssociated> earliestEntities = g.Where(t => t.EffectiveDate == earliestEffective);
+
+                    // Null propagations protect us from null sandentities. Redundant but safe
+                    // Step 3: compute "custard min date" for tie-breaking
+                    long earliestCustardMinDate = earliestEntities 
+                        .Min(t => Math.Min(t.Custard.UnixDate, t.Custard.SandEntities?.Single().UnixDate ?? long.MaxValue));
+        
+                    // Step 4: only take entities where custard min date matches the earliest
+                    List<EffectiveDateAssociated> result = [.. earliestEntities
+                        .Where(t => Math.Min(t.Custard.UnixDate, t.Custard.SandEntities?.Single().UnixDate ?? long.MaxValue) == earliestCustardMinDate)
+                    ];
+        
                     return result;
                 });
 
-        caliperAttributable =
-            [.. caliperAttributable
-                    .Where(a =>
-                        firstTouchesByPhone.TryGetValue(a.Link.MatchingPhone, out List<CustardEntity>? custards) &&
-                        custards.Contains(a.Custard) &&
-                        a.Link.UnixMatchDate <= a.Custard.UnixDate)
-            ];
 
-        cornAttributable =
-            [.. cornAttributable
-                    .Where(a =>
-                        firstTouchesByPhone.TryGetValue(a.Link.MatchingPhone, out List<CustardEntity>? custards) &&
-                        custards.Contains(a.Custard) &&
-                        a.Link.UnixMatchDate <= a.Custard.UnixDate)
-            ];
+        List<AttributionResult> attributions = firstTouchesByPhone
+            .SelectMany(d => d.Value.Select(v => // We are translating All custards that have the same EntityDate, Custard.UnixDate, and SandEntities.Single().UnixDate across them
+                new AttributionResult()
+                {
+                    MatchingPhone = v.MatchingPhone,
+                    FirstTouchUnixDate = v.UnixMatchDate,
+                    Source = v.Source,
+                    Custard = v.Custard,
+                    Sand = v.Custard.SandEntities.Single()
+                }
+            )).ToList();
 
-        plumbAttributable =
-            [.. plumbAttributable
-                .Where(a =>
-                    firstTouchesByPhone.TryGetValue(a.Link.MatchingPhone, out List<CustardEntity>? custards) &&
-                    custards.Contains(a.Custard) &&
-                    a.Link.UnixMatchDate <= a.Custard.UnixDate)
-            ];
-
-        //*********************************************************************************
-        // Report
-        //*********************************************************************************
-
-        var caliperAttributionResults = caliperAttributable.Select(c =>
-            new AttributionResult()
-            {
-                Custard = c.Custard,
-                FirstTouchUnixDate = c.Link.UnixMatchDate,
-                MatchingPhone = c.Link.MatchingPhone,
-                Sand = c.Custard.SandEntities.Single(),
-                Source = AttributionSource.Caliper
-            });
-        var cornAttributionResults = cornAttributable.Select(c =>
-            new AttributionResult()
-            {
-                Custard = c.Custard,
-                FirstTouchUnixDate = c.Link.UnixMatchDate,
-                MatchingPhone = c.Link.MatchingPhone,
-                Sand = c.Custard.SandEntities.Single(),
-                Source = AttributionSource.Corn
-            });
-        var plumbAttributionResults = plumbAttributable.Select(c =>
-            new AttributionResult()
-            {
-                Custard = c.Custard,
-                FirstTouchUnixDate = c.Link.UnixMatchDate,
-                MatchingPhone = c.Link.MatchingPhone,
-                Sand = c.Custard.SandEntities.Single(),
-                Source = AttributionSource.Plumbing
-            });
-
-        List<ReportYeller> reports =
-        [
-            .. caliperAttributionResults.Select(_translate.Translate),
-            .. cornAttributionResults.Select(_translate.Translate),
-            .. plumbAttributionResults.Select(_translate.Translate),
-        ];
+        var reports = attributions.Select(_translate.Translate).ToList();
 
         return reports;
     }
 
     // Respect first sand after entity and Completed == true
-    static IEnumerable<CustardAssociation<TEntity, TLink>> Attributable<TEntity, TLink>(IEnumerable<CustardAssociation<TEntity, TLink>> associations)
+    static List<CustardAssociation<TEntity>> Attributable<TEntity>(IEnumerable<CustardAssociation<TEntity>> associations)
     {
         var result = associations
             .GroupBy(a => a.Custard.Id)
@@ -220,23 +185,32 @@ internal sealed class TransformYellerReport(
                     ? earliest
                     : null;
             })
-            .OfType<CustardAssociation<TEntity, TLink>>();
+            .OfType<CustardAssociation<TEntity>>()
+            .ToList();
         return result;
     }
 
-    static bool IsAttributable<T, TLink>(CustardAssociation<T, TLink> a)
+    static bool IsAttributable<T>(CustardAssociation<T> a)
     {
-        var sands = a.Custard.SandEntities; // already filtered to first sand
-        if (sands == null || sands.Count == 0) return false; // Redundant check here isn't harmful
+        var sands = a.Custard.SandEntities;
+        if (sands == null || sands.Count == 0) // This is redundant, for safety
+            return false;
 
-        var firstSandDate = sands.Min(s => s.UnixDate);
+        long? firstSandDate = sands
+            .Where(s => s.Complete) // We MUST filter by complete here, because that's an attribution rule
+            .Select(s => (long?)s.UnixDate) // Casting prevents Min from throwing
+            .Min();
 
-        // Entity must occur before custard AND before first sand
-        return a.EntityDate < a.Custard.UnixDate && a.EntityDate < firstSandDate;
+        if (firstSandDate is null)
+            return false;
+
+        return a.EntityDate < a.Custard.UnixDate &&
+               a.EntityDate < firstSandDate.Value;
     }
 
-    record CustardAssociation<T, TLink>(TLink Link, T Entity, CustardEntity Custard, long EntityDate);
-    record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate);
+
+    record CustardAssociation<T>(T Entity, CustardEntity Custard, long EntityPhone, long EntityDate);
+    record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate, AttributionSource Source);
 }
 
 #region Logic map

@@ -1,5 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
@@ -43,7 +44,7 @@ public static class InjectTranslation
         services.AddScoped<IEntityToVo<CaliperMySqlEntity, Caliper>, CaliperMySqlEntityToCaliper>();
         services.AddScoped<IEntityToVo<SandMySqlEntity, Sandwich>, SandMySqlEntityToSandwich>();
         services.AddScoped<IEntityToVo<CustardMySqlEntity, Custard>, CustardMySqlEntityToCustard>();
-        services.AddScoped<IEntityToVo<CornMySqlEntity, CornFormula>,CornMySqlEntityToCornFormula>();
+        services.AddScoped<IEntityToVo<CornMySqlEntity, CornFormula>, CornMySqlEntityToCornFormula>();
 
         // IVoToDto
         services.AddScoped<IVoToDto<Plumbing, LabDto>, PlumbingToLabDto>();
@@ -65,7 +66,7 @@ public static class InjectTranslation
         services.AddScoped<IEntityToReport<CustardPlumbingLink, ReportYeller>, CustardPlumbingLinkToReportYeller>();
         services.AddScoped<IEntityToReport<CustardCaliperLink, ReportYeller>, CustardCaliperLinkToReportYeller>();
         services.AddScoped<IEntityToReport<CustardCornLink, ReportYeller>, CustardCornLinkToReportYeller>();
-
+        services.AddScoped<IEntityToReport<AttributionResult, ReportYeller>, AttributionResultToReportYeller>();
 
         return services;
     }

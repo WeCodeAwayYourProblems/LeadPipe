@@ -32,6 +32,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
 	  <ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
+	  <ProjectReference Include="..\LeadPipe.Translation\LeadPipe.Translation.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -4,7 +4,6 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -30,6 +29,13 @@ public sealed class CustardCaliperLinkRepository
         DateCol: nameof(CustardCaliperLink.UnixMatchDate),
         EntityName: nameof(CustardCaliperLink)
         );
+
+    protected override ParentFields Parent => new(
+        Parent1Name: TableNames.CustardEntitiesName,
+        Parent1Id: nameof(CustardEntity.Id),
+        Parent2Name: TableNames.CaliperEntitiesName,
+        Parent2Id: nameof(CaliperEntity.Id)
+    );
 
     protected override async Task AddLinks(List<CustardCaliperLink> links, int batchSize, CancellationToken ct)
     {

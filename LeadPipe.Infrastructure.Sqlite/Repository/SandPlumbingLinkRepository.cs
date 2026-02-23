@@ -27,6 +27,13 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
         EntityName: nameof(SandPlumbingLink)
         );
 
+    protected override ParentFields Parent => new(
+        Parent1Name: TableNames.SandEntitiesName,
+        Parent1Id: nameof(SandEntity.Id),
+        Parent2Name: TableNames.PlumbingEntitiesName,
+        Parent2Id: nameof(PlumbingEntity.Id)
+    );
+
     protected override async Task AddLinks(List<SandPlumbingLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)

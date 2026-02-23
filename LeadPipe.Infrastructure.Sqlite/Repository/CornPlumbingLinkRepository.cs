@@ -30,6 +30,13 @@ public sealed class CornPlumbingLinkRepository
         EntityName: nameof(CornPlumbingLink)
         );
 
+    protected override ParentFields Parent => new(
+        Parent1Name: TableNames.CornEntitiesName,
+        Parent1Id: nameof(CornEntity.Id),
+        Parent2Name: TableNames.PlumbingEntitiesName,
+        Parent2Id: nameof(PlumbingEntity.Id)
+    );
+
     protected override async Task AddLinks(List<CornPlumbingLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)
@@ -58,4 +65,5 @@ public sealed class CornPlumbingLinkRepository
     public override async Task<Result<List<CornPlumbingLink>>> UpsertRangeAsync(
         List<CornPlumbingLink> links,
         CancellationToken ct = default) => await UpsertLinkRangeAsync(links, ct);
+
 }

@@ -28,6 +28,13 @@ public sealed class SandCornLinkRepository(
         EntityName: nameof(SandCornLink)
         );
 
+    protected override ParentFields Parent => new(
+        Parent1Name: TableNames.SandEntitiesName,
+        Parent1Id: nameof(SandEntity.Id),
+        Parent2Name: TableNames.CornEntitiesName,
+        Parent2Id: nameof(CornEntity.Id)
+    );
+
     protected override async Task AddLinks(List<SandCornLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)

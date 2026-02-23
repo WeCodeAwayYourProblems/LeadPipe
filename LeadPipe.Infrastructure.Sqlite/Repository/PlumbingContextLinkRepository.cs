@@ -13,15 +13,19 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
     ) : PlumbingContextBaseRepository<TEntity, TRepo>(context, logger)
     where TEntity : class, IEntity
 {
+    protected record ParentFields(string Parent1Name, string Parent1Id, string Parent2Name, string Parent2Id);
     protected record UpsertFields(string TableName, string TempTable, string Id1, string Id2, string PhoneCol, string DateCol, string EntityName);
     protected abstract Task AddLinks(List<TEntity> links, int batchSize, CancellationToken ct);
     protected abstract UpsertFields LinkDetails { get; }
+    protected abstract ParentFields Parent { get; }
     protected string TempId1 = "id1";
     protected string TempId2 = "id2";
     protected string TempPhone = "phone";
     protected string TempDate = "matchDate";
-    protected virtual string TempTable => $"""
+    protected string DropTemp => $"""
         DROP TABLE IF EXISTS {LinkDetails.TempTable};
+    """;
+    protected string TempTable => $"""
         CREATE TEMP TABLE {LinkDetails.TempTable} (
             {TempId1} INTEGER,
             {TempId2} INTEGER,
@@ -29,7 +33,7 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
             {TempDate} INTEGER
         );
     """;
-    protected virtual string UpdateSql => $"""
+    protected string UpdateSql => $"""
         UPDATE {LinkDetails.TableName}
         SET {LinkDetails.PhoneCol} = (
                 SELECT t.{TempPhone}
@@ -60,7 +64,7 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
               AND t.{TempDate} < {LinkDetails.TableName}.{LinkDetails.DateCol}
         );
     """;
-    protected virtual string InsertSql => $"""
+    protected string InsertSql => $"""
         INSERT INTO {LinkDetails.TableName} 
         (
             {LinkDetails.Id1}, 
@@ -70,7 +74,7 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
         )
         SELECT 
             t.{TempId1}, 
-            t.{TempId2},
+            t.{TempId2}, 
             (
                 SELECT t2.{TempPhone}
                 FROM {LinkDetails.TempTable} t2
@@ -86,12 +90,21 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
           AND NOT EXISTS (
               SELECT 1 
               FROM {LinkDetails.TableName} ccl
-              WHERE ccl.{LinkDetails.Id1} = t.{TempId1}
+              WHERE ccl.{LinkDetails.Id1} = t.{TempId1} 
                 AND ccl.{LinkDetails.Id2} = t.{TempId2}
+          )
+          AND EXISTS (
+              SELECT 1 
+              FROM {Parent.Parent1Name} c
+              WHERE c.{Parent.Parent1Id} = t.{TempId1}
+          )
+          AND EXISTS (
+              SELECT 1 
+              FROM {Parent.Parent2Name} co
+              WHERE co.{Parent.Parent2Id} = t.{TempId2}
           )
         GROUP BY t.{TempId1}, t.{TempId2};
     """;
-
     internal async Task<Result<List<TEntity>>> UpsertLinkRangeAsync(
         List<TEntity> links,
         CancellationToken ct) 
@@ -109,12 +122,21 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
+            // Drop temp table in case it exists
+            await _context.Database.ExecuteSqlRawAsync(DropTemp, ct);
+
             // Create temp table with id1/id2
             await _context.Database.ExecuteSqlRawAsync(TempTable, ct);
 
             // Insert in batches
             int batchSize = 999 / 4;
-            await AddLinks(links, batchSize, ct);
+            try
+            { await AddLinks(links, batchSize, ct); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed inserting batch into temp table for {Entity}", LinkDetails.EntityName);
+                throw;
+            }
 
             // Update existing rows (earliest match date wins)
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(UpdateSql, ct);

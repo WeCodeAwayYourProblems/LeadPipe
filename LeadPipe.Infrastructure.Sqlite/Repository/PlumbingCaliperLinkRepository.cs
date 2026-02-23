@@ -30,6 +30,13 @@ public sealed class PlumbingCaliperLinkRepository
         EntityName: nameof(PlumbingCaliperLink)
         );
 
+    protected override ParentFields Parent => new(
+        Parent1Name: TableNames.PlumbingEntitiesName,
+        Parent1Id: nameof(PlumbingEntity.Id),
+        Parent2Name: TableNames.CaliperEntitiesName,
+        Parent2Id: nameof(CaliperEntity.Id)
+    );
+
     protected override async Task AddLinks(List<PlumbingCaliperLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)

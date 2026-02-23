@@ -30,6 +30,13 @@ public sealed class CustardPlumbingLinkRepository
         EntityName: nameof(CustardPlumbingLink)
         );
 
+    protected override ParentFields Parent => new(
+        Parent1Name: TableNames.CustardEntitiesName,
+        Parent1Id: nameof(CustardEntity.Id),
+        Parent2Name: TableNames.PlumbingEntitiesName,
+        Parent2Id: nameof(PlumbingEntity.Id)
+    );
+
     protected override async Task AddLinks(List<CustardPlumbingLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)

@@ -13,7 +13,6 @@ public sealed class CornCaliperLinkRepository
         ILogger<CornCaliperLinkRepository> logger
     ) : PlumbingContextLinkRepository<CornCaliperLink, CornCaliperLinkRepository>(context, logger), IRepository<CornCaliperLink>
 {
-    
     protected override IQueryable<CornCaliperLink> WithIncludes(IQueryable<CornCaliperLink> q)
     {
         return q
@@ -31,6 +30,13 @@ public sealed class CornCaliperLinkRepository
         EntityName: nameof(CornCaliperLink)
         );
 
+    protected override ParentFields Parent => new(
+        Parent1Name: TableNames.CornEntitiesName,
+        Parent1Id: nameof(CornEntity.Id),
+        Parent2Name: TableNames.CaliperEntitiesName,
+        Parent2Id: nameof(CaliperEntity.Id)
+    );
+    
     protected override async Task AddLinks(List<CornCaliperLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)
@@ -59,4 +65,5 @@ public sealed class CornCaliperLinkRepository
     public override async Task<Result<List<CornCaliperLink>>> UpsertRangeAsync(
         List<CornCaliperLink> links,
         CancellationToken ct = default) => await UpsertLinkRangeAsync(links, ct);
+
 }

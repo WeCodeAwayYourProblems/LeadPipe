@@ -16,6 +16,82 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
     protected record UpsertFields(string TableName, string TempTable, string Id1, string Id2, string PhoneCol, string DateCol, string EntityName);
     protected abstract Task AddLinks(List<TEntity> links, int batchSize, CancellationToken ct);
     protected abstract UpsertFields LinkDetails { get; }
+    protected string TempId1 = "id1";
+    protected string TempId2 = "id2";
+    protected string TempPhone = "phone";
+    protected string TempDate = "matchDate";
+    protected virtual string TempTable => $"""
+        DROP TABLE IF EXISTS {LinkDetails.TempTable};
+        CREATE TEMP TABLE {LinkDetails.TempTable} (
+            {TempId1} INTEGER,
+            {TempId2} INTEGER,
+            {TempPhone} INTEGER,
+            {TempDate} INTEGER
+        );
+    """;
+    protected virtual string UpdateSql => $"""
+        UPDATE {LinkDetails.TableName}
+        SET {LinkDetails.PhoneCol} = (
+                SELECT t.{TempPhone}
+                FROM {LinkDetails.TempTable} t
+                WHERE t.{TempId1} = {LinkDetails.TableName}.{LinkDetails.Id1}
+                  AND t.{TempId2} = {LinkDetails.TableName}.{LinkDetails.Id2}
+                  AND t.{TempPhone} <> 0
+                  AND t.{TempDate} < {LinkDetails.TableName}.{LinkDetails.DateCol}
+                ORDER BY t.{TempDate} ASC
+                LIMIT 1
+            ),
+            {LinkDetails.DateCol} = (
+                SELECT t.{TempDate}
+                FROM {LinkDetails.TempTable} t
+                WHERE t.{TempId1} = {LinkDetails.TableName}.{LinkDetails.Id1}
+                  AND t.{TempId2} = {LinkDetails.TableName}.{LinkDetails.Id2}
+                  AND t.{TempPhone} <> 0
+                  AND t.{TempDate} < {LinkDetails.TableName}.{LinkDetails.DateCol}
+                ORDER BY t.{TempDate} ASC
+                LIMIT 1
+            )
+        WHERE EXISTS (
+            SELECT 1
+            FROM {LinkDetails.TempTable} t
+            WHERE t.{TempId1} = {LinkDetails.TableName}.{LinkDetails.Id1}
+              AND t.{TempId2} = {LinkDetails.TableName}.{LinkDetails.Id2}
+              AND t.{TempPhone} <> 0
+              AND t.{TempDate} < {LinkDetails.TableName}.{LinkDetails.DateCol}
+        );
+    """;
+    protected virtual string InsertSql => $"""
+        INSERT INTO {LinkDetails.TableName} 
+        (
+            {LinkDetails.Id1}, 
+            {LinkDetails.Id2}, 
+            {LinkDetails.PhoneCol}, 
+            {LinkDetails.DateCol}
+        )
+        SELECT 
+            t.{TempId1}, 
+            t.{TempId2},
+            (
+                SELECT t2.{TempPhone}
+                FROM {LinkDetails.TempTable} t2
+                WHERE t2.{TempId1} = t.{TempId1}
+                  AND t2.{TempId2} = t.{TempId2}
+                  AND t2.{TempPhone} <> 0
+                ORDER BY t2.{TempDate} ASC
+                LIMIT 1
+            ),
+            MIN(t.{TempDate})
+        FROM {LinkDetails.TempTable} t
+        WHERE t.{TempPhone} <> 0
+          AND NOT EXISTS (
+              SELECT 1 
+              FROM {LinkDetails.TableName} ccl
+              WHERE ccl.{LinkDetails.Id1} = t.{TempId1}
+                AND ccl.{LinkDetails.Id2} = t.{TempId2}
+          )
+        GROUP BY t.{TempId1}, t.{TempId2};
+    """;
+
     internal async Task<Result<List<TEntity>>> UpsertLinkRangeAsync(
         List<TEntity> links,
         CancellationToken ct) 
@@ -34,76 +110,17 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             // Create temp table with id1/id2
-            string createTemp = $"""
-                DROP TABLE IF EXISTS {LinkDetails.TempTable};
-                CREATE TEMP TABLE {LinkDetails.TempTable} (
-                    id1 INTEGER,
-                    id2 INTEGER,
-                    phone INTEGER,
-                    matchDate INTEGER
-                );
-            """;
-            await _context.Database.ExecuteSqlRawAsync(createTemp, ct);
+            await _context.Database.ExecuteSqlRawAsync(TempTable, ct);
 
             // Insert in batches
             int batchSize = 999 / 4;
             await AddLinks(links, batchSize, ct);
 
             // Update existing rows (earliest match date wins)
-            string updateSql = $"""
-            UPDATE {LinkDetails.TableName}
-            SET {LinkDetails.PhoneCol} = (
-                    SELECT t.phone
-                    FROM {LinkDetails.TempTable} t
-                    WHERE t.id1 = {LinkDetails.TableName}.{LinkDetails.Id1}
-                      AND t.id2 = {LinkDetails.TableName}.{LinkDetails.Id2}
-                      AND t.phone <> 0
-                      AND t.matchDate < {LinkDetails.TableName}.{LinkDetails.DateCol}
-                    ORDER BY t.matchDate ASC
-                    LIMIT 1
-                ),
-                {LinkDetails.DateCol} = (
-                    SELECT t.matchDate
-                    FROM {LinkDetails.TempTable} t
-                    WHERE t.id1 = {LinkDetails.TableName}.{LinkDetails.Id1}
-                      AND t.id2 = {LinkDetails.TableName}.{LinkDetails.Id2}
-                      AND t.phone <> 0
-                      AND t.matchDate < {LinkDetails.TableName}.{LinkDetails.DateCol}
-                    ORDER BY t.matchDate ASC
-                    LIMIT 1
-                )
-            WHERE EXISTS (
-                SELECT 1
-                FROM {LinkDetails.TempTable} t
-                WHERE t.id1 = {LinkDetails.TableName}.{LinkDetails.Id1}
-                  AND t.id2 = {LinkDetails.TableName}.{LinkDetails.Id2}
-                  AND t.phone <> 0
-                  AND t.matchDate < {LinkDetails.TableName}.{LinkDetails.DateCol}
-            );
-        """;
-
-            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
+            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(UpdateSql, ct);
 
             // Insert new rows
-            string insertSql = $"""
-            INSERT INTO {LinkDetails.TableName} 
-            (
-                {LinkDetails.Id1}, 
-                {LinkDetails.Id2}, 
-                {LinkDetails.PhoneCol}, 
-                {LinkDetails.DateCol}
-            )
-            SELECT t.id1, t.id2, t.phone, MIN(t.matchDate)
-            FROM {LinkDetails.TempTable} t
-            WHERE t.phone <> 0
-              AND NOT EXISTS (
-                  SELECT 1 FROM {LinkDetails.TableName} ccl
-                  WHERE ccl.{LinkDetails.Id1} = t.id1 AND ccl.{LinkDetails.Id2} = t.id2
-              )
-            GROUP BY t.id1, t.id2;
-        """;
-
-            int totalInserted = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
+            int totalInserted = await _context.Database.ExecuteSqlRawAsync(InsertSql, ct);
 
             _logger.LogInformation(
                 "{Entity} upsert complete: Incoming={Incoming}, Updated={Updated}, Inserted={Inserted}",
@@ -113,10 +130,7 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
             await transaction.CommitAsync(ct);
             return Result.Success(links);
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Entity} upsert failed for table {Table}", LinkDetails.EntityName, LinkDetails.TableName);

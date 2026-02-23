@@ -24,7 +24,6 @@ public static class InjectTranslation
         // Primitives
         services.AddScoped<IDateTimeTranslate, DateTimeTranslate>();
 
-        // Translations 
         // IDtoToVo
         services.AddScoped<IDtoToVo<CalliDto, Plumbing>, CalliDtoToPlumbing>();
         services.AddScoped<IDtoToVo<LabDto, Plumbing>, LabDtoToPlumbing>();
@@ -37,9 +36,9 @@ public static class InjectTranslation
 
         // IEntityToVo
         services.AddScoped<IEntityToVo<CaliperEntity, Caliper>, CaliperEntityToCaliper>();
-        services.AddScoped<IVoToEntity<Custard, CustardEntity>, CustardToCustardEntity>();
         services.AddScoped<IEntityToVo<SandEntity, Sandwich>, SandEntityToSandwich>();
         services.AddScoped<IEntityToVo<PlumbingEntity, Plumbing>, PlumbingEntityToPlumbing>();
+        services.AddScoped<IEntityToVo<CustardEntity, Custard>, CustardEntityToCustard>();
 
         services.AddScoped<IEntityToVo<CaliperMySqlEntity, Caliper>, CaliperMySqlEntityToCaliper>();
         services.AddScoped<IEntityToVo<SandMySqlEntity, Sandwich>, SandMySqlEntityToSandwich>();
@@ -52,6 +51,7 @@ public static class InjectTranslation
         services.AddScoped<IVoToDto<Plumbing, YellerDto>, PlumbingToYellerDto>();
 
         // IVoToEntity
+        services.AddScoped<IVoToEntity<Custard, CustardEntity>, CustardToCustardEntity>();
         services.AddScoped<IVoToEntity<Caliper, CaliperEntity>, CaliperToCaliperEntity>();
         services.AddScoped<IVoToEntity<Plumbing, PlumbingEntity>, PlumbingToPlumbingEntity>();
         services.AddScoped<IVoToEntity<Sandwich, SandEntity>, SandwichToSandEntity>();

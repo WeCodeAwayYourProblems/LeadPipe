@@ -105,6 +105,8 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         return combinedUpserts;
     }
 
+    #region Link Generation
+
     // Custard to Corn
     private static List<CustardCornLink> GenerateCustardCornLinks(
         List<CustardEntity> custards,
@@ -413,6 +415,8 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
 
         return results;
     }
+
+#endregion 
 
     private static List<TLink> CreateLink<TSource, TTarget, TLink>
     (

@@ -83,7 +83,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
 
     public string? PanReportLoc { get; set; }
     public string? PanSourceLoc { get; set; }
-    
+
     public string? LatherReportLoc { get; set; }
     public string? LatherSourceLoc { get; set; }
 
@@ -99,4 +99,11 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public double PanInterval { get; set; }
     public double YellerInterval { get; set; }
     public double LatherInterval { get; set; }
+
+    // Catman Settings
+    public string? CatManClientName { get; set; }
+    public string? CatToken { get; set; }
+    public string? CatManDateFormat { get; set; }
+    public string? CatBaseEndpoint { get; set; }
+    public string? CatAccountId { get; set; }
 }

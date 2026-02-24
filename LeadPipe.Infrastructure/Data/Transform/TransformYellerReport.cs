@@ -92,20 +92,23 @@ internal sealed class TransformYellerReport(
         var custardCaliperAssociations =
             from custard in custards.Value
             from link in custard.CustardCaliperLinks
-            let caliper = caliperById[link.CaliperId]
-            select new CustardAssociation<CaliperEntity>(caliper, custard, caliper.PhoneNumber.Number, caliper.UnixDate);
+            let entity = caliperById.TryGetValue(link.CaliperId, out var caliper) ? caliper : null
+            where entity != null
+            select new CustardAssociation<CaliperEntity>(entity!, custard, entity.PhoneNumber.Number, entity.UnixDate);
 
         var custardCornAssociations =
             from custard in custards.Value
             from link in custard.CustardCornLinks
-            let corn = cornById[link.CornId]
-            select new CustardAssociation<CornEntity>(corn, custard, corn.PhoneNumber.Number, corn.UnixDate);
+            let entity = cornById.TryGetValue(link.CornId, out var corn) ? corn : null
+            where entity != null
+            select new CustardAssociation<CornEntity>(entity!, custard, entity.PhoneNumber.Number, entity.UnixDate);
 
         var custardPlumbAssociations =
             from custard in custards.Value
             from link in custard.CustardPlumbingLinks
-            let plumb = plumbById[link.PlumbingId]
-            select new CustardAssociation<PlumbingEntity>(plumb, custard, plumb.PhoneNumber.Number, plumb.UnixDate);
+            let entity = plumbById.TryGetValue(link.PlumbingId, out var plumb) ? plumb : null
+            where entity != null
+            select new CustardAssociation<PlumbingEntity>(entity!, custard, entity.PhoneNumber.Number, entity.UnixDate);
 
         List<CustardAssociation<CaliperEntity>> caliperAttributable = Attributable(custardCaliperAssociations);
         List<CustardAssociation<CornEntity>> cornAttributable = Attributable(custardCornAssociations);
@@ -144,14 +147,14 @@ internal sealed class TransformYellerReport(
 
                     // Null propagations protect us from null sandentities. Redundant but safe
                     // Step 3: compute "custard min date" for tie-breaking
-                    long earliestCustardMinDate = earliestEntities 
+                    long earliestCustardMinDate = earliestEntities
                         .Min(t => Math.Min(t.Custard.UnixDate, t.Custard.SandEntities?.Single().UnixDate ?? long.MaxValue));
-        
+
                     // Step 4: only take entities where custard min date matches the earliest
                     List<EffectiveDateAssociated> result = [.. earliestEntities
                         .Where(t => Math.Min(t.Custard.UnixDate, t.Custard.SandEntities?.Single().UnixDate ?? long.MaxValue) == earliestCustardMinDate)
                     ];
-        
+
                     return result;
                 });
 

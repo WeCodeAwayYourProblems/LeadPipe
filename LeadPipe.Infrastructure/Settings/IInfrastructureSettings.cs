@@ -7,6 +7,7 @@ public interface IInfrastructureSettings :
     ILabSettings,
     ILeafSettings,
     IYellerSettings,
+    ICatManSettings,
     ISyncSettings
 {
     public Ef? Ef { get; set; }

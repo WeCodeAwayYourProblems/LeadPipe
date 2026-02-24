@@ -14,6 +14,7 @@ public class TranslatorBackAndForthFullTests
 {
     private readonly IDateTimeTranslate _dt = Substitute.For<IDateTimeTranslate>();
     private readonly IInfrastructureSettings _settings = Substitute.For<IInfrastructureSettings>();
+    private readonly IEntityToVo<CustardEntity, Custard> _eToCustard = Substitute.For<IEntityToVo<CustardEntity, Custard>>();
 
     private static TVo RoundTrip<TEntity1, TEntity2, TVo>(
         TEntity1 entity,
@@ -229,7 +230,7 @@ public class TranslatorBackAndForthFullTests
         );
 
         var toEntity = new SandwichToSandEntity();
-        var toVo = new SandEntityToSandwich(_dt);
+        var toVo = new SandEntityToSandwich(_eToCustard);
 
         Sandwich result = sandwichVo;
         for (int i = 0; i < 500_000; i++)
@@ -254,14 +255,20 @@ public class TranslatorBackAndForthFullTests
         _dt.Convert(Arg.Any<DateTime>(), Arg.Any<ETimeZone>())
            .Returns(callInfo => new DateTimeOffset((DateTime)callInfo[0], TimeSpan.Zero));
 
+        var dt = new DateTime(2025, 6, 1, 12, 0, 0);
+        var d = new DateTimeOffset(dt);
+        var cxl = new DateTime(2025, 12, 31, 23, 59, 59);
+        var c = new DateTimeOffset(cxl);
         var custardEntity = new CustardEntity
         {
             Id = 10,
             Active = true,
             PhoneNumber = new(5551002000),
             PhoneNumber2 = new(5551003000),
-            Date = new DateTime(2025, 6, 1, 12, 0, 0),
-            CancelDate = new DateTime(2025, 12, 31, 23, 59, 59)
+            Date = dt,
+            UnixDate = d.ToUnixTimeMilliseconds(),
+            CancelDate = cxl,
+            UnixCancelDate = c.ToUnixTimeSeconds()
         };
 
         var entity = new SandEntity
@@ -269,8 +276,10 @@ public class TranslatorBackAndForthFullTests
             Id = 99,
             CustardId = 10,
             CustardEntity = custardEntity,
-            Date = new DateTime(2025, 6, 1, 12, 0, 0),
-            CancelDate = new DateTime(2025, 12, 31, 23, 59, 59),
+            Date = dt,
+            UnixDate = d.ToUnixTimeSeconds(),
+            CancelDate = cxl,
+            UnixCancelDate = c.ToUnixTimeSeconds(),
             Active = true,
             Complete = true,
             Type = "Premium",
@@ -281,7 +290,7 @@ public class TranslatorBackAndForthFullTests
             Offerman = string.Empty
         };
 
-        var toVo = new SandEntityToSandwich(_dt);
+        var toVo = new SandEntityToSandwich(_eToCustard);
         var toEntity = new SandwichToSandEntity();
 
         Sandwich vo = RoundTrip(entity, toVo, toEntity, toVo, 500_000);

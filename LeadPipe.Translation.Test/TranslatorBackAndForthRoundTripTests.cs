@@ -14,6 +14,7 @@ public class TranslatorBackAndForthRoundTripTests
 {
     private readonly IDateTimeTranslate _dt = Substitute.For<IDateTimeTranslate>();
     private readonly IInfrastructureSettings _settings = Substitute.For<IInfrastructureSettings>();
+    private readonly IEntityToVo<CustardEntity, Custard> _eToCustard = Substitute.For<IEntityToVo<CustardEntity, Custard>>();
 
     // Utility for repeated round-trip
     private static TVo RoundTrip<TEntity1, TEntity2, TVo>(
@@ -186,7 +187,7 @@ public class TranslatorBackAndForthRoundTripTests
         );
 
         var toEntity = new SandwichToSandEntity();
-        var toVo = new SandEntityToSandwich(_dt);
+        var toVo = new SandEntityToSandwich(_eToCustard);
 
         // Convert Sandwich → SandEntity → Sandwich 500k times
         Sandwich result = sandwichVo;

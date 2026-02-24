@@ -1,5 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
 using NSubstitute;
@@ -9,7 +10,7 @@ namespace LeadPipe.Translation.Test.SandTests;
 public sealed class SandwichToSandEntityTests
 {
     private readonly IDateTimeTranslate _dt = Substitute.For<IDateTimeTranslate>();
-
+    private readonly IEntityToVo<CustardEntity, Custard> _eToCustard = Substitute.For<IEntityToVo<CustardEntity, Custard>>();
     private static Sandwich CreateVo()
     {
         var cust = new Custard(
@@ -50,7 +51,7 @@ public sealed class SandwichToSandEntityTests
             Offerman = vo.Offerman
         };
 
-        var translator = new SandEntityToSandwich(_dt);
+        var translator = new SandEntityToSandwich(_eToCustard);
 
         Assert.Throws<ArgumentException>(() => translator.Translate(entity));
     }
@@ -79,6 +80,7 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber = vo.Custard.Phone1,
                 PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
+                UnixDate = vo.Custard.Date.ToUnixTimeSeconds(),
                 CancelDate = vo.Custard.DateCancelled.UtcDateTime
             },
             Offerman= vo.Offerman
@@ -87,7 +89,7 @@ public sealed class SandwichToSandEntityTests
         _dt.Convert(Arg.Any<DateTime>(), Arg.Any<ETimeZone>())
             .Returns(callInfo => new DateTimeOffset((DateTime)callInfo[0], TimeSpan.Zero));
 
-        var translator = new SandEntityToSandwich(_dt);
+        var translator = new SandEntityToSandwich(_eToCustard);
         Sandwich result = translator.Translate(entity);
 
         Assert.Equal(vo.SandId, result.SandId);
@@ -123,6 +125,7 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber = vo.Custard.Phone1,
                 PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
+                UnixDate = vo.Custard.Date.ToUnixTimeSeconds(),
                 CancelDate = vo.Custard.DateCancelled.UtcDateTime
             },
             Offerman = vo.Offerman
@@ -131,7 +134,7 @@ public sealed class SandwichToSandEntityTests
         _dt.Convert(Arg.Any<DateTime>(), Arg.Any<ETimeZone>())
             .Returns(callInfo => new DateTimeOffset((DateTime)callInfo[0], TimeSpan.Zero));
 
-        var translator = new SandEntityToSandwich(_dt);
+        var translator = new SandEntityToSandwich(_eToCustard);
 
         Sandwich current = translator.Translate(entity);
 

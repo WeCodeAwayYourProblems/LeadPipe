@@ -1,4 +1,6 @@
-﻿namespace LeadPipe.Infrastructure.Interfaces.Core;
+﻿using LeadPipe.Domain.ValueObjects;
+
+namespace LeadPipe.Infrastructure.Interfaces.Core;
 
 public interface IEntity
 {
@@ -7,4 +9,13 @@ public interface IEntity
 public interface IHasUnixMatchDate
 {
     long UnixMatchDate { get; set; }
+}
+public interface IPhoneDateIdEntity: IEntity, IPhoneEntity
+{
+    long UnixDate { get; set; }
+}
+public interface IPhoneEntity
+{
+    PhoneNumber PhoneNumber { get; set; }
+
 }

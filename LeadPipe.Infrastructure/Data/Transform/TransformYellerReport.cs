@@ -13,6 +13,9 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 internal sealed class TransformYellerReport(
     IRepositoryFactory factory,
     IEntityToReport<AttributionResult, ReportYeller> translate,
+    IEntityToReport<CornEntity, ReportYeller> cornToR,
+    IEntityToReport<PlumbingEntity, ReportYeller> plumbToR,
+    IEntityToReport<CaliperEntity, ReportYeller> caliperToR,
     IYellerSettings settings
     ) : ITransform<Plumbing, ReportYeller>
 {
@@ -22,7 +25,10 @@ internal sealed class TransformYellerReport(
     private readonly IRepository<CornEntity> _cornRepo = factory.GetRepository<CornEntity>();
     private readonly IRepository<PlumbingEntity> _plumbRepo = factory.GetRepository<PlumbingEntity>();
 
-    private readonly IEntityToReport<AttributionResult, ReportYeller> _translate = translate;
+    private readonly IEntityToReport<AttributionResult, ReportYeller> _attrToR = translate;
+    private readonly IEntityToReport<CornEntity, ReportYeller> _cornToR = cornToR;
+    private readonly IEntityToReport<PlumbingEntity, ReportYeller> _plumbToR = plumbToR;
+    private readonly IEntityToReport<CaliperEntity, ReportYeller> _caliperToR = caliperToR;
 
     private readonly IYellerSettings _settings = settings;
 
@@ -70,14 +76,16 @@ internal sealed class TransformYellerReport(
                 .Where(c => c.SandEntities != null && c.SandEntities.Count != 0) // filter out null/empty sands
                 .Select(c =>
                 {
+                    CustardEntity result = c.Clone();
+
                     // .OrderBy().First() = O(n log n)
                     // This is effectively O(n) + O(n)
                     long minDate = c.SandEntities
                         .Min(s => s.UnixDate);
                     SandEntity firstSand = c.SandEntities
                         .First(s => s.UnixDate == minDate);
-                    c.SandEntities = [firstSand]; // keep only the earliest sand 
-                    return c;
+                    result.SandEntities = [firstSand]; // keep only the earliest sand 
+                    return result;
                 }).ToList()
         );
 
@@ -118,20 +126,22 @@ internal sealed class TransformYellerReport(
         // Cross-entity first-touch filter
         //*********************************************************************************
 
-        List<(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, AttributionSource Source)> allTouches =
+        List<(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, AttributionSource Source, IEntity Entity)> allTouches =
         [
-            .. plumbAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Plumbing)),
-            .. cornAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Corn)),
-            .. caliperAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Caliper))
+            .. plumbAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Plumbing, a.Entity)),
+            .. cornAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Corn, a.Entity)),
+            .. caliperAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Caliper, a.Entity))
         ];
 
         // For each custard, earliest effective date = min(link.UnixMatchDate, custard.UnixDate, firstSandDate)
-        List<EffectiveDateAssociated> touchesWithEffectiveDate = allTouches.Select(t =>
-        {
-            long firstSandDate = t.Custard.SandEntities?.Min(s => s.UnixDate) ?? long.MaxValue;
-            long effectiveDate = Math.Min(t.UnixMatchDate, Math.Min(firstSandDate, t.Custard.UnixDate));
-            return new EffectiveDateAssociated(t.MatchingPhone, t.UnixMatchDate, t.Custard, EffectiveDate: effectiveDate, t.Source);
-        }).ToList();
+        // Earliest sand regardless of completion affects tie-breaking
+        List<EffectiveDateAssociated> touchesWithEffectiveDate = [.. allTouches
+            .Select(t =>
+            {
+                long firstSandDate = t.Custard.SandEntities?.Min(s => s.UnixDate) ?? long.MaxValue;
+                long effectiveDate = Math.Min(t.UnixMatchDate, Math.Min(firstSandDate, t.Custard.UnixDate));
+                return new EffectiveDateAssociated(t.MatchingPhone, t.UnixMatchDate, t.Custard, EffectiveDate: effectiveDate, t.Source, t.Entity);
+            })];
 
         Dictionary<long, List<EffectiveDateAssociated>> firstTouchesByPhone = touchesWithEffectiveDate
             .GroupBy(t => t.MatchingPhone)
@@ -159,7 +169,7 @@ internal sealed class TransformYellerReport(
                 });
 
 
-        List<AttributionResult> attributions = firstTouchesByPhone
+        List<AttributionResult> attributions = [.. firstTouchesByPhone
             .SelectMany(d => d.Value.Select(v => // We are translating All custards that have the same EntityDate, Custard.UnixDate, and SandEntities.Single().UnixDate across them
                 new AttributionResult()
                 {
@@ -167,13 +177,89 @@ internal sealed class TransformYellerReport(
                     FirstTouchUnixDate = v.UnixMatchDate,
                     Source = v.Source,
                     Custard = v.Custard,
-                    Sand = v.Custard.SandEntities.Single()
+                    Sand = v.Custard.SandEntities.Single(),
                 }
-            )).ToList();
+            ))];
 
-        var reports = attributions.Select(_translate.Translate).ToList();
+        //*********************************************************************************
+        // Non attributed reporting
+        //*********************************************************************************
+        
+        // Find first touch by phone number across all entities for non-attributed reporting
+        var firstCalipers = calipers.Value
+            .GroupBy(c => c.PhoneNumber.Number)
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .OrderBy(c => c.UnixDate)
+                    .ThenBy(c => c.Id)
+                    .First()
+            );
+
+        var firstCorns = corns.Value
+            .GroupBy(c => c.PhoneNumber.Number)
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .OrderBy(c => c.UnixDate)
+                    .ThenBy(c => c.Id)
+                    .First()
+            );
+        var firstPlumbing = plumbs.Value
+            .GroupBy(c => c.PhoneNumber.Number)
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .OrderBy(c => c.UnixDate)
+                    .ThenBy(c => c.Id)
+                    .First()
+            );
+
+        Dictionary<long, IPhoneDateIdEntity> crossEntityFirstTouches = firstCalipers.Values
+            .Cast<IPhoneDateIdEntity>()
+            .Concat(firstCorns.Values)
+            .Concat(firstPlumbing.Values)
+            .GroupBy(e => e.PhoneNumber.Number)
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .OrderBy(e => e.UnixDate)
+                    .ThenBy(e => e.Id)
+                    .First()
+            );
+
+        // Build lookup of attribution winners by phone
+        var attributionByPhone = attributions
+            .GroupBy(a => a.MatchingPhone)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        List<ReportYeller> reports = [];
+
+        // We want one report per phone
+        foreach (var phone in crossEntityFirstTouches.Keys)
+        {
+            if (attributionByPhone.TryGetValue(phone, out var winners))
+            {
+                // Attribution overrides raw first-touch
+                reports.AddRange(winners.Select(_attrToR.Translate));
+            }
+            else
+            {
+                // Where there's no attribution, use cross-entity first touch
+                var entity = crossEntityFirstTouches[phone];
+
+                reports.Add(entity switch
+                {
+                    CaliperEntity c => _caliperToR.Translate(c),
+                    CornEntity c => _cornToR.Translate(c),
+                    PlumbingEntity p => _plumbToR.Translate(p),
+                    _ => throw new InvalidOperationException("Unknown entity type")
+                });
+            }
+        }
 
         return reports;
+
     }
 
     // Respect first sand after entity and Completed == true
@@ -213,7 +299,7 @@ internal sealed class TransformYellerReport(
 
 
     record CustardAssociation<T>(T Entity, CustardEntity Custard, long EntityPhone, long EntityDate);
-    record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate, AttributionSource Source);
+    record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate, AttributionSource Source, IEntity Entity);
 }
 
 #region Logic map

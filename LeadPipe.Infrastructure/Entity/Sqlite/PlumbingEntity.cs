@@ -1,10 +1,29 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Interfaces.Core;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class PlumbingEntity : ISourceEntity 
+public class PlumbingEntity : ISourceEntity, IPhoneDateIdEntity
 {
+    public PlumbingEntity() { }
+    [SetsRequiredMembers]
+    private PlumbingEntity(PlumbingEntity p)
+    {
+        Id = p.Id;
+        PhoneNumber = p.PhoneNumber;
+        Date = p.Date;
+        UnixDate = p.UnixDate;
+        Contents = p.Contents;
+        Source = p.Source;
+        MetaData = p.MetaData;
+        Branch = p.Branch;
+        CustardPlumbingLinks = [.. p.CustardPlumbingLinks.Select(c => c.Clone())];
+        SandPlumbingLinks = [.. p.SandPlumbingLinks.Select(c => c.Clone())];
+        PlumbingCaliperLinks = [.. p.PlumbingCaliperLinks.Select(c => c.Clone())];
+        CornPlumbingLinks = [.. p.CornPlumbingLinks.Select(c => c.Clone())];
+
+    }
     public required long Id { get; set; }
     public required PhoneNumber PhoneNumber { get; set; }
     public DateTime Date { get; set; }
@@ -18,4 +37,6 @@ public class PlumbingEntity : ISourceEntity
     public ICollection<SandPlumbingLink> SandPlumbingLinks { get; set; } = [];
     public ICollection<PlumbingCaliperLink> PlumbingCaliperLinks { get; set; } = [];
     public ICollection<CornPlumbingLink> CornPlumbingLinks { get; set; } = [];
+
+    internal PlumbingEntity Clone() => new(this);
 }

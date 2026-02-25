@@ -1,4 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Interfaces.Core;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
@@ -8,6 +9,18 @@ namespace LeadPipe.Infrastructure.Entity.Sqlite;
 /// </summary>
 public class SandCornLink : IEntity, IHasUnixMatchDate
 {
+    public SandCornLink() { }
+    [SetsRequiredMembers]
+    private SandCornLink(SandCornLink s)
+    {
+        Id = s.Id;
+        SandId = s.SandId;
+        SandEntity = s.SandEntity.Clone();
+        CornId = s.CornId;
+        CornEntity = s.CornEntity.Clone();
+        MatchingPhone = s.MatchingPhone;
+        UnixMatchDate = s.UnixMatchDate;
+    }
     public long Id { get; set; }
 
     public required long SandId { get; set; }
@@ -18,4 +31,6 @@ public class SandCornLink : IEntity, IHasUnixMatchDate
 
     public required long MatchingPhone { get; set; }
     public required long UnixMatchDate { get; set; }
+
+    internal SandCornLink Clone() => new(this);
 }

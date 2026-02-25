@@ -1,10 +1,28 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Interfaces.Core;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class CornEntity : IEntity
+public class CornEntity : IEntity, IPhoneDateIdEntity
 {
+    public CornEntity() { }
+    [SetsRequiredMembers]
+    private CornEntity(CornEntity c)
+    {
+        Id = c.Id;
+        PhoneNumber = c.PhoneNumber;
+        Date = c.Date;
+        UnixDate = c.UnixDate;
+        Payload = c.Payload;
+        MetaData = c.MetaData;
+        Source = c.Source;
+
+        CustardCornLinks = [.. c.CustardCornLinks.Select(c => c.Clone())];
+        SandCornLinks = [.. c.SandCornLinks.Select(c => c.Clone())];
+        CornCaliperLinks = [.. c.CornCaliperLinks.Select(c => c.Clone())];
+        CornPlumbingLinks = [.. c.CornPlumbingLinks.Select(c => c.Clone())];
+    }
     public required long Id { get; set; }
     public required PhoneNumber PhoneNumber { get; set; }
     public required DateTime Date { get; set; }
@@ -17,4 +35,6 @@ public class CornEntity : IEntity
     public ICollection<SandCornLink> SandCornLinks { get; set; } = [];
     public ICollection<CornCaliperLink> CornCaliperLinks { get; set; } = [];
     public ICollection<CornPlumbingLink> CornPlumbingLinks { get; set; } = [];
+
+    internal CornEntity Clone() => new(this);
 }

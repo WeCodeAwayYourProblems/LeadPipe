@@ -1,10 +1,31 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Interfaces.Core;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class CustardEntity : IEntity
+public class CustardEntity : IEntity, IPhoneDateIdEntity
 {
+    [SetsRequiredMembers]
+    private CustardEntity(CustardEntity entity)
+    {
+        Id = entity.Id;
+        Active = entity.Active;
+        PhoneNumber = entity.PhoneNumber;
+        PhoneNumber2 = entity.PhoneNumber2;
+        Date = entity.Date;
+        UnixDate = entity.UnixDate;
+        CancelDate = entity.CancelDate;
+        UnixCancelDate = entity.UnixCancelDate;
+        SandEntities = [.. entity.SandEntities.Select(s => s.Clone())];
+        CustardCaliperLinks = [.. entity.CustardCaliperLinks.Select(c => c.Clone())];
+        CustardCornLinks = [.. entity.CustardCornLinks.Select(c => c.Clone())];
+        CustardPlumbingLinks = [.. entity.CustardPlumbingLinks.Select(c => c.Clone())];
+
+    }
+    public CustardEntity() { }
+    public CustardEntity Clone() => new(this);
+
     public required long Id { get; set; }
     public bool Active { get; set; }
     public required PhoneNumber PhoneNumber { get; set; }

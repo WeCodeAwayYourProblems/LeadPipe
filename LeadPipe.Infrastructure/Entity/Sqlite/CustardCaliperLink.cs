@@ -1,9 +1,22 @@
 ﻿using LeadPipe.Infrastructure.Interfaces.Core;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
 public class CustardCaliperLink : IEntity, IHasUnixMatchDate
 {
+    public CustardCaliperLink() { }
+    [SetsRequiredMembers]
+    private CustardCaliperLink(CustardCaliperLink l)
+    {
+        Id = l.Id;
+        CustardId = l.CustardId;
+        Custard = l.Custard.Clone();
+        CaliperId = l.CaliperId;
+        Caliper = l.Caliper.Clone();
+        MatchingPhone = l.MatchingPhone;
+        UnixMatchDate = l.UnixMatchDate;
+    }
     public long Id { get; set; }
 
     public required long CustardId { get; set; }
@@ -14,4 +27,6 @@ public class CustardCaliperLink : IEntity, IHasUnixMatchDate
 
     public required long MatchingPhone { get; set; }
     public required long UnixMatchDate { get; set; }
+
+    internal CustardCaliperLink Clone() => new(this);
 }

@@ -20,10 +20,10 @@ public class CaliperEntity : IEntity, IPhoneDateIdEntity
         Duration = c.Duration;
         Billable = c.Billable;
 
-        CustardCaliperLinks = [.. c.CustardCaliperLinks.Select(c => c.Clone())];
-        SandCaliperLinks = [.. c.SandCaliperLinks.Select(c => c.Clone())];
-        PlumbingCaliperLinks = [.. c.PlumbingCaliperLinks.Select(c => c.Clone())];
-        CornCaliperLinks = [.. c.CornCaliperLinks.Select(c => c.Clone())];
+        CustardCaliperLinks = [.. c.CustardCaliperLinks.Select(c => c)];
+        SandCaliperLinks = [.. c.SandCaliperLinks.Select(c => c)];
+        PlumbingCaliperLinks = [.. c.PlumbingCaliperLinks.Select(c => c)];
+        CornCaliperLinks = [.. c.CornCaliperLinks.Select(c => c)];
 
     }
     public required long Id { get; set; }

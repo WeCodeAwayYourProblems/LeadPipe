@@ -26,9 +26,9 @@ public class SandEntity : IEntity
         Offerman = s.Offerman;
 
         CustardEntity = s.CustardEntity?.Clone();
-        SandPlumbingLinks = [.. s.SandPlumbingLinks.Select(s => s.Clone())];
-        SandCaliperLinks = [.. s.SandCaliperLinks.Select(s => s.Clone())];
-        SandCornLinks = [.. s.SandCornLinks.Select(s => s.Clone())];
+        SandPlumbingLinks = [.. s.SandPlumbingLinks.Select(s => s)];
+        SandCaliperLinks = [.. s.SandCaliperLinks.Select(s => s)];
+        SandCornLinks = [.. s.SandCornLinks.Select(s => s)];
 
     }
     public required long Id { get; set; }

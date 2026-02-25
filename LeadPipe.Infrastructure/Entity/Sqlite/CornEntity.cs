@@ -18,10 +18,10 @@ public class CornEntity : IEntity, IPhoneDateIdEntity
         MetaData = c.MetaData;
         Source = c.Source;
 
-        CustardCornLinks = [.. c.CustardCornLinks.Select(c => c.Clone())];
-        SandCornLinks = [.. c.SandCornLinks.Select(c => c.Clone())];
-        CornCaliperLinks = [.. c.CornCaliperLinks.Select(c => c.Clone())];
-        CornPlumbingLinks = [.. c.CornPlumbingLinks.Select(c => c.Clone())];
+        CustardCornLinks = [.. c.CustardCornLinks.Select(c => c)];
+        SandCornLinks = [.. c.SandCornLinks.Select(c => c)];
+        CornCaliperLinks = [.. c.CornCaliperLinks.Select(c => c)];
+        CornPlumbingLinks = [.. c.CornPlumbingLinks.Select(c => c)];
     }
     public required long Id { get; set; }
     public required PhoneNumber PhoneNumber { get; set; }

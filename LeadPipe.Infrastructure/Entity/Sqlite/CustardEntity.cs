@@ -17,10 +17,10 @@ public class CustardEntity : IEntity, IPhoneDateIdEntity
         UnixDate = entity.UnixDate;
         CancelDate = entity.CancelDate;
         UnixCancelDate = entity.UnixCancelDate;
-        SandEntities = [.. entity.SandEntities.Select(s => s.Clone())];
-        CustardCaliperLinks = [.. entity.CustardCaliperLinks.Select(c => c.Clone())];
-        CustardCornLinks = [.. entity.CustardCornLinks.Select(c => c.Clone())];
-        CustardPlumbingLinks = [.. entity.CustardPlumbingLinks.Select(c => c.Clone())];
+        SandEntities = [.. entity.SandEntities.Select(s => s)];
+        CustardCaliperLinks = [.. entity.CustardCaliperLinks.Select(c => c)];
+        CustardCornLinks = [.. entity.CustardCornLinks.Select(c => c)];
+        CustardPlumbingLinks = [.. entity.CustardPlumbingLinks.Select(c => c)];
 
     }
     public CustardEntity() { }

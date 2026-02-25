@@ -18,10 +18,10 @@ public class PlumbingEntity : ISourceEntity, IPhoneDateIdEntity
         Source = p.Source;
         MetaData = p.MetaData;
         Branch = p.Branch;
-        CustardPlumbingLinks = [.. p.CustardPlumbingLinks.Select(c => c.Clone())];
-        SandPlumbingLinks = [.. p.SandPlumbingLinks.Select(c => c.Clone())];
-        PlumbingCaliperLinks = [.. p.PlumbingCaliperLinks.Select(c => c.Clone())];
-        CornPlumbingLinks = [.. p.CornPlumbingLinks.Select(c => c.Clone())];
+        CustardPlumbingLinks = [.. p.CustardPlumbingLinks.Select(c => c)];
+        SandPlumbingLinks = [.. p.SandPlumbingLinks.Select(c => c)];
+        PlumbingCaliperLinks = [.. p.PlumbingCaliperLinks.Select(c => c)];
+        CornPlumbingLinks = [.. p.CornPlumbingLinks.Select(c => c)];
 
     }
     public required long Id { get; set; }

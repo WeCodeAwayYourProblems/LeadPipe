@@ -102,21 +102,21 @@ internal sealed class TransformYellerReport(
             from link in custard.CustardCaliperLinks
             let entity = caliperById.TryGetValue(link.CaliperId, out var caliper) ? caliper : null
             where entity != null
-            select new CustardAssociation<CaliperEntity>(entity!, custard, entity.PhoneNumber.Number, entity.UnixDate);
+            select new CustardAssociation<CaliperEntity>(entity!, custard, entity!.PhoneNumber.Number, entity!.UnixDate);
 
         var custardCornAssociations =
             from custard in custards.Value
             from link in custard.CustardCornLinks
             let entity = cornById.TryGetValue(link.CornId, out var corn) ? corn : null
             where entity != null
-            select new CustardAssociation<CornEntity>(entity!, custard, entity.PhoneNumber.Number, entity.UnixDate);
+            select new CustardAssociation<CornEntity>(entity!, custard, entity!.PhoneNumber.Number, entity!.UnixDate);
 
         var custardPlumbAssociations =
             from custard in custards.Value
             from link in custard.CustardPlumbingLinks
             let entity = plumbById.TryGetValue(link.PlumbingId, out var plumb) ? plumb : null
             where entity != null
-            select new CustardAssociation<PlumbingEntity>(entity!, custard, entity.PhoneNumber.Number, entity.UnixDate);
+            select new CustardAssociation<PlumbingEntity>(entity!, custard, entity!.PhoneNumber.Number, entity!.UnixDate);
 
         List<CustardAssociation<CaliperEntity>> caliperAttributable = Attributable(custardCaliperAssociations);
         List<CustardAssociation<CornEntity>> cornAttributable = Attributable(custardCornAssociations);
@@ -184,9 +184,9 @@ internal sealed class TransformYellerReport(
         //*********************************************************************************
         // Non attributed reporting
         //*********************************************************************************
-        
+
         // Find first touch by phone number across all entities for non-attributed reporting
-        var firstCalipers = calipers.Value
+        Dictionary<long, CaliperEntity> firstCalipers = calipers.Value
             .GroupBy(c => c.PhoneNumber.Number)
             .ToDictionary(
                 g => g.Key,
@@ -196,7 +196,7 @@ internal sealed class TransformYellerReport(
                     .First()
             );
 
-        var firstCorns = corns.Value
+        Dictionary<long, CornEntity> firstCorns = corns.Value
             .GroupBy(c => c.PhoneNumber.Number)
             .ToDictionary(
                 g => g.Key,
@@ -205,7 +205,7 @@ internal sealed class TransformYellerReport(
                     .ThenBy(c => c.Id)
                     .First()
             );
-        var firstPlumbing = plumbs.Value
+        Dictionary<long, PlumbingEntity> firstPlumbing = plumbs.Value
             .GroupBy(c => c.PhoneNumber.Number)
             .ToDictionary(
                 g => g.Key,

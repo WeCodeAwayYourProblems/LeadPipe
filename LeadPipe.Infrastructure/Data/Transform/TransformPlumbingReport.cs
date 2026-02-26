@@ -39,7 +39,7 @@ public sealed class TransformPlumbingReport(
         // Turn subsplumbinglinks into a hashset of plumbingids for fast lookup
         HashSet<long> ids = [.. subsLinks.Select(e => e.PlumbingId)];
 
-        // Turn empty PlumbingEntities into subsplumbinglinks
+        // Turn empty PlumbingEntities into sandplumbinglinks
         List<SandPlumbingLink> unfoundPlumbing =
             [.. plumbingEntities
                 .Where(e => !ids.Contains(e.Id)) // We are creating a partition

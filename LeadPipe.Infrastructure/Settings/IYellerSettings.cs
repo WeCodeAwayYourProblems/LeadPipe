@@ -22,4 +22,5 @@ public interface IYellerSettings
     string? YellerSalt { get; set; }
     string? YellerCornSource { get; set; }
     string? YellerReportEndpoint { get; set; }
+    string? YellerActionSource { get; set; }
 }

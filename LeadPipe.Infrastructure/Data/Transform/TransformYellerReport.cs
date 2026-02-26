@@ -233,30 +233,21 @@ internal sealed class TransformYellerReport(
             .GroupBy(a => a.MatchingPhone)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        List<ReportYeller> reports = [];
-
-        // We want one report per phone
-        foreach (var phone in crossEntityFirstTouches.Keys)
-        {
-            if (attributionByPhone.TryGetValue(phone, out var winners))
-            {
-                // Attribution overrides raw first-touch
-                reports.AddRange(winners.Select(_attrToR.Translate));
-            }
-            else
-            {
-                // Where there's no attribution, use cross-entity first touch
-                var entity = crossEntityFirstTouches[phone];
-
-                reports.Add(entity switch
-                {
-                    CaliperEntity c => _caliperToR.Translate(c),
-                    CornEntity c => _cornToR.Translate(c),
-                    PlumbingEntity p => _plumbToR.Translate(p),
-                    _ => throw new InvalidOperationException("Unknown entity type")
-                });
-            }
-        }
+        List<ReportYeller> reports = [.. crossEntityFirstTouches.Keys
+            .SelectMany(phone =>
+                attributionByPhone.TryGetValue(phone, out var winners)
+                    ? winners.Select(_attrToR.Translate)
+                    :
+                    [
+                        crossEntityFirstTouches[phone] switch
+                        {
+                            CaliperEntity c => _caliperToR.Translate(c),
+                            CornEntity c => _cornToR.Translate(c),
+                            PlumbingEntity p => _plumbToR.Translate(p),
+                            _ => throw new InvalidOperationException("Unknown entity type")
+                        }
+                    ]
+            )];
 
         return reports;
 

@@ -11,9 +11,11 @@ public sealed record SyncKey
     public static readonly SyncKey Custard = new(nameof(Custard).ToLowerInvariant());
     public static readonly SyncKey Plumbing = new(nameof(Plumbing).ToLowerInvariant());
     public static readonly SyncKey Sandwich = new(nameof(Sandwich).ToLowerInvariant());
+    
+    public static readonly SyncKey Catman = new("catman");
     public static readonly SyncKey Associate = new("association");
 
-    // All predefined keys for TryParse and iteration
+    // All allowed predefined keys for TryParse and iteration
     private static readonly List<SyncKey> AllKeys = 
     [
         Caliper, 

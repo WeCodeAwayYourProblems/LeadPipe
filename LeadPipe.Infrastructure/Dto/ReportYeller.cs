@@ -6,7 +6,7 @@ public class ReportYeller
     public required string event_id { get; set; }
     public required long event_time { get; set; }
     public string? event_name { get; set; }
-    public string? action_source { get; set; }
+    public required string action_source { get; set; }
     public required UserData user_data { get; set; }
     public required CustomData custom_data { get; set; }
 }

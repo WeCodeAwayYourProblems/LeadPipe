@@ -14,6 +14,7 @@ public class YellerDataSource(IYellerService yeller) : IDataSourceAsync<YellerDt
         Result<List<YellerDto>> get = await _yeller.GetAllAsync(false);
         if (get.IsFailure)
             return Result.Failure<List<YellerDto>>(get.Error);
+
         return get;
     }
 
@@ -22,6 +23,7 @@ public class YellerDataSource(IYellerService yeller) : IDataSourceAsync<YellerDt
         Result<List<YellerDto>> get = await _yeller.RefreshAsync();
         if (get.IsFailure)
             return Result.Failure<List<YellerDto>>(get.Error);
+
         return get;
     }
 }

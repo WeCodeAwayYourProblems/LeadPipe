@@ -17,6 +17,7 @@ using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -156,19 +157,44 @@ public static class InjectInfrastructure
         string accept = "application/json";
 
         // Add Leaf Client
-        RegisterHttpClient(settings.LeafName, settings.LeafBase, accept, settings.LeafToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_leafDto));
+        RegisterHttpClientWithToken(settings.LeafName, settings.LeafBase, accept, settings.LeafToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_leafDto));
 
         // Add Lab Client
         if (string.IsNullOrWhiteSpace(settings.LabAccept))
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
+        RegisterHttpClientWithToken(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
 
         // Add Yeller Getter Client
-        RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
+        RegisterHttpClientWithToken(settings.YellerGetterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
         // Add Yeller Reporter Client
         bool useYellerReporterTestClient = settings.HttpClients?.Yeller?.Reporter?.UseTestClients ?? useTestClientsGlobal;
-        RegisterHttpClient(settings.YellerReporterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerReporterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
+        RegisterHttpClientWithToken(settings.YellerReporterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerReporterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
+
+        // Add catman client
+        if (string.IsNullOrWhiteSpace(settings.CatManClientName))
+            throw new Exception($"{nameof(settings.CatManClientName)} cannot be null");
+        if (string.IsNullOrWhiteSpace(settings.CatBaseEndpoint))
+            throw new Exception($"{nameof(settings.CatBaseEndpoint)} cannot be null");
+        if (string.IsNullOrWhiteSpace(settings.CatmanSecret))
+            throw new Exception($"{nameof(settings.CatmanSecret)} cannot be null");
+        if (string.IsNullOrWhiteSpace(settings.CatmanSecret))
+            throw new Exception($"{nameof(settings.CatmanKey)} cannot be null");
+        services.AddHttpClient(settings.CatManClientName, c =>
+        {
+            c.BaseAddress = new Uri(settings.CatBaseEndpoint);
+            var secretkeyBytes = Encoding.ASCII.GetBytes($"{settings.CatmanSecret}:{settings.CatmanKey}");
+            var secretkeyString = Convert.ToBase64String(secretkeyBytes);
+
+            c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", secretkeyString);
+        }).ConfigurePrimaryHttpMessageHandler(() => 
+            new HttpClientHandler()
+            {
+                AutomaticDecompression =
+                    DecompressionMethods.GZip |
+                    DecompressionMethods.Deflate
+            }
+        );
 
         #endregion
         // *****************************************
@@ -176,7 +202,7 @@ public static class InjectInfrastructure
         return services;
     }
 
-    private static void RegisterHttpClient(
+    private static void RegisterHttpClientWithToken(
         string? clientName,
         string? baseUri,
         string acceptType,
@@ -223,7 +249,7 @@ public static class InjectInfrastructure
             // Return empty success response
             var response = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(_content) // Or whatever shape your API expects
+                Content = new StringContent(_content)
             };
             return Task.FromResult(response);
         }

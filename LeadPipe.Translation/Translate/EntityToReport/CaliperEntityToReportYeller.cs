@@ -1,11 +1,13 @@
 ﻿using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class CaliperEntityToReportYeller : IEntityToReport<CaliperEntity, ReportYeller>
+internal sealed class CaliperEntityToReportYeller(IYellerSettings settings) : IEntityToReport<CaliperEntity, ReportYeller>
 {
+    private readonly string _action = settings.YellerActionSource!;
     public ReportYeller Translate(CaliperEntity data)
     {
         long eventtime = data.UnixDate;
@@ -25,6 +27,7 @@ internal sealed class CaliperEntityToReportYeller : IEntityToReport<CaliperEntit
             event_name = eventname,
             event_time = eventtime,
             custom_data = custom,
+            action_source = _action,
             user_data = user
         };
         return result;

@@ -9,7 +9,7 @@ internal abstract class AbstractDummyUpdateService : IUpdateService<Plumbing>
 {
     public Task<Result<List<Plumbing>>> GetDataAsync(bool _)
     {
-        return Task.FromResult(Result.Success<List<Plumbing>>([]));
+        return Task.FromResult(Result.Success(new List<Plumbing>()));
     }
 
     public Task<Result> SaveDataAsync(List<Plumbing> data)

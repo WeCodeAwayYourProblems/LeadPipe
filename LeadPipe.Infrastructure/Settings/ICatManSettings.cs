@@ -8,11 +8,13 @@ public interface ICatManSettings
     string? CatBaseEndpoint { get; set; }
     string? CatmanSecret { get; set; }
     string? CatmanKey { get; set; }
-    CatAccountId? CatAccountId { get; set; }
+    int CatAccountId { get; set; }
+    CatAccount? CatAccount { get; set; }
 }
-public class CatAccountId
+public class CatAccount
 {
-    public int Fat { get; set; }
-    public int Sandbox { get; set; }
-    public int Natal { get; set; }
+    public CatAcctDetails? Fat { get; set; }
+    public CatAcctDetails? Sandbox { get; set; }
+    public CatAcctDetails? Natal { get; set; }
 }
+public record CatAcctDetails(int Id, string? Secret, string? Key);

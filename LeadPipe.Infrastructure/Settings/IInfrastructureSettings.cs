@@ -13,27 +13,20 @@ public interface IInfrastructureSettings :
     public Ef? Ef { get; set; }
     public HttpClients? HttpClients { get; set; }
 
-    string? CalliReportLoc { get; set; }
-    string? CalliSourceLoc { get; set; }
-
-    string? LabReportLoc { get; set; }
-    string? LabSourceLoc { get; set; }
-
-    string? LibacionSourceLoc { get; set; }
-    string? LibacionReportLoc { get; set; }
-
-    string? LeasedSourceLoc { get; set; }
-    string? LeasedReportLoc { get; set; }
-
-    string? PanReportLoc { get; set; }
-    string? PanSourceLoc { get; set; }
-
-    string? LatherReportLoc { get; set; }
-    string? LatherSourceLoc { get; set; }
+    LocationPair? CalliLoc { get; set; }
+    LocationPair? LabLoc { get; set; }
+    LocationPair? LibacionLoc { get; set; }
+    LocationPair? LeasedLoc { get; set; }
+    LocationPair? PanLoc { get; set; }
+    LocationPair? LatherLoc { get; set; }
 
     string[]? CornSources { get; set; }
 }
-
+public class LocationPair
+{
+    public string? Source { get; set; }
+    public string? Report { get; set; }
+}
 public class Ef
 {
     public LogLevel LogLevel { get; set; }

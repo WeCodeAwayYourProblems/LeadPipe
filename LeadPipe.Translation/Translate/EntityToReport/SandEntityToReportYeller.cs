@@ -31,7 +31,7 @@ internal sealed class SandEntityToReportYeller(IYellerSettings settings) : IEnti
             currency = YellerReportHelper.Currency,
             value = sub.Value
         };
-        string eventid = sub.Id.ToString();
+        string eventid = sub.Id.ToString() + "-19114"; // 19 == s, 1 == a, 14 == n
 
         ReportYeller result = new()
         {

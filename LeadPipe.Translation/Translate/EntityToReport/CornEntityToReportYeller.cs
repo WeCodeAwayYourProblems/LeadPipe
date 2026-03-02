@@ -13,7 +13,7 @@ internal sealed class CornEntityToReportYeller(IYellerSettings settings) : IEnti
         long eventTime = data.UnixDate;
         string eventName = "lead";
         string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
-        string eventId = data.Id.ToString();
+        string eventId = data.Id.ToString() + "-31518"; // 3 == c, 15 == o, 18 == r
 
         UserData user = new() { ph = [num] };
         CustomData custom = new()

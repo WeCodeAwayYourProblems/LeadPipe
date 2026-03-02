@@ -13,9 +13,7 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 internal sealed class TransformYellerReport(
     IRepositoryFactory factory,
     IEntityToReport<AttributionResult, ReportYeller> translate,
-    IEntityToReport<CornEntity, ReportYeller> cornToR,
-    IEntityToReport<PlumbingEntity, ReportYeller> plumbToR,
-    IEntityToReport<CaliperEntity, ReportYeller> caliperToR,
+    IEntityToYellerReportFactory reportFactory,
     IYellerSettings settings
     ) : ITransform<Plumbing, ReportYeller>
 {
@@ -26,9 +24,9 @@ internal sealed class TransformYellerReport(
     private readonly IRepository<PlumbingEntity> _plumbRepo = factory.GetRepository<PlumbingEntity>();
 
     private readonly IEntityToReport<AttributionResult, ReportYeller> _attrToR = translate;
-    private readonly IEntityToReport<CornEntity, ReportYeller> _cornToR = cornToR;
-    private readonly IEntityToReport<PlumbingEntity, ReportYeller> _plumbToR = plumbToR;
-    private readonly IEntityToReport<CaliperEntity, ReportYeller> _caliperToR = caliperToR;
+    private readonly IEntityToReport<CornEntity, ReportYeller> _cornToR = reportFactory.GetService<CornEntity>();
+    private readonly IEntityToReport<PlumbingEntity, ReportYeller> _plumbToR = reportFactory.GetService<PlumbingEntity>();
+    private readonly IEntityToReport<CaliperEntity, ReportYeller> _caliperToR = reportFactory.GetService<CaliperEntity>();
 
     private readonly IYellerSettings _settings = settings;
 

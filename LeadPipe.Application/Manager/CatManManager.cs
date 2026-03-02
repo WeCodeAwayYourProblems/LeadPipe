@@ -13,9 +13,13 @@ internal class CatManManager(IUpdateFactory factory) : ICatManManager
     private readonly IUpdateService<Caliper> _catMan = factory.GetService<Caliper>(Source.Yeller);
     public async Task<Result> Manage(bool refresh)
     {
-        var result = refresh
+        var data = refresh
             ? await _catMan.UpdateDataAsync(false)
             : await _catMan.GetDataAsync(false);
-        return result;
+        if (data.IsFailure)
+            return data;
+        
+        var saved = await _catMan.SaveDataAsync(data.Value);
+        return saved;
     }
 }

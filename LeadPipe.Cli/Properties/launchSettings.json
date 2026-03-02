@@ -19,6 +19,24 @@
     },
 
     // *******************************************
+    // CatMan Update
+    // *******************************************
+    "Update CatMan Data: Refresh Data": {
+      "commandName": "Project",
+      "commandLineArgs": "catman -r",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Update CatMan Data: Get all Data": {
+      "commandName": "Project",
+      "commandLineArgs": "catman",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+
+    // *******************************************
     // Data Reporting
     // *******************************************
     "Data report only": {

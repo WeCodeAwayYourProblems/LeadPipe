@@ -70,6 +70,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<LibacionDto>, LibacionFileDataSource>();
         services.AddScoped<IDataSourceAsync<PanDto>, PanFileDataSource>();
         services.AddScoped<IDataSourceAsync<LatherDto>, LatherFileDataSource>();
+        services.AddScoped<IDataSourceAsync<CatManDto>, CatManDataSource>();
 
         services.AddScoped<IDataSourceAsync<CaliperMySqlEntity>, CaliperMySqlDataSource>();
         services.AddScoped<IDataSourceAsync<SandMySqlEntity>, SandMySqlDataSource>();
@@ -94,6 +95,8 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, PanUpdateFromFileService>(Source.Pan);
         services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
         services.AddKeyedScoped<IUpdateService<Plumbing>, LatherUpdateService>(Source.Lather);
+
+        services.AddKeyedScoped<IUpdateService<Caliper>, CatManUpdateService>(Source.Yeller);
 
         // Nonkeyed update services
         services.AddScoped<IUpdateService<Caliper>, CalipersUpdateService>();
@@ -143,6 +146,7 @@ public static class InjectInfrastructure
         services.AddScoped<ILeafService, LeafClientService>();
         services.AddScoped<IEntityAssociationService, EntityAssociationService>();
         services.AddScoped<IYellerService, YellerClientService>();
+        services.AddScoped<ICatManService, CatManClientService>();
 
         services.AddScoped<ISyncGate, SyncGate>();
 
@@ -187,7 +191,7 @@ public static class InjectInfrastructure
             var secretkeyString = Convert.ToBase64String(secretkeyBytes);
 
             c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", secretkeyString);
-        }).ConfigurePrimaryHttpMessageHandler(() => 
+        }).ConfigurePrimaryHttpMessageHandler(() =>
             new HttpClientHandler()
             {
                 AutomaticDecompression =

@@ -15,7 +15,7 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
     private readonly DateTime Today = DateTime.UtcNow;
     public async Task<Result<List<CatManDto>>> LoadAsync(bool _ = default)
     {
-        DateTime twentyTwelve = new(2012, 1, 1);
+        DateTime twentyTwelve = new(2025, 1, 1);
         Result<List<CatManDto>> get = await _cat.GetAllAsync(twentyTwelve, Today);
 
         return get;

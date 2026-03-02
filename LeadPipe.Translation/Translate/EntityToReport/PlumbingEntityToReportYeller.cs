@@ -13,7 +13,7 @@ internal sealed class PlumbingEntityToReportYeller(IYellerSettings settings) : I
         long eventtime = data.UnixDate;
         string eventName = "lead";
         string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
-        string eventid = data.Id.ToString();
+        string eventid = data.Id.ToString() + "-161221"; // 16 == p, 12 == l, 21 == u
 
         UserData user = new() { ph = [num] };
         CustomData custom = new()

@@ -13,7 +13,7 @@ internal sealed class CaliperEntityToReportYeller(IYellerSettings settings) : IE
         long eventtime = data.UnixDate;
         string eventname = "lead";
         string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
-        string eventid = data.Id.ToString();
+        string eventid = data.Id.ToString() + "-3112"; // 3 == c, 1 == a, 12 == l
 
         UserData user = new() { ph = [num] };
         CustomData custom = new()

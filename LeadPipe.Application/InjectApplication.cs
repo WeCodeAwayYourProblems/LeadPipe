@@ -13,6 +13,7 @@ public static class InjectApplication
         services.AddScoped<IReportManager, ReportManager>();
         services.AddScoped<IUpdateManager, UpdateManager>();
         services.AddScoped<IFileRWManager, FileRWManager>();
+        services.AddScoped<ICatManManager, CatManManager>();
 
         return services;
     }

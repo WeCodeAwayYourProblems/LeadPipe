@@ -6,6 +6,7 @@ using LeadPipe.Translation;
 using LeadPipe.Infrastructure;
 using LeadPipe.Infrastructure.MySql;
 using LeadPipe.Infrastructure.Sqlite;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Cli;
 
@@ -27,6 +28,14 @@ internal static class ConfigureCommandLine
         if (yellerBellerId is null || yellerBellerId.Length == 0)
             throw new InvalidOperationException($"{nameof(settings.YellerBellerId)} for the selected environment is missing or empty");
         settings.YellerBellerId = yellerBellerId;
+
+        // More special items : Catman
+        bool isNatal = configuration.GetValue("CatManNatal", false);
+        CatAcctDetails account = isNatal
+            ? settings.CatAccount!.Natal!
+            : settings.CatAccount!.Sandbox!;
+        (settings.CatAccountId, settings.CatmanSecret, settings.CatmanKey) =
+            (account.Id!, account.Secret!, account.Key!);
 
         // ConnectionStrings
         string? password = configuration["DbPassword"];

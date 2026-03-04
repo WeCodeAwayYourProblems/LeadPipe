@@ -50,7 +50,7 @@ public class CatManDto
     public string? country { get; set; }
     public string? postal_code { get; set; }
     public string? called_at { get; set; }
-    public int? unix_time { get; set; }
+    public long? unix_time { get; set; }
     public int? tracking_number_id { get; set; }
     public string? tracking_number_sid { get; set; }
     public string? tracking_number { get; set; }

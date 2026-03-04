@@ -22,25 +22,33 @@ public class TransformYellerReportTests
     IQueryable<CaliperEntity> caliper,
     List<AttributionResult> captured)
     {
-        var factory = Substitute.For<IRepositoryFactory>();
+        var repoFactory = Substitute.For<IRepositoryFactory>();
         var custardRepo = Substitute.For<IRepository<CustardEntity>>();
         var plumbRepo = Substitute.For<IRepository<PlumbingEntity>>();
         var cornRepo = Substitute.For<IRepository<CornEntity>>();
         var caliperRepo = Substitute.For<IRepository<CaliperEntity>>();
-        var translator = Substitute.For<IEntityToReport<AttributionResult, ReportYeller>>();
+        
+        var translateFactory = Substitute.For<IEntityToYellerReportFactory>();
+        var attrToR = Substitute.For<IEntityToReport<AttributionResult, ReportYeller>>();
         var cornToR = Substitute.For<IEntityToReport<CornEntity, ReportYeller>>();
         var plumbToR = Substitute.For<IEntityToReport<PlumbingEntity, ReportYeller>>();
         var caliperToR = Substitute.For<IEntityToReport<CaliperEntity, ReportYeller>>();
+        
         var settings = Substitute.For<IYellerSettings>();
 
         settings.YellerCaliperSource1.Returns("source1");
         settings.YellerCaliperSource2.Returns("source2");
         settings.YellerCornSource.Returns("source1");
 
-        factory.GetRepository<CustardEntity>().Returns(custardRepo);
-        factory.GetRepository<PlumbingEntity>().Returns(plumbRepo);
-        factory.GetRepository<CornEntity>().Returns(cornRepo);
-        factory.GetRepository<CaliperEntity>().Returns(caliperRepo);
+        repoFactory.GetRepository<CustardEntity>().Returns(custardRepo);
+        repoFactory.GetRepository<PlumbingEntity>().Returns(plumbRepo);
+        repoFactory.GetRepository<CornEntity>().Returns(cornRepo);
+        repoFactory.GetRepository<CaliperEntity>().Returns(caliperRepo);
+
+        translateFactory.GetService<AttributionResult>().Returns(attrToR);
+        translateFactory.GetService<CornEntity>().Returns(cornToR);
+        translateFactory.GetService<PlumbingEntity>().Returns(plumbToR);
+        translateFactory.GetService<CaliperEntity>().Returns(caliperToR);
 
         static IQueryable<T> SafeQuery<T>(IQueryable<T>? q)
             => q ?? Enumerable.Empty<T>().AsQueryable();
@@ -71,7 +79,7 @@ public class TransformYellerReportTests
             .FindAsync(Arg.Any<Expression<Func<CaliperEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(Result.Success(SafeQuery(caliper).ToList())));
 
-        translator
+        attrToR
             .Translate(Arg.Any<AttributionResult>())
             .Returns(ci =>
             {
@@ -103,7 +111,7 @@ public class TransformYellerReportTests
         //    });
         //plumbToR; caliperToR;
 
-        return new TransformYellerReport(factory, translator, cornToR, plumbToR, caliperToR, settings);
+        return new TransformYellerReport(repoFactory, translateFactory, settings);
     }
     #endregion
 

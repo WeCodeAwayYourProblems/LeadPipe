@@ -15,6 +15,12 @@ internal class Program
     static void Main(string[] args)
     {
         IHostBuilder builder = Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, config) =>
+            {
+                // Only load 1Password secrets in Production
+                if (!context.HostingEnvironment.IsDevelopment())
+                    config.AddOnePasswordDocumentJson(documentTitle: "LeadPipe.secrets.json");
+            })
             .UseSerilog((context, services, configuration) =>
                 configuration.ReadFrom.Configuration(context.Configuration))
             .ConfigureServices((context, services) =>

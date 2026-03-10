@@ -131,7 +131,8 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReport<ReportPlumbing>, YellerCsvReporter>(Source.Yeller);
 
         // Make sure we're using the correct reporter, depending on whether we're doing testing
-        bool useClientReporter = config.GetSection("YellerReporter").GetValue("UseClient", false);
+        bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
+        bool useClientReporter = settings.HttpClients?.Yeller?.Reporter?.UseTestClients ?? useTestClientsGlobal;
         if (useClientReporter)
             services.AddScoped<IReport<ReportYeller>, YellerClientReporter>();
         else
@@ -156,7 +157,6 @@ public static class InjectInfrastructure
         // *****************************************
         #region ADD CLIENTS
 
-        bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
         bool useYellerGetterTestClient = settings.HttpClients?.Yeller?.Getter?.UseTestClients ?? useTestClientsGlobal;
         string accept = "application/json";
 

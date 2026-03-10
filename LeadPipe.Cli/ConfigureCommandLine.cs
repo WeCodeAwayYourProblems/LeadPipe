@@ -21,8 +21,9 @@ internal static class ConfigureCommandLine
         // Special items
         bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
         bool useYellerGetterTestClient = settings.HttpClients?.Yeller?.Getter?.UseTestClients ?? useTestClientsGlobal;
+        bool useYellerTestId = configuration.GetValue("YellerTestId", false);
         YellerBeller beller = configuration.GetSection("YellerBellerId").Get<YellerBeller>()!;
-        string[]? yellerBellerId = useYellerGetterTestClient
+        string[]? yellerBellerId = useYellerTestId
             ? beller.Test
             : beller.Prod;
         if (yellerBellerId is null || yellerBellerId.Length == 0)

@@ -3,6 +3,7 @@
 internal class TableNames
 {
     public const string SyncStateName = nameof(PlumbingContext.SyncState);
+    public const string SyncStampName = nameof(PlumbingContext.SyncStamp);
     public const string CaliperEntitiesName = nameof(PlumbingContext.CaliperEntities);
     public const string CornEntitiesName = nameof(PlumbingContext.CornEntities);
     public const string PlumbingEntitiesName = nameof(PlumbingContext.PlumbingEntities);

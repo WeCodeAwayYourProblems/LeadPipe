@@ -34,7 +34,7 @@ internal class Program
         IConfiguration config = service.GetRequiredService<IConfiguration>();
         var settings = service.GetRequiredService<Settings>();
 
-        EnsureInMemoryDbIsMade(service, settings);
+        EnsureInMemoryDbIsCreated(service, settings);
 
         Execute(args, service);
     }
@@ -91,11 +91,9 @@ internal class Program
         }
     }
 
-    private static void EnsureInMemoryDbIsMade(IServiceProvider service, Settings settings)
+    private static void EnsureInMemoryDbIsCreated(IServiceProvider service, Settings settings)
     {
         // Make sure db is created if we're using inmemory
-        bool globalInMemoryDatabase = (bool)(settings.Ef?.UseInMemoryDatabase)!;
-        bool globalInMemoryConnection = (bool)(settings.Ef?.UseInMemoryConnection)!;
         bool sqliteInMemory = (bool)(settings.Ef?.Sqlite?.UseInMemoryConnection)!;
         bool mysqlInMemory = (bool)(settings.Ef?.MySql?.UseInMemoryDatabase)!;
 

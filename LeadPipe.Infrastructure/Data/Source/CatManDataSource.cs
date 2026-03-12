@@ -20,7 +20,7 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
         DateTime twentyTwelve = new(2025, 1, 1);
         Result<List<CatManDto>> get = await _cat.GetAllAsync(twentyTwelve, Today);
 
-        var syncDate = GetDate(get);
+        DateTimeOffset syncDate = GetDate(get);
         await SyncStateAsync(_state, syncDate, Key);
         return get;
     }

@@ -106,15 +106,15 @@ public sealed class UpdateManager(
     private async Task<Result> AssociateIfDue()
     {
         var key = SyncKey.Associate;
-        bool shouldRun = await _syncGate.ShouldRunAsync(key);
+        bool shouldRun = await _syncGate.ShouldRunAsync(null, key);
         if (!shouldRun)
             return Result.Success();
 
         Result result = await _associate.AssociateAsync();
         if (result.IsSuccess)
-            await _syncGate.MarkSuccessAsync(key);
+            await _syncGate.MarkSuccessAsync(null, key);
         else
-            await _syncGate.MarkFailureAsync(key, result.Error);
+            await _syncGate.MarkFailureAsync(null, key);
 
         return result;
     }
@@ -130,23 +130,23 @@ public sealed class UpdateManager(
         if (result.IsSuccess)
             await _syncGate.MarkSuccessAsync(source, key);
         else
-            await _syncGate.MarkFailureAsync(source, key, result.Error);
+            await _syncGate.MarkFailureAsync(source, key);
 
         return result;
     }
 
     private async Task<Result> RunIfDue<T>(SyncKey key, bool refresh, bool withDetails, IUpdateService<T> service)
     {
-        bool shouldRun = await _syncGate.ShouldRunAsync(key);
+        bool shouldRun = await _syncGate.ShouldRunAsync(null, key);
         if (!shouldRun)
             return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, withDetails, service);
 
         if (result.IsSuccess)
-            await _syncGate.MarkSuccessAsync(key);
+            await _syncGate.MarkSuccessAsync(null, key);
         else
-            await _syncGate.MarkFailureAsync(key, result.Error);
+            await _syncGate.MarkFailureAsync(null, key);
 
         return result;
     }

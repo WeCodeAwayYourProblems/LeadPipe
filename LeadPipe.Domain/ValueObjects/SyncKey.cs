@@ -1,4 +1,5 @@
 ﻿namespace LeadPipe.Domain.ValueObjects;
+
 public sealed record SyncKey
 {
     public string Value { get; }
@@ -11,19 +12,33 @@ public sealed record SyncKey
     public static readonly SyncKey Custard = new(nameof(Custard).ToLowerInvariant());
     public static readonly SyncKey Plumbing = new(nameof(Plumbing).ToLowerInvariant());
     public static readonly SyncKey Sandwich = new(nameof(Sandwich).ToLowerInvariant());
-    
+
     public static readonly SyncKey Catman = new("catman");
     public static readonly SyncKey Associate = new("association");
 
     // All allowed predefined keys for TryParse and iteration
-    private static readonly List<SyncKey> AllKeys = 
+    private static readonly List<SyncKey> AllKeys =
     [
-        Caliper, 
-        CornFormula, 
-        Custard, 
-        Plumbing, 
+        Caliper,
+        CornFormula,
+        Custard,
+        Plumbing,
         Sandwich
     ];
+
+    // Dictionary for From lookup
+    private static readonly Dictionary<string, SyncKey> KeyDictionary =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            [Caliper.Value] = Caliper,
+            [CornFormula.Value] = CornFormula,
+            [Custard.Value] = Custard,
+            [Plumbing.Value] = Plumbing,
+            [Sandwich.Value] = Sandwich,
+            
+            [Catman.Value] = Catman,
+            [Associate.Value] = Associate
+        };
 
     /// <summary>
     /// Tries to parse a string into a known SyncKey.
@@ -41,7 +56,14 @@ public sealed record SyncKey
         key = null!; // force null-forgiving operator, safe because TryParse returns false
         return false;
     }
-    
+
     public override string ToString() => Value;
 
+    public static SyncKey From(string value)
+    {
+        return KeyDictionary.TryGetValue(value, out var key)
+            ? key 
+            : throw new ArgumentException($"Invalid {nameof(SyncKey)} '{value}'");
+    }
 }
+

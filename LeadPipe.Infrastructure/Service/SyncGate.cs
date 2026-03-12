@@ -9,11 +9,11 @@ using System.Collections.Immutable;
 namespace LeadPipe.Infrastructure.Service;
 
 public sealed class SyncGate(
-    ISyncStateRepository repo,
+    ISyncStampRepository repo,
     ISyncSettings settings
 ) : ISyncGate
 {
-    private readonly ISyncStateRepository _repo = repo;
+    private readonly ISyncStampRepository _repo = repo;
     private readonly TimeSpan _noSourceInterval = TimeSpan.FromHours(settings.DefaultInterval);
     private readonly TimeSpan _associationInterval = TimeSpan.FromHours(settings.DefaultAssociationInterval);
     private readonly TimeSpan _defaultSourceInterval = TimeSpan.FromHours(settings.DefaultSourceInterval);
@@ -40,35 +40,36 @@ public sealed class SyncGate(
 
     public async Task<bool> ShouldRunAsync(Source source, SyncKey key)
     {
-        Result<SyncStateEntity> found = await _repo.GetByKeyAsync(source, key);
+        Result<SyncStampEntity> found = await _repo.GetByKeyAsync(source, key);
 
         // First run: allow
         if (found.IsFailure)
             return true;
 
-        SyncStateEntity state = found.Value;
+        SyncStampEntity state = found.Value;
 
-        DateTime now = DateTime.UtcNow;
+        DateTimeOffset now = DateTime.UtcNow;
 
         TimeSpan interval = _interval.TryGetValue(source, out TimeSpan inter)
             ? inter
             : _defaultSourceInterval;
-        bool run = now - state.LastSyncUtc >= interval;
+        DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeSeconds(state.UnixSyncUtc);
+        bool run = now - syncDate >= interval;
 
         return run;
     }
 
     public async Task<bool> ShouldRunAsync(SyncKey key)
     {
-        Result<SyncStateEntity> found = await _repo.GetByKeyAsync(null, key);
+        Result<SyncStampEntity> found = await _repo.GetByKeyAsync(null, key);
 
         if (found.IsFailure) return true;
 
-        SyncStateEntity state = found.Value;
+        SyncStampEntity state = found.Value;
 
-        DateTime now = DateTime.UtcNow;
+        DateTimeOffset now = DateTime.UtcNow;
 
-        TimeSpan syncstatetiming = now - state.LastSyncUtc;
+        TimeSpan syncstatetiming = now - DateTimeOffset.FromUnixTimeSeconds(state.UnixSyncUtc);
         TimeSpan interval = key.Value == SyncKey.Associate.Value
             ? _associationInterval
             : _noSourceInterval;
@@ -78,30 +79,30 @@ public sealed class SyncGate(
         return run;
     }
 
-    public async Task MarkSuccessAsync(Source source, SyncKey entity) => await UpsertAsync(source, entity);
+    public async Task MarkSuccessAsync(Source source, SyncKey entity) => await UpsertAsync(source, entity, true);
 
-    public async Task MarkSuccessAsync(SyncKey entity) => await UpsertAsync(null, entity);
+    public async Task MarkSuccessAsync(SyncKey entity) => await UpsertAsync(null, entity, true);
 
     // don't currently persist error state.
-    public async Task MarkFailureAsync(Source source, SyncKey entity, string error) => await UpsertAsync(source, entity);
+    public async Task MarkFailureAsync(Source source, SyncKey entity, string error) => await UpsertAsync(source, entity, false);
 
-    public async Task MarkFailureAsync(SyncKey entity, string error) => await UpsertAsync(null, entity);
+    public async Task MarkFailureAsync(SyncKey entity, string error) => await UpsertAsync(null, entity, false);
 
-    private async Task UpsertAsync(Source? source, SyncKey entity)
+    private async Task UpsertAsync(Source? source, SyncKey entity, bool successState)
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
-        SyncStateEntity state = new()
+        SyncStampEntity state = new()
         {
-            BusinessId = BusinessId.BuildBusinessId(source, entity),
-            LastSyncUtc = now.UtcDateTime,
-            UnixLastSyncUtc = now.ToUnixTimeSeconds(),
-            LastProcessedId = null
+            Id = default,
+            Key = entity,
+            Source = source,
+            UnixSyncUtc = now.ToUnixTimeSeconds(),
+            SuccessState = successState
         };
 
-        await _repo.UpsertRangeAsync([state]);
+        await _repo.UpsertAsync(state);
     }
-
 
 }
 

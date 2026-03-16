@@ -2,8 +2,9 @@
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 public abstract class FileDataSource<TDto, TSource>(FileInfo file, ICsvRwService csv, IJsonRwService json, ILogger<TSource> logging) : IDataSourceAsync<TDto>
 {
@@ -29,10 +30,7 @@ public abstract class FileDataSource<TDto, TSource>(FileInfo file, ICsvRwService
         return flattened;
     }
 
-    public async Task<Result<List<TDto>>> RefreshAsync(bool _ = false)
-    {
-        return await LoadAsync();
-    }
+    public async Task<Result<List<TDto>>> RefreshAsync(bool _ = false) => await LoadAsync();
 
     protected abstract Result<List<TDto>> FlattenInvalid(Result<List<TDto>> fileContents);
 

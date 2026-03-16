@@ -3,7 +3,7 @@ using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 public sealed class SandMySqlDataSource(
     ISandMySqlRepository repo

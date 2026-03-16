@@ -3,7 +3,7 @@ using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 public class YellerDataSource(IYellerService yeller) : IDataSourceAsync<YellerDto>
 {

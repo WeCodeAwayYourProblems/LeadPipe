@@ -6,7 +6,7 @@ using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 internal class PanFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<PanFileDataSource> logging)
     : FileDataSource<PanDto, PanFileDataSource>(new FileInfo(settings.PanLoc!.Source!), csv, json, logging), IDataSourceAsync<PanDto>

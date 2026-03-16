@@ -5,7 +5,7 @@ using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 public sealed class CustardMySqlDataSource(
     ICustardMySqlRepository repo,
@@ -42,4 +42,33 @@ public sealed class CustardMySqlDataSource(
         found.IsSuccess && found.Value.Count > 0
             ? new(found.Value.Max(v => v.dateAdded) ?? DateTime.UtcNow.AddDays(-30), TimeSpan.Zero)
             : DateTimeOffset.UtcNow.AddDays(-30);
+}
+
+public sealed class CustardMySqlDataSourceBased(
+    ICustardMySqlRepository repo,
+    ISyncStateRepository sync,
+    IClock clock
+) : SyncedDataSourceBase<CustardMySqlEntity>(sync, clock)
+{
+    private readonly ICustardMySqlRepository _repo = repo;
+    protected override SyncKey Key => SyncKey.Custard;
+
+    protected override DateTimeOffset GetLatest(Result<List<CustardMySqlEntity>> entities)
+        => entities.IsSuccess && entities.Value.Count > 0
+            ? new(entities.Value.Max(v => v.dateAdded) ?? _clock.UtcNow.UtcDateTime.AddDays(-30), TimeSpan.Zero)
+            : _clock.UtcNow.AddDays(-30);
+
+    protected override async Task<Result<List<CustardMySqlEntity>>> Load(bool withDetails)
+    {
+        DateTime twentyTwelve = new(2012, 1, 1, 0, 0, 0);
+        Result<List<CustardMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= twentyTwelve, withDetails);
+        return found;
+    }
+
+    protected override async Task<Result<List<CustardMySqlEntity>>> Refresh(DateTimeOffset latest, bool withDetails)
+    {
+        DateTime syncDate = latest.UtcDateTime.AddDays(-7);
+        Result<List<CustardMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= syncDate, withDetails);
+        return found;
+    }
 }

@@ -5,7 +5,7 @@ using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 public class LabDataSource(ILabService lab, IVoToDto<Plumbing, LabDto> voToDto) : IDataSourceAsync<LabDto>
 {

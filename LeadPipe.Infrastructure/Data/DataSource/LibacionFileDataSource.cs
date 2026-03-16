@@ -6,7 +6,7 @@ using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 internal class LibacionFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<LibacionFileDataSource> logging)
     : FileDataSource<LibacionDto, LibacionFileDataSource>(new FileInfo(settings.LibacionLoc!.Source!), csv, json, logging), IDataSourceAsync<LibacionDto>

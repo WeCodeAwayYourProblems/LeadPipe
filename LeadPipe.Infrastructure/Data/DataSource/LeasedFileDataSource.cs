@@ -6,7 +6,7 @@ using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 internal class LeasedFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<LeasedFileDataSource> logging)
     : FileDataSource<LeasedDto, LeasedFileDataSource>(new FileInfo(settings.LeasedLoc!.Source!), csv, json, logging), IDataSourceAsync<LeasedDto>

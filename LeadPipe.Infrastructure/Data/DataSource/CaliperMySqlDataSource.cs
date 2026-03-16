@@ -5,7 +5,7 @@ using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
-namespace LeadPipe.Infrastructure.Data.Source;
+namespace LeadPipe.Infrastructure.Data.DataSource;
 
 public sealed class CaliperMySqlDataSource(
     ICaliperMySqlRepository repo,
@@ -57,4 +57,34 @@ public sealed class CaliperMySqlDataSource(
             ? found.Value.Select(v => new DateTimeOffset(v.called_at_utc, TimeSpan.Zero)).Max()
             : defaultLatest;
 
+}
+
+public sealed class SyncedCaliperMySqlDataSource(
+    ICaliperMySqlRepository repo,
+    ISyncStateRepository sync,
+    IClock clock
+    ) : SyncedDataSourceBase<CaliperMySqlEntity>(sync, clock)
+{
+    private readonly ICaliperMySqlRepository _repo = repo;
+
+    protected override SyncKey Key => SyncKey.Caliper;
+
+    protected override DateTimeOffset GetLatest(Result<List<CaliperMySqlEntity>> entities)
+        => entities.IsSuccess && entities.Value.Count > 0
+            ? entities.Value.Select(v => new DateTimeOffset(v.called_at_utc, TimeSpan.Zero)).Max()
+            : _clock.UtcNow.AddDays(-30);
+
+    protected override async Task<Result<List<CaliperMySqlEntity>>> Load(bool withDetails)
+    {
+        DateTime dateFilter = new(_clock.UtcNow.Year - 1, 1, 1);
+        Result<List<CaliperMySqlEntity>> loaded = await _repo.FindAsync(c => c.called_at_utc >= dateFilter, withDetails);
+        return loaded;
+    }
+
+    protected override async Task<Result<List<CaliperMySqlEntity>>> Refresh(DateTimeOffset latest, bool withDetails)
+    {
+        DateTime mostRecentDate = latest.UtcDateTime.AddDays(-7);
+        var found = await _repo.FindAsync(c => c.called_at_utc <= mostRecentDate, withDetails);
+        return found;
+    }
 }

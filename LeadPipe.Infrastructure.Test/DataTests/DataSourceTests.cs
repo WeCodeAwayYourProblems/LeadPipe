@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Data.Source;
+using LeadPipe.Infrastructure.Data.DataSource;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;

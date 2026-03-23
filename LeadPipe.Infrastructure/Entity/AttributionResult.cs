@@ -1,4 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Core;
 
 namespace LeadPipe.Infrastructure.Entity;
 
@@ -28,6 +29,11 @@ public sealed class AttributionResult
     /// Important for reporting, auditing, tie-break logic.
     /// </summary>
     public required AttributionSource Source { get; init; }
+
+    /// <summary>
+    /// The entity itself
+    /// </summary>
+    public required IPhoneDateIdEntity Entity { get; init; }
 
     /// <summary>
     /// The Custard that is being attributed.

@@ -132,7 +132,7 @@ internal sealed class TransformYellerReport(
         //*********************************************************************************
 
         // Gather all attributable associations together
-        List<(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, AttributionSource Source, IEntity Entity)> allTouches =
+        List<(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, AttributionSource Source, IPhoneDateIdEntity Entity)> allTouches =
         [
             .. plumbAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Plumbing, a.Entity)),
             .. cornAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Corn, a.Entity)),
@@ -185,11 +185,15 @@ internal sealed class TransformYellerReport(
                     MatchingPhone = v.MatchingPhone,
                     FirstTouchUnixDate = v.UnixMatchDate,
                     Source = v.Source,
+                    Entity = v.Entity,
                     Custard = v.Custard,
                     Sand = v.Custard.SandEntities.Single(),
                 }
             ))];
 
+        return attributions.Select(_attrToR.Translate).ToList();
+
+        /*
         //*********************************************************************************
         // Non attributed reporting
         //*********************************************************************************
@@ -264,6 +268,7 @@ internal sealed class TransformYellerReport(
             )];
 
         return reports;
+        */
 
     }
 
@@ -308,7 +313,7 @@ internal sealed class TransformYellerReport(
     }
 
     private record CustardAssociation<T>(T Entity, CustardEntity Custard, long EntityPhone, long EntityDate);
-    private record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate, AttributionSource Source, IEntity Entity);
+    private record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate, AttributionSource Source, IPhoneDateIdEntity Entity);
 }
 
 #region Logic map

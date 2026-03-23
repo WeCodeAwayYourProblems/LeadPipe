@@ -27,17 +27,12 @@ public sealed class TransformPlumbingReport(
         Result<List<SandPlumbingLink>> linkResult = await _repo.FindWithDetailsAsync(l => plumbingIds.Contains(l.PlumbingId));
 
         // Check Success
-        List<SandPlumbingLink>? links = linkResult.IsSuccess
-            ? linkResult.Value
-            : null;
-        if (links is null)
+        if (linkResult.IsFailure)
             return Result.Failure<List<ReportPlumbing>>(linkResult.Error);
+        List<SandPlumbingLink> links = linkResult.Value;
 
-        // Ensure the list is not null
-        List<SandPlumbingLink> subsLinks = links!;
-
-        // Turn subsplumbinglinks into a hashset of plumbingids for fast lookup
-        HashSet<long> ids = [.. subsLinks.Select(e => e.PlumbingId)];
+        // Turn sandplumbinglinks into a hashset of plumbingids for fast lookup
+        HashSet<long> ids = [.. links.Select(e => e.PlumbingId)];
 
         // Turn empty PlumbingEntities into sandplumbinglinks
         List<SandPlumbingLink> unfoundPlumbing =
@@ -55,7 +50,7 @@ public sealed class TransformPlumbingReport(
 
         List<ReportPlumbing> result =
             [
-                .. subsLinks.Select(_eToR.Translate),
+                .. links.Select(_eToR.Translate),
                 .. unfoundPlumbing.Select(_eToR.Translate)
             ];
 

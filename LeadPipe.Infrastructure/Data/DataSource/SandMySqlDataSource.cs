@@ -17,8 +17,5 @@ public sealed class SandMySqlDataSource(
         return found;
     }
 
-    public async Task<Result<List<SandMySqlEntity>>> RefreshAsync(bool withDetails)
-    {
-        return await LoadAsync(withDetails);
-    }
+    public async Task<Result<List<SandMySqlEntity>>> RefreshAsync(bool withDetails) => await LoadAsync(withDetails);
 }

@@ -14,6 +14,7 @@ public sealed class CaliperToCaliperMySqlEntityTests
             Duration: TimeSpan.FromSeconds(125),
             Note: "mysql note",
             Source: "src",
+            Label: "label",
             Location: "loc",
             Billable: billable
         );

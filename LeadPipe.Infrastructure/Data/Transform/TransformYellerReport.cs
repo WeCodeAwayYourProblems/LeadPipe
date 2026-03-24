@@ -56,12 +56,12 @@ internal sealed class TransformYellerReport(
         HashSet<long> cornLookup = [.. corns.Value.Select(x => x.Id)];
 
         // Load custards with details
-        Result<List<CustardEntity>> custards = await _custardRepo.FindWithDetailsAsync(c =>
+        Result<List<CustardEntity>> custardsResult = await _custardRepo.FindWithDetailsAsync(c =>
                 c.CustardPlumbingLinks.Any(link => plumbLookup.Contains(link.PlumbingId)) ||
                 c.CustardCaliperLinks.Any(link => caliperLookup.Contains(link.CaliperId)) ||
                 c.CustardCornLinks.Any(link => cornLookup.Contains(link.CornId))
             );
-        if (custards.IsFailure) return Result.Failure<List<ReportYeller>>(custards.Error);
+        if (custardsResult.IsFailure) return Result.Failure<List<ReportYeller>>(custardsResult.Error);
 
         //*********************************************************************************
         // Flatten sands: keep only first chronological sand per custard
@@ -69,8 +69,8 @@ internal sealed class TransformYellerReport(
 
         // Any entity matching the custard is non-attributable when ANY sand or custard date is before the entity date
         // Only the first sand is relevant. It also has to be completed, but that is determined later
-        custards = Result.Success(
-            custards.Value
+        var custards = Result.Success(
+            custardsResult.Value
                 .Where(c => c.SandEntities != null && c.SandEntities.Count != 0) // filter out null/empty sands
                 .Select(c =>
                 {
@@ -191,9 +191,7 @@ internal sealed class TransformYellerReport(
                 }
             ))];
 
-        return attributions.Select(_attrToR.Translate).ToList();
-
-        /*
+        ///*
         //*********************************************************************************
         // Non attributed reporting
         //*********************************************************************************
@@ -268,7 +266,6 @@ internal sealed class TransformYellerReport(
             )];
 
         return reports;
-        */
 
     }
 

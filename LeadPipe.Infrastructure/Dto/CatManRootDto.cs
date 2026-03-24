@@ -106,6 +106,13 @@ public class CatManDto
     public string? last_touch { get; set; }
     public Geo? geo { get; set; }
     public DateTime timestamp { get; set; }
+
+    /// <summary>
+    /// Serializes <see cref="CatManDto"/> to Json
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString() => JsonSerializer.Serialize(this, _options);
+    private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
 }
 public class Duration_Period
 {
@@ -181,6 +188,11 @@ public class Form
     public int form_id { get; set; }
     public string? form_name { get; set; }
     public Custom[] custom { get; set; }
+    
+    /// <summary>
+    /// Serializes <see cref="Form"/> to json
+    /// </summary>
+    /// <returns></returns>
     public override string ToString() => JsonSerializer.Serialize(this, _options);
     private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
 }

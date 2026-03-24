@@ -84,7 +84,7 @@ public sealed class SyncedCaliperMySqlDataSource(
     protected override async Task<Result<List<CaliperMySqlEntity>>> Refresh(DateTimeOffset latest, bool withDetails)
     {
         DateTime mostRecentDate = latest.UtcDateTime.AddDays(-7);
-        var found = await _repo.FindAsync(c => c.called_at_utc <= mostRecentDate, withDetails);
+        var found = await _repo.FindAsync(c => c.called_at_utc >= mostRecentDate, withDetails);
         return found;
     }
 }

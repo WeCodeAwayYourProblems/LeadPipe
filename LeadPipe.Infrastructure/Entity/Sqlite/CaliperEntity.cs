@@ -17,6 +17,7 @@ public class CaliperEntity : IEntity, IPhoneDateIdEntity
         Note = c.Note;
         Source = c.Source;
         Location = c.Location;
+        Label = c.Label;
         Duration = c.Duration;
         Billable = c.Billable;
 
@@ -33,6 +34,7 @@ public class CaliperEntity : IEntity, IPhoneDateIdEntity
     public required string Note { get; set; }
     public required string Source { get; set; }
     public required string Location { get; set; }
+    public required string Label { get; set; }
     public long Duration { get; set; }
     public bool Billable { get; set; }
 

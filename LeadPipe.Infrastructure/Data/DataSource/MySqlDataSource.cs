@@ -3,7 +3,6 @@ using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
-using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Data.DataSource;
 

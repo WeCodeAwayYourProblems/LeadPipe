@@ -47,7 +47,7 @@ public abstract class SyncedDataSourceBase<TEntity>(
     {
         SyncStateEntity state = new()
         {
-            BusinessId = BusinessId.From(key.Value),
+            BusinessId = BusinessId.BuildBusinessId(null, key),
             LastSyncUtc = dateUpdated.UtcDateTime,
             UnixLastSyncUtc = dateUpdated.ToUnixTimeSeconds()
         };

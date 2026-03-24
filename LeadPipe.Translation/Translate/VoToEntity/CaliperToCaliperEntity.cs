@@ -16,6 +16,7 @@ internal class CaliperToCaliperEntity : IVoToEntity<Caliper, CaliperEntity>
             UnixDate = c.Date.ToUnixTimeSeconds(),
             Note = c.Note,
             Source = c.Source,
+            Label = c.Label,
             Location = c.Location,
             Duration = (int)c.Duration.TotalSeconds,
             Billable = c.Billable

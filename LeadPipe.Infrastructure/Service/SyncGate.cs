@@ -67,13 +67,14 @@ public sealed class SyncGate(
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
-        TimeSpan interval = _interval.TryGetValue(source, out TimeSpan inter)
+        TimeSpan resetInterval = _interval.TryGetValue(source, out TimeSpan inter)
             ? inter
             : _defaultSourceInterval;
 
         DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeSeconds(found.UnixSyncUtc);
+        TimeSpan timeSinceSync = now - syncDate;
 
-        bool run = now - syncDate >= interval && found.SuccessState is true;
+        bool run = timeSinceSync >= resetInterval || found.SuccessState is false;
 
         return run;
     }

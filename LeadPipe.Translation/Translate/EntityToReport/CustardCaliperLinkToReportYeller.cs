@@ -6,10 +6,10 @@ using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class CustardCaliperLinkToReportYeller(IYellerSettings settings) : IEntityToReport<CustardCaliperLink, ReportYeller>
+internal sealed class CustardCaliperLinkToReportYellerOld(IYellerSettings settings) : IEntityToReport<CustardCaliperLink, ReportYeller_Old>
 {
     private readonly string _action = settings.YellerActionSource!;
-    public ReportYeller Translate(CustardCaliperLink data)
+    public ReportYeller_Old Translate(CustardCaliperLink data)
     {
         if (data.Custard is null)
             throw new ArgumentNullException($"{nameof(data)} has null navigation properties that cannot be null", new Exception($"Navigation properties in {nameof(CustardCaliperLink)} cannot be null"));
@@ -30,7 +30,7 @@ internal sealed class CustardCaliperLinkToReportYeller(IYellerSettings settings)
             currency = YellerReportHelper.Currency,
             value = 0
         };
-        ReportYeller result = new()
+        ReportYeller_Old result = new()
         {
             event_id = eventid,
             event_name = eventname,

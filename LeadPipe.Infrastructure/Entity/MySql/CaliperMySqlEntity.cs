@@ -10,6 +10,7 @@ public class CaliperMySqlEntity
     public string? source { get; set; }
     public string? location { get; set; }
     public string? note { get; set; }
+    public string? numbers_name { get; set; }
     public DateTime called_at_utc { get; set; }
 
     // Navigation properties

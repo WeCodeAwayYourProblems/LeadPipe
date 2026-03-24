@@ -21,6 +21,7 @@ public interface IInfrastructureSettings :
     LocationPair? LatherLoc { get; set; }
 
     string[]? CornSources { get; set; }
+    string? CornFilter { get; set; }
 }
 public class LocationPair
 {

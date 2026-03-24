@@ -64,7 +64,9 @@ internal class YellerClientService : IYellerService
 
             // Retrieve sync state id
             // If the syncStateId is empty, then we will retrieve all data
-            Result<SyncStateEntity> syncState = await _sync.GetByIdAsync(BusinessId.From(yellerId));
+            Result<SyncStateEntity> syncState = 
+                Result.Failure<SyncStateEntity>("Still Confirming how codes work on this api");
+                //await _sync.GetByIdAsync(BusinessId.From(yellerId));
             string syncStateId = syncState.IsSuccess && refresh
                 ? syncState.Value.BusinessId.ToString()
                 : string.Empty;

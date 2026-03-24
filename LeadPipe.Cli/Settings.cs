@@ -46,6 +46,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? SandTableName { get; set; }
     public string? CustardTableName { get; set; }
     public string[]? CornSources { get; set; }
+    public string? CornFilter { get; set; }
 
     // Yeller 
     public string? YellerGetterName { get; set; }

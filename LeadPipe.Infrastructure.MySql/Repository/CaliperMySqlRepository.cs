@@ -2,14 +2,17 @@
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 using LeadPipe.Infrastructure.MySql.Context;
+using LeadPipe.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Runtime;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
 
-public class CaliperMySqlRepository(MySqlSchema2Context context) : ICaliperMySqlRepository
+public class CaliperMySqlRepository(IInfrastructureSettings settings, MySqlSchema2Context context) : ICaliperMySqlRepository
 {
     private readonly DbSet<CaliperMySqlEntity> _set = context.Set<CaliperMySqlEntity>();
+    private readonly string _cornFilter = settings.CornFilter!;
 
     public async Task<Result<List<CaliperMySqlEntity>>> FindAsync(Expression<Func<CaliperMySqlEntity, bool>> predicate, bool includeDetails = true)
     {
@@ -20,6 +23,7 @@ public class CaliperMySqlRepository(MySqlSchema2Context context) : ICaliperMySql
             if (includeDetails)
             {
                 query = query
+                    .Where(c => c.numbers_name != _cornFilter) // This filter is highly necessary
                     .Include(c => c.summaries)
                     .Include(c => c.transcriptions);
             }

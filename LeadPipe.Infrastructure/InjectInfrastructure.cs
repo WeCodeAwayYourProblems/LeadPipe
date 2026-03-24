@@ -98,7 +98,7 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
         services.AddKeyedScoped<IUpdateService<Plumbing>, LatherUpdateService>(Source.Lather);
 
-        services.AddKeyedScoped<IUpdateService<Caliper>, CatManUpdateService>(Source.Yeller);
+        services.AddKeyedScoped<IUpdateService<CornFormula>, CatManUpdateService>(Source.Yeller);
 
         // Nonkeyed update services
         services.AddScoped<IUpdateService<Caliper>, CalipersUpdateService>();

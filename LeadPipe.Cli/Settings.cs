@@ -67,6 +67,9 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? YellerCornSource { get; set; }
     public string? YellerReportEndpoint { get; set; }
     public string? YellerActionSource { get; set; }
+    public string? YellerPlumbingName { get; set; }
+    public string? YellerCaliperName { get; set; }
+    public string? YellerCornName { get; set; }
 
     // SyncState
     public double DefaultInterval { get; set; }

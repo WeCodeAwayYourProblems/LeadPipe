@@ -48,6 +48,7 @@ public class TranslatorBackAndForthRoundTripTests
             Duration = 123,
             Note = "Note",
             Source = "Source",
+            Label = "Label",
             Location = "Location",
             Billable = true
         };

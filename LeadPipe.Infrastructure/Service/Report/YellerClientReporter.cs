@@ -156,7 +156,7 @@ public sealed class YellerJsonReporter(
 
     public async Task<Result> ReportData(List<ReportYeller> d)
     {
-        FileInfo loc = new(_settings.YellerClientReporterLoc!);
+        FileInfo loc = new(_settings.YellerJsonReporterLoc!);
         var result = await _json.WriteToFileAsync(loc, d);
         return result;
     }

@@ -5,7 +5,6 @@ using LeadPipe.Infrastructure.MySql.Context;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Runtime;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
 
@@ -23,12 +22,15 @@ public class CaliperMySqlRepository(IInfrastructureSettings settings, MySqlSchem
             if (includeDetails)
             {
                 query = query
-                    .Where(c => c.numbers_name != _cornFilter) // This filter is highly necessary
                     .Include(c => c.summaries)
                     .Include(c => c.transcriptions);
             }
 
-            List<CaliperMySqlEntity> list = await query.Where(predicate).ToListAsync();
+            List<CaliperMySqlEntity> list = await query
+                .Where(c => c.numbers_name != _cornFilter) // This filter is highly necessary. We filter out existing data that does not belong
+                .Where(predicate)
+                .ToListAsync();
+
             return Result.Success(list);
         }
         catch (Exception ex) { return Result.Failure<List<CaliperMySqlEntity>>(ex.ToString()); }

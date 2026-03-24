@@ -17,7 +17,8 @@ public interface IYellerSettings
     string? YellerPrelimId { get; set; }
     string? YellerCaliperSource1 { get; set; }
     string? YellerCaliperSource2 { get; set; }
-    string? YellerClientReporterLoc { get; set; }
+    string? YellerJsonReporterLoc { get; set; }
+    string? YellerCsvReporterLoc { get; set; }
     string[]? YellerBellerId { get; set; }
     string? YellerSalt { get; set; }
     string? YellerCornSource { get; set; }

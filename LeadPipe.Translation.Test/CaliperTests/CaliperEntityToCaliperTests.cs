@@ -20,6 +20,7 @@ public sealed class CaliperEntityToCaliperTests
             Duration = durationSeconds,
             Note = "Test note",
             Source = "Test source",
+            Label = "Test Label",
             Location = "Test location",
             Billable = billable
         };

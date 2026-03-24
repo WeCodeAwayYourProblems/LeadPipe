@@ -30,6 +30,7 @@ internal sealed class CatManDtoToCaliper : IDtoToVo<CatManDto, Caliper>
             Duration: duration,
             Note: note,
             Source: source,
+            Label: data.tracking_label ?? "Unknown",
             Billable: billable,
             Location: location
         );

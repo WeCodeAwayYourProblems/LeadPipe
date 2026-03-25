@@ -103,4 +103,5 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public LocationPair? LeasedLoc { get; set; }
     public LocationPair? PanLoc { get; set; }
     public LocationPair? LatherLoc { get; set; }
+    public LocationPair? YellerLoc { get; set; }
 }

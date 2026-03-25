@@ -14,27 +14,33 @@ public sealed class SandCornLinkRepository(
 {
     protected override IQueryable<SandCornLink> WithIncludes(IQueryable<SandCornLink> q)
     {
-        return q.Include(x => x.CornEntity)
-                .Include(x => x.SandEntity);
+        return q
+            .Include(x => x.CornEntity)
+            .Include(x => x.SandEntity);
     }
 
-    protected override UpsertFields LinkDetails { get; } = new(
+    protected override UpsertFields LinkDetails { get; } =
+    new(
         TableName: TableNames.SandCornLinksName,
         TempTable: $"temp_{TableNames.SandCornLinksName}",
         Id1: nameof(SandCornLink.SandId),
         Id2: nameof(SandCornLink.CornId),
         PhoneCol: nameof(SandCornLink.MatchingPhone),
         DateCol: nameof(SandCornLink.UnixMatchDate),
-        EntityName: nameof(SandCornLink)
+        EntityName: nameof(SandCornLink),
+        ColumnCount: 4
         );
 
-    protected override ParentFields Parent => new(
+    protected override ParentFields Parent { get; } =
+    new(
         Parent1Name: TableNames.SandEntitiesName,
         Parent1Id: nameof(SandEntity.Id),
         Parent2Name: TableNames.CornEntitiesName,
         Parent2Id: nameof(CornEntity.Id)
     );
 
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, LinkDetails.ColumnCount)];
     protected override async Task AddLinks(List<SandCornLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)
@@ -47,15 +53,27 @@ public sealed class SandCornLinkRepository(
             {
                 var link = batch[j];
 
-                int o = j * 4;
-                rows.Add($"({{{o}}}, {{{o + 1}}}, {{{o + 2}}}, {{{o + 3}}})");
+                int o = j * LinkDetails.ColumnCount;
+                var placeholders = ColumnIndexes.Select(ci => $"{{{o + ci}}}");
+                rows.Add($"({string.Join(", ", placeholders)})");
+
+                // Order here must match order below
                 values.Add(link.SandId);
                 values.Add(link.CornId);
                 values.Add(link.MatchingPhone);
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
+            // Order here must match order above
+            string joined = $"""
+                INSERT INTO {LinkDetails.TempTable} (
+                    {nameof(SandCornLink.SandId)},
+                    {nameof(SandCornLink.CornId)},
+                    {nameof(SandCornLink.MatchingPhone)},
+                    {nameof(SandCornLink.UnixMatchDate)}
+                )
+                VALUES {string.Join(",", rows)}
+                """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

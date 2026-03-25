@@ -67,12 +67,12 @@ public sealed class SandCornLinkRepository(
             // Order here must match order above
             string joined = $"""
                 INSERT INTO {LinkDetails.TempTable} (
-                    {nameof(SandCornLink.SandId)},
-                    {nameof(SandCornLink.CornId)},
-                    {nameof(SandCornLink.MatchingPhone)},
-                    {nameof(SandCornLink.UnixMatchDate)}
+                    {TempId1},
+                    {TempId2},
+                    {TempPhone},
+                    {TempDate}
                 )
-                VALUES {string.Join(",", rows)}
+                VALUES {string.Join(',', rows)}
                 """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }

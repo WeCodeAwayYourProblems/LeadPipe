@@ -68,12 +68,12 @@ public sealed class CustardCaliperLinkRepository
             // Order here must match order above
             string joined = $"""
                 INSERT INTO {LinkDetails.TempTable} (
-                    {nameof(CustardCaliperLink.CustardId)},
-                    {nameof(CustardCaliperLink.CaliperId)},
-                    {nameof(CustardCaliperLink.MatchingPhone)},
-                    {nameof(CustardCaliperLink.UnixMatchDate)}
+                    {TempId1},
+                    {TempId2},
+                    {TempPhone},
+                    {TempDate}
                 )
-                VALUES {string.Join(",", rows)}
+                VALUES {string.Join(',', rows)}
                 """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }

@@ -19,10 +19,23 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
     protected abstract UpsertFields LinkDetails { get; }
     protected abstract ParentFields Parent { get; }
     protected abstract int[] ColumnIndexes { get; }
-    private readonly static string TempId1 = "id1";
-    private readonly static string TempId2 = "id2";
-    private readonly static string TempPhone = "phone";
-    private readonly static string TempDate = "matchDate";
+    protected readonly static string TempId1 = "id1";
+    protected readonly static string TempId2 = "id2";
+    protected readonly static string TempPhone = "phone";
+    protected readonly static string TempDate = "matchDate";
+    protected string InsertIntoTempTable(List<string> rows)
+    {
+        var sql = $"""
+        INSERT INTO {LinkDetails.TempTable} (
+            {TempId1},
+            {TempId2},
+            {TempPhone},
+            {TempDate}
+        )
+        VALUES {string.Join(',', rows)}
+        """;
+        return sql;
+    }
     protected string DropTempTable => $"DROP TABLE IF EXISTS {LinkDetails.TempTable};";
     /// <summary>
     /// If any of the child repositories changes its the number of columns, the sql strings must be overridden

@@ -68,12 +68,12 @@ public sealed class CornPlumbingLinkRepository
             // Order here must match order above
             string joined = $"""
                 INSERT INTO {LinkDetails.TempTable} (
-                    {nameof(CornPlumbingLink.CornId)},
-                    {nameof(CornPlumbingLink.PlumbingId)},
-                    {nameof(CornPlumbingLink.MatchingPhone)},
-                    {nameof(CornPlumbingLink.UnixMatchDate)}
-                ) 
-                VALUES {string.Join(",", rows)}
+                    {TempId1},
+                    {TempId2},
+                    {TempPhone},
+                    {TempDate}
+                )
+                VALUES {string.Join(',', rows)}
                 """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }

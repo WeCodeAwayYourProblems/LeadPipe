@@ -65,12 +65,12 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
             // Order here must match order above
             string joined = $"""
                 INSERT INTO {LinkDetails.TempTable} (
-                    {nameof(SandCaliperLink.SandId)},
-                    {nameof(SandCaliperLink.CaliperId)},
-                    {nameof(SandCaliperLink.MatchingPhone)},
-                    {nameof(SandCaliperLink.UnixMatchDate)}
+                    {TempId1},
+                    {TempId2},
+                    {TempPhone},
+                    {TempDate}
                 )
-                VALUES {string.Join(",", rows)}
+                VALUES {string.Join(',', rows)}
                 """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }

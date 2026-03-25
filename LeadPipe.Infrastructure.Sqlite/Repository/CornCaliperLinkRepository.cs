@@ -59,21 +59,21 @@ public sealed class CornCaliperLinkRepository
                 rows.Add($"({string.Join(", ", placeholders)})");
 
                 // Order here must match order below
-                values.Add(link.CornId);
-                values.Add(link.CaliperId);
-                values.Add(link.MatchingPhone);
-                values.Add(link.UnixMatchDate);
+                values.Add(link.CornId); // id1
+                values.Add(link.CaliperId); // id2
+                values.Add(link.MatchingPhone); // phone
+                values.Add(link.UnixMatchDate); // matchdate
             }
 
             // Order here must match order above
             string joined = $"""
                 INSERT INTO {LinkDetails.TempTable} (
-                    {nameof(CornCaliperLink.CornId)},
-                    {nameof(CornCaliperLink.CaliperId)},
-                    {nameof(CornCaliperLink.MatchingPhone)},
-                    {nameof(CornCaliperLink.UnixMatchDate)}
+                    {TempId1},
+                    {TempId2},
+                    {TempPhone},
+                    {TempDate}
                 )
-                VALUES {string.Join(",", rows)}
+                VALUES {string.Join(',', rows)}
                 """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }

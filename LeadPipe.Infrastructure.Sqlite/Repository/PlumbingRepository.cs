@@ -22,33 +22,8 @@ public class PlumbingRepository
             .Include(c => c.CornPlumbingLinks);
     }
 
-    protected override void InsertBatch(List<PlumbingEntity> batch)
-    {
-#pragma warning disable CS8604
-        var values = new List<object>();
-        var rows = new List<string>();
-
-        for (int i = 0; i < batch.Count; i++)
-        {
-            var e = batch[i];
-            int o = i * EntityDetails.ColumnCount;
-            rows.Add($"({{{o}}},{{{o + 1}}},{{{o + 2}}},{{{o + 3}}},{{{o + 4}}},{{{o + 5}}},{{{o + 6}}})");
-
-            values.Add(e.PhoneNumber.Number);
-            values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-            values.Add(e.UnixDate);
-            values.Add(e.Contents);
-            values.Add(e.Source.ToString()); // Ensure Enum is passed as string
-            values.Add(e.MetaData ?? string.Empty);
-            values.Add(e.Branch);
-        }
-        string joined = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)}";
-        _context.Database.ExecuteSqlRaw(joined, [.. values]);
-#pragma warning restore CS8604
-    }
-
-    protected override UpsertFields EntityDetails => new
-    (
+    protected override UpsertFields EntityDetails { get; } =
+    new(
         TableName: TableNames.PlumbingEntitiesName,
         TempTable: $"temp_{TableNames.PlumbingEntitiesName}",
         EntityName: nameof(PlumbingEntity),
@@ -117,6 +92,50 @@ public class PlumbingRepository
     """;
 
     protected override bool IsUpdatable => true;
+
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, EntityDetails.ColumnCount)];
+    protected override void InsertBatch(List<PlumbingEntity> batch)
+    {
+#pragma warning disable CS8604
+        var values = new List<object>();
+        var rows = new List<string>();
+
+        for (int i = 0; i < batch.Count; i++)
+        {
+            var e = batch[i];
+            int o = i * EntityDetails.ColumnCount;
+            var placeholders = ColumnIndexes.Select(ci => $"{{{o + ci}}}");
+            rows.Add($"({string.Join(", ", placeholders)})");
+
+            // Order here must match order below
+            values.Add(e.PhoneNumber.Number);
+            values.Add(e.Date.ToString(IsoString));
+            values.Add(e.UnixDate);
+            values.Add(e.Contents);
+            values.Add(e.Source.ToString()); // Ensure Enum is passed as string
+            values.Add(e.MetaData ?? string.Empty);
+            values.Add(e.Branch);
+        }
+        
+        // Order here must match order above
+        string joined = $"""
+            INSERT INTO {EntityDetails.TempTable} (
+                {nameof(PlumbingEntity.PhoneNumber)},
+                {nameof(PlumbingEntity.Date)},
+                {nameof(PlumbingEntity.UnixDate)},
+                {nameof(PlumbingEntity.Contents)},
+                {nameof(PlumbingEntity.Source)},
+                {nameof(PlumbingEntity.MetaData)},
+                {nameof(PlumbingEntity.Branch)}
+            )
+            VALUES {string.Join(",", rows)}
+            """;
+
+        _context.Database.ExecuteSqlRaw(joined, [.. values]);
+#pragma warning restore CS8604
+    }
+
     public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(
         List<PlumbingEntity> entities,
         CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);

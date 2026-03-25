@@ -89,7 +89,7 @@ public sealed class SyncGate(
             ? _associationInterval
             : _noSourceInterval;
 
-        bool run = syncstatetiming >= interval && found.SuccessState is true;
+        bool run = syncstatetiming >= interval || found.SuccessState is false;
 
         return run;
     }

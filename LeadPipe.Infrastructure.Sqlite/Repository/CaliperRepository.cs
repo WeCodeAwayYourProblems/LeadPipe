@@ -1,7 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
-using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,11 +10,9 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public sealed class CaliperRepository
     (
         PlumbingContext context,
-        ILogger<CaliperRepository> logger,
-        IInfrastructureSettings settings
+        ILogger<CaliperRepository> logger
     ) : PlumbingContextEntityRepository<CaliperEntity, CaliperRepository>(context, logger), IRepository<CaliperEntity>
 {
-    private readonly IInfrastructureSettings _settings = settings;
     protected override IQueryable<CaliperEntity> WithIncludes(IQueryable<CaliperEntity> q)
     {
         return q
@@ -25,11 +22,12 @@ public sealed class CaliperRepository
             .Include(c => c.CornCaliperLinks);
     }
 
-    protected override UpsertFields EntityDetails => new(
-        TableName: TableNames.CaliperEntitiesName,
-        TempTable: $"temp_{TableNames.CaliperEntitiesName}",
-        EntityName: nameof(CaliperEntity),
-        ColumnCount: 9);
+    protected override UpsertFields EntityDetails { get; } =
+        new(
+            TableName: TableNames.CaliperEntitiesName,
+            TempTable: $"temp_{TableNames.CaliperEntitiesName}",
+            EntityName: nameof(CaliperEntity),
+            ColumnCount: 10);
 
     protected override string CreateTempTable => $"""
         CREATE TEMP TABLE IF NOT EXISTS {EntityDetails.TempTable} (
@@ -39,6 +37,7 @@ public sealed class CaliperRepository
             {nameof(CaliperEntity.UnixDate)} INTEGER NOT NULL,
             {nameof(CaliperEntity.Note)} TEXT,
             {nameof(CaliperEntity.Source)} TEXT,
+            {nameof(CaliperEntity.Label)} TEXT,
             {nameof(CaliperEntity.Location)} TEXT,
             {nameof(CaliperEntity.Duration)} INTEGER,
             {nameof(CaliperEntity.Billable)} INTEGER
@@ -49,52 +48,19 @@ public sealed class CaliperRepository
     protected override string UpdateSql => $"""
         UPDATE {TableNames.CaliperEntitiesName}
         SET
-            {nameof(CaliperEntity.PhoneNumber)} = (
-                SELECT temp.{nameof(CaliperEntity.PhoneNumber)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            ),
-            {nameof(CaliperEntity.Date)} = (
-                SELECT temp.{nameof(CaliperEntity.Date)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            ),
-            {nameof(CaliperEntity.UnixDate)} = (
-                SELECT temp.{nameof(CaliperEntity.UnixDate)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            ),
-            {nameof(CaliperEntity.Note)} = (
-                SELECT temp.{nameof(CaliperEntity.Note)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            ),
-            {nameof(CaliperEntity.Source)} = (
-                SELECT temp.{nameof(CaliperEntity.Source)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            ),
-            {nameof(CaliperEntity.Location)} = (
-                SELECT temp.{nameof(CaliperEntity.Location)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            ),
-            {nameof(CaliperEntity.Duration)} = (
-                SELECT temp.{nameof(CaliperEntity.Duration)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            ),
-            {nameof(CaliperEntity.Billable)} = (
-                SELECT temp.{nameof(CaliperEntity.Billable)}
-                FROM {EntityDetails.TempTable} temp
-                WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-            )
-        WHERE EXISTS (
-            SELECT 1
-            FROM {EntityDetails.TempTable} temp
-            WHERE temp.{nameof(CaliperEntity.Id)} = {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)}
-        );
+            {nameof(CaliperEntity.PhoneNumber)} = temp.{nameof(CaliperEntity.PhoneNumber)},
+            {nameof(CaliperEntity.Date)} = temp.{nameof(CaliperEntity.Date)},
+            {nameof(CaliperEntity.UnixDate)} = temp.{nameof(CaliperEntity.UnixDate)},
+            {nameof(CaliperEntity.Note)} = temp.{nameof(CaliperEntity.Note)},
+            {nameof(CaliperEntity.Source)} = temp.{nameof(CaliperEntity.Source)},
+            {nameof(CaliperEntity.Label)} = temp.{nameof(CaliperEntity.Label)},
+            {nameof(CaliperEntity.Location)} = temp.{nameof(CaliperEntity.Location)},
+            {nameof(CaliperEntity.Duration)} = temp.{nameof(CaliperEntity.Duration)},
+            {nameof(CaliperEntity.Billable)} = temp.{nameof(CaliperEntity.Billable)}
+        FROM {EntityDetails.TempTable} temp
+        WHERE {TableNames.CaliperEntitiesName}.{nameof(CaliperEntity.Id)} = temp.{nameof(CaliperEntity.Id)};
     """;
+
 
     protected override string InsertSql => $"""
         INSERT INTO {TableNames.CaliperEntitiesName} (
@@ -104,6 +70,7 @@ public sealed class CaliperRepository
             {nameof(CaliperEntity.UnixDate)}, 
             {nameof(CaliperEntity.Note)}, 
             {nameof(CaliperEntity.Source)}, 
+            {nameof(CaliperEntity.Label)},
             {nameof(CaliperEntity.Location)}, 
             {nameof(CaliperEntity.Duration)}, 
             {nameof(CaliperEntity.Billable)}
@@ -115,6 +82,7 @@ public sealed class CaliperRepository
             {nameof(CaliperEntity.UnixDate)}, 
             {nameof(CaliperEntity.Note)}, 
             {nameof(CaliperEntity.Source)}, 
+            {nameof(CaliperEntity.Label)},
             {nameof(CaliperEntity.Location)}, 
             {nameof(CaliperEntity.Duration)}, 
             {nameof(CaliperEntity.Billable)}
@@ -125,8 +93,11 @@ public sealed class CaliperRepository
             WHERE t.{nameof(CaliperEntity.Id)} = temp.{nameof(CaliperEntity.Id)}
         );
     """;
+
     protected override bool IsUpdatable => true;
 
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, EntityDetails.ColumnCount)];
     protected override void InsertBatch(List<CaliperEntity> batch)
     {
         var values = new List<object>();
@@ -137,26 +108,44 @@ public sealed class CaliperRepository
             var e = batch[i];
             int offset = i * EntityDetails.ColumnCount;
 
-            // Build placeholder string: ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})
-            rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}}, {{{offset + 7}}}, {{{offset + 8}}})");
+            var placeholders = ColumnIndexes.Select(columnIndex => $"{{{offset + columnIndex}}}");
+            rows.Add($"({string.Join(", ", placeholders)})");
 
+            // Order here must match order below
             values.Add(e.Id);
             values.Add(e.PhoneNumber.Number); // Extract long from PhoneNumber object
-            values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss")); // ISO String for SQLite
+            values.Add(e.Date.ToString(IsoString));
             values.Add(e.UnixDate);
             values.Add(e.Note);
             values.Add(e.Source);
+            values.Add(e.Label);
             values.Add(e.Location);
             values.Add(e.Duration);
             values.Add(e.Billable ? 1 : 0);
         }
 
-        string sql = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)};";
+        // Order here must match order above
+        string sql = $"""
+        INSERT INTO {EntityDetails.TempTable} (
+            {nameof(CaliperEntity.Id)},
+            {nameof(CaliperEntity.PhoneNumber)},
+            {nameof(CaliperEntity.Date)},
+            {nameof(CaliperEntity.UnixDate)},
+            {nameof(CaliperEntity.Note)},
+            {nameof(CaliperEntity.Source)},
+            {nameof(CaliperEntity.Label)},
+            {nameof(CaliperEntity.Location)},
+            {nameof(CaliperEntity.Duration)},
+            {nameof(CaliperEntity.Billable)}
+        )
+        VALUES {string.Join(",", rows)};
+        """;
+
         _context.Database.ExecuteSqlRaw(sql, [.. values]);
     }
 
     public override async Task<Result<List<CaliperEntity>>> UpsertRangeAsync(
-        List<CaliperEntity> entities, 
+        List<CaliperEntity> entities,
         CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);
 
 }

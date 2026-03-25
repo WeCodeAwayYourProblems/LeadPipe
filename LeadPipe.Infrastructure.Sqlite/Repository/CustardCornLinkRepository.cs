@@ -20,23 +20,28 @@ public sealed class CustardCornLinkRepository
             .Include(q => q.Corn);
     }
 
-    protected override UpsertFields LinkDetails => new(
+    protected override UpsertFields LinkDetails { get; } =
+    new(
         TableName: TableNames.CustardCornLinksName,
         TempTable: $"temp_{TableNames.CustardCornLinksName}",
         Id1: nameof(CustardCornLink.CustardId),
         Id2: nameof(CustardCornLink.CornId),
         PhoneCol: nameof(CustardCornLink.MatchingPhone),
         DateCol: nameof(CustardCornLink.UnixMatchDate),
-        EntityName: nameof(CustardCornLink)
+        EntityName: nameof(CustardCornLink),
+        ColumnCount: 4
     );
-    
-    protected override ParentFields Parent => new(
-        Parent1Name: TableNames.CustardEntitiesName,
-        Parent1Id: nameof(CustardEntity.Id),
-        Parent2Name: TableNames.CornEntitiesName,
-        Parent2Id: nameof(CornEntity.Id)
+
+    protected override ParentFields Parent { get; } =
+        new(
+            Parent1Name: TableNames.CustardEntitiesName,
+            Parent1Id: nameof(CustardEntity.Id),
+            Parent2Name: TableNames.CornEntitiesName,
+            Parent2Id: nameof(CornEntity.Id)
     );
-    
+
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, LinkDetails.ColumnCount)];
     protected override async Task AddLinks(List<CustardCornLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)
@@ -49,15 +54,27 @@ public sealed class CustardCornLinkRepository
             {
                 var link = batch[j];
 
-                int o = j * 4;
-                rows.Add($"({{{o}}}, {{{o + 1}}}, {{{o + 2}}}, {{{o + 3}}})");
+                int o = j * LinkDetails.ColumnCount;
+                var placeholders = ColumnIndexes.Select(ci => $"{{{o + ci}}}");
+                rows.Add($"({string.Join(", ", placeholders)})");
+
+                // Order here must match order below
                 values.Add(link.CustardId);
                 values.Add(link.CornId);
                 values.Add(link.MatchingPhone);
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
+            // Order here must match order above
+            string joined = $"""
+                INSERT INTO {LinkDetails.TempTable} (
+                    {nameof(CustardCornLink.CustardId)},
+                    {nameof(CustardCornLink.CornId)},
+                    {nameof(CustardCornLink.MatchingPhone)},
+                    {nameof(CustardCornLink.UnixMatchDate)}
+                )
+                VALUES {string.Join(",", rows)}
+                """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

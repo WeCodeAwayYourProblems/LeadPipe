@@ -19,6 +19,7 @@ public interface IInfrastructureSettings :
     LocationPair? LeasedLoc { get; set; }
     LocationPair? PanLoc { get; set; }
     LocationPair? LatherLoc { get; set; }
+    LocationPair? YellerLoc { get; set; }
 
     string[]? CornSources { get; set; }
     string? CornFilter { get; set; }

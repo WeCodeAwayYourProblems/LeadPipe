@@ -29,6 +29,7 @@ internal sealed class TransformYellerReport(
 
     private readonly IYellerSettings _settings = settings;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:Use the 'StringComparison' method overloads to perform case-insensitive string comparisons", Justification = "The expression is passed to ef, which can't deal with StringComparison method overloads")]
     public async Task<Result<List<ReportYeller>>> TransformAsync(List<Plumbing> data)
     {
         //*********************************************************************************
@@ -37,7 +38,7 @@ internal sealed class TransformYellerReport(
 
         Result<List<CornEntity>> corns =
             await _cornRepo.FindAsync(c =>
-                c.Source.ToLowerInvariant().Contains(_settings.YellerCornSource!, StringComparison.InvariantCultureIgnoreCase) ||
+                c.Source.ToLower().Contains(_settings.YellerCornSource!.ToLower()) ||
                 c.Source == _settings.YellerCaliperSource1 ||
                 c.Source == _settings.YellerCaliperSource2);
         if (corns.IsFailure) return Result.Failure<List<ReportYeller>>(corns.Error);
@@ -194,7 +195,6 @@ internal sealed class TransformYellerReport(
                 }
             ))];
 
-        ///*
         //*********************************************************************************
         // Non attributed reporting
         //*********************************************************************************

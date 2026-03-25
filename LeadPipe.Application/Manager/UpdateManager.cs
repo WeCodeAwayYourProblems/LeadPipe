@@ -16,7 +16,7 @@ public sealed class UpdateManager(
 ) : IUpdateManager
 {
     private readonly IUpdateFactory _update = update;
-    private readonly IUpdateService<Caliper> _call = update.GetService<Caliper>();
+    private readonly IUpdateService<Caliper> _caliper = update.GetService<Caliper>();
     private readonly IUpdateService<Sandwich> _sandwich = update.GetService<Sandwich>();
     private readonly IUpdateService<CornFormula> _corn = update.GetService<CornFormula>();
     private readonly IUpdateService<Custard> _custard = update.GetService<Custard>();
@@ -73,7 +73,7 @@ public sealed class UpdateManager(
     /// <returns></returns>
     private async Task<Result> RunGlobals(bool refresh)
     {
-        Result caliperSaved = await RunIfDue(SyncKey.Caliper, refresh, false, _call);
+        Result caliperSaved = await RunIfDue(SyncKey.Caliper, refresh, false, _caliper);
         if (caliperSaved.IsFailure)
             return caliperSaved;
 

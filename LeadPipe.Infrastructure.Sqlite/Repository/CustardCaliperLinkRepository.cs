@@ -20,23 +20,28 @@ public sealed class CustardCaliperLinkRepository
             .Include(q => q.Caliper);
     }
 
-    protected override UpsertFields LinkDetails { get; } = new(
+    protected override UpsertFields LinkDetails { get; } =
+    new(
         TableName: TableNames.CustardCaliperLinksName,
         TempTable: $"temp_{TableNames.CustardCaliperLinksName}",
         Id1: nameof(CustardCaliperLink.CustardId),
         Id2: nameof(CustardCaliperLink.CaliperId),
         PhoneCol: nameof(CustardCaliperLink.MatchingPhone),
         DateCol: nameof(CustardCaliperLink.UnixMatchDate),
-        EntityName: nameof(CustardCaliperLink)
+        EntityName: nameof(CustardCaliperLink),
+        ColumnCount: 4
         );
 
-    protected override ParentFields Parent => new(
+    protected override ParentFields Parent { get; } =
+    new(
         Parent1Name: TableNames.CustardEntitiesName,
         Parent1Id: nameof(CustardEntity.Id),
         Parent2Name: TableNames.CaliperEntitiesName,
         Parent2Id: nameof(CaliperEntity.Id)
     );
 
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, LinkDetails.ColumnCount)];
     protected override async Task AddLinks(List<CustardCaliperLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)
@@ -49,15 +54,27 @@ public sealed class CustardCaliperLinkRepository
             {
                 var link = batch[j];
 
-                int o = j * 4;
-                rows.Add($"({{{o}}}, {{{o + 1}}}, {{{o + 2}}}, {{{o + 3}}})");
+                int o = j * LinkDetails.ColumnCount;
+                var placeholders = ColumnIndexes.Select(ci => $"{{{o + ci}}}");
+                rows.Add($"({string.Join(", ", placeholders)})");
+
+                // Order here must match order below
                 values.Add(link.CustardId);
                 values.Add(link.CaliperId);
                 values.Add(link.MatchingPhone);
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
+            // Order here must match order above
+            string joined = $"""
+                INSERT INTO {LinkDetails.TempTable} (
+                    {nameof(CustardCaliperLink.CustardId)},
+                    {nameof(CustardCaliperLink.CaliperId)},
+                    {nameof(CustardCaliperLink.MatchingPhone)},
+                    {nameof(CustardCaliperLink.UnixMatchDate)}
+                )
+                VALUES {string.Join(",", rows)}
+                """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }

@@ -13,9 +13,9 @@ public sealed class CaliperMySqlDataSource(
     ) : MySqlDataSource(sync), IDataSourceAsync<CaliperMySqlEntity>
 {
     private readonly ICaliperMySqlRepository _repo = repo;
-    private readonly Result<DateTimeOffset>? _latest;
+    private Result<DateTimeOffset>? _latest;
 
-    private async Task<Result<DateTimeOffset>> Latest() => _latest ?? await LatestSyncDate(SyncKey.Caliper);
+    private async Task<Result<DateTimeOffset>> Latest() => _latest ??= await LatestSyncDate(SyncKey.Caliper);
     public async Task<Result<List<CaliperMySqlEntity>>> LoadAsync(bool withDetails)
     {
         // Retrieve all calipers since jan 1 last year

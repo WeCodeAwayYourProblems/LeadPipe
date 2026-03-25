@@ -21,36 +21,13 @@ public sealed class CornRepository(
             .Include(c => c.CornPlumbingLinks);
     }
 
-    protected override void InsertBatch(List<CornEntity> batch)
-    {
-        var values = new List<object>();
-        var rows = new List<string>();
-
-        for (int i = 0; i < batch.Count; i++)
-        {
-            var e = batch[i];
-            int offset = i * EntityDetails.ColumnCount;
-
-            // Build placeholder string: ({0}, {1}, {2}, {3}, {4}, {5}, {6})
-            rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}})");
-
-            values.Add(e.Id);
-            values.Add(e.PhoneNumber.Number);
-            values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-            values.Add(e.UnixDate);
-            values.Add(e.Payload ?? string.Empty);
-            values.Add(e.MetaData ?? string.Empty);
-            values.Add(e.Source ?? string.Empty);
-        }
-
-        string sql = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)};";
-        _context.Database.ExecuteSqlRaw(sql, [.. values]);
-    }
-    protected override UpsertFields EntityDetails => new(
+    protected override UpsertFields EntityDetails { get; } =
+    new(
         TableName: TableNames.CornEntitiesName,
         TempTable: $"temp_{TableNames.CornEntitiesName}",
         EntityName: nameof(CornEntity),
         ColumnCount: 7);
+
     protected override string CreateTempTable => $"""
         CREATE TEMP TABLE IF NOT EXISTS {EntityDetails.TempTable} (
             {nameof(CornEntity.Id)} INTEGER PRIMARY KEY,
@@ -63,6 +40,7 @@ public sealed class CornRepository(
         ) WITHOUT ROWID;
         DELETE FROM {EntityDetails.TempTable};
     """;
+
     protected override string UpdateSql => $"""
         UPDATE {TableNames.CornEntitiesName}
         SET 
@@ -75,6 +53,7 @@ public sealed class CornRepository(
         FROM {EntityDetails.TempTable} temp
         WHERE {TableNames.CornEntitiesName}.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)};
     """;
+
     protected override string InsertSql => $"""
         INSERT INTO {TableNames.CornEntitiesName} 
         (
@@ -101,7 +80,52 @@ public sealed class CornRepository(
             WHERE t.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)}
         );
     """;
+
     protected override bool IsUpdatable => true;
+
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, EntityDetails.ColumnCount)];
+    protected override void InsertBatch(List<CornEntity> batch)
+    {
+        var values = new List<object>();
+        var rows = new List<string>();
+
+        for (int i = 0; i < batch.Count; i++)
+        {
+            var e = batch[i];
+            int offset = i * EntityDetails.ColumnCount;
+
+            var placeholders = ColumnIndexes.Select(ci => $"{{{offset + ci}}}");
+
+            // Build placeholder string: ({0}, {1}, {2}, {3}, {4}, {5}, {6})
+            rows.Add($"({string.Join(", ", placeholders)})");
+
+            // Order here must match order below
+            values.Add(e.Id);
+            values.Add(e.PhoneNumber.Number);
+            values.Add(e.Date.ToString(IsoString));
+            values.Add(e.UnixDate);
+            values.Add(e.Payload ?? string.Empty);
+            values.Add(e.MetaData ?? string.Empty);
+            values.Add(e.Source ?? string.Empty);
+        }
+
+        // Order here must match order above
+        string sql = $"""
+            INSERT INTO {EntityDetails.TempTable} (
+                {nameof(CornEntity.Id)},
+                {nameof(CornEntity.PhoneNumber)},
+                {nameof(CornEntity.Date)},
+                {nameof(CornEntity.UnixDate)},
+                {nameof(CornEntity.Payload)},
+                {nameof(CornEntity.MetaData)},
+                {nameof(CornEntity.Source)}
+            )
+            VALUES {string.Join(",", rows)};
+            """;
+        _context.Database.ExecuteSqlRaw(sql, [.. values]);
+    }
+
     public override async Task<Result<List<CornEntity>>> UpsertRangeAsync(
         List<CornEntity> entities,
         CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);

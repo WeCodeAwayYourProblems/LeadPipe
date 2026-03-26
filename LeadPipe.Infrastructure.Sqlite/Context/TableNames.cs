@@ -7,6 +7,7 @@ internal class TableNames
     public const string CaliperEntitiesName = nameof(PlumbingContext.CaliperEntities);
     public const string CornEntitiesName = nameof(PlumbingContext.CornEntities);
     public const string PlumbingEntitiesName = nameof(PlumbingContext.PlumbingEntities);
+    public const string PlumbingPhoneNumbersName = nameof(PlumbingContext.PlumbingPhoneNumbers);
     public const string CustardEntitiesName = nameof(PlumbingContext.CustardEntities);
     public const string SandEntitiesName = nameof(PlumbingContext.SandEntities);
     public const string CornCaliperLinksName = nameof(PlumbingContext.CornCaliperLinks);

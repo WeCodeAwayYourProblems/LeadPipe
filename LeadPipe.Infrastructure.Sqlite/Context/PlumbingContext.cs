@@ -12,6 +12,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
     public DbSet<CaliperEntity> CaliperEntities { get; set; }
     public DbSet<CornEntity> CornEntities { get; set; }
     public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
+    public DbSet<PlumbingPhoneNumber> PlumbingPhoneNumbers { get; set; }
     public DbSet<CustardEntity> CustardEntities { get; set; }
     public DbSet<SandEntity> SandEntities { get; set; }
 

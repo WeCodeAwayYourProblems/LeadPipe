@@ -19,7 +19,8 @@ public class PlumbingRepository
             .Include(c => c.CustardPlumbingLinks)
             .Include(c => c.SandPlumbingLinks)
             .Include(c => c.PlumbingCaliperLinks)
-            .Include(c => c.CornPlumbingLinks);
+            .Include(c => c.CornPlumbingLinks)
+            .Include(c => c.PhoneNumbers);
     }
 
     protected override UpsertFields EntityDetails { get; } =
@@ -84,10 +85,10 @@ public class PlumbingRepository
         WHERE NOT EXISTS (
             SELECT 1
             FROM {TableNames.PlumbingEntitiesName} t
-            WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.PhoneNumber
-              AND t.{nameof(PlumbingEntity.UnixDate)} = temp.UnixDate
-              AND t.{nameof(PlumbingEntity.Source)} = temp.Source
-              AND t.{nameof(PlumbingEntity.MetaData)} = temp.MetaData
+            WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
+              AND t.{nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)}
+              AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)}
+              AND t.{nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
         );
     """;
 
@@ -117,7 +118,7 @@ public class PlumbingRepository
             values.Add(e.MetaData ?? string.Empty);
             values.Add(e.Branch);
         }
-        
+
         // Order here must match order above
         string joined = $"""
             INSERT INTO {EntityDetails.TempTable} (
@@ -130,7 +131,7 @@ public class PlumbingRepository
                 {nameof(PlumbingEntity.Branch)}
             )
             VALUES {string.Join(",", rows)}
-            """;
+         """;
 
         _context.Database.ExecuteSqlRaw(joined, [.. values]);
 #pragma warning restore CS8604

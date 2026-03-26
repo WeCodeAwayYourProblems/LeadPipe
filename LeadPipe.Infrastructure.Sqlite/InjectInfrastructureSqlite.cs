@@ -79,6 +79,7 @@ public static class InjectInfrastructureSqlite
         services.AddScoped<IRepository<CustardEntity>, CustardRepository>();
         services.AddScoped<IRepository<PlumbingCaliperLink>, PlumbingCaliperLinkRepository>();
         services.AddScoped<IRepository<PlumbingEntity>, PlumbingRepository>();
+        services.AddScoped<IRepository<PlumbingPhoneNumber>, PlumbingPhoneNumbersRepository>();
         services.AddScoped<IRepository<SandCaliperLink>, SandCaliperLinkRepository>();
         services.AddScoped<IRepository<SandCornLink>, SandCornLinkRepository>();
         services.AddScoped<IRepository<SandPlumbingLink>, SandPlumbingLinkRepository>();

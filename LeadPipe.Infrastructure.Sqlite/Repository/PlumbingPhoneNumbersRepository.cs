@@ -37,9 +37,7 @@ public class PlumbingPhoneNumbersRepository
     """;
 
     // Should we throw or should we just let it slide?
-    protected override string UpdateSql =>
-        throw new InvalidOperationException($"Table {EntityDetails.TableName} is not updatable");
-        //string.Empty;
+    protected override string UpdateSql => throw new InvalidOperationException($"Table {EntityDetails.TableName} is not updatable");
 
     protected override string InsertSql => $"""
         INSERT INTO {EntityDetails.TableName} (
@@ -62,7 +60,6 @@ public class PlumbingPhoneNumbersRepository
 
     private static int[]? _columnIndexes;
     protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, EntityDetails.ColumnCount)];
-
     protected override void InsertBatch(List<PlumbingPhoneNumber> batch)
     {
         var values = new List<object>();

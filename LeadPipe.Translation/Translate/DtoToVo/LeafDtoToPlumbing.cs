@@ -55,7 +55,8 @@ internal class LeafDtoToPlumbing : IDtoToVo<LeafDto, Plumbing>
             Contents: content,
             Branch: null,
             MetaData: metadata,
-            Source: Source.Leaf
+            Source: Source.Leaf,
+            null
         );
         return result;
     }

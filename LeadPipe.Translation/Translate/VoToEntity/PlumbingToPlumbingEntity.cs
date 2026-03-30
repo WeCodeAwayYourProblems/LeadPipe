@@ -8,6 +8,16 @@ internal class PlumbingToPlumbingEntity : IVoToEntity<Plumbing, PlumbingEntity>
 {
     public PlumbingEntity Translate(Plumbing plumbing)
     {
+        ICollection<PlumbingPhoneNumber> numbers = plumbing.Numbers is not null
+            ? [
+                .. plumbing.Numbers.Select(p => new PlumbingPhoneNumber() 
+                    {
+                        PhoneNumber = new(p),
+                        PlumbingId = plumbing.Id
+                    })
+              ]
+            : [];
+
         var result = new PlumbingEntity()
         {
             Id = plumbing.Id,
@@ -17,6 +27,7 @@ internal class PlumbingToPlumbingEntity : IVoToEntity<Plumbing, PlumbingEntity>
             Contents = plumbing.Contents,
             MetaData = plumbing.MetaData,
             Source = plumbing.Source,
+            PhoneNumbers = numbers
         };
         return result;
     }

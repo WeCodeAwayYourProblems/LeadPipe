@@ -12,6 +12,7 @@ internal class PlumbingEntityToPlumbing : IEntityToVo<PlumbingEntity, Plumbing>
         DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(entity.UnixDate);
         var contents = entity.Contents;
         var source = entity.Source;
+        PhoneNumber[] numbers = [.. entity.PhoneNumbers.Select(p => p.PhoneNumber)];
 
         Plumbing result = new
         (
@@ -21,7 +22,8 @@ internal class PlumbingEntityToPlumbing : IEntityToVo<PlumbingEntity, Plumbing>
             Contents: contents,
             Branch: entity.Branch,
             MetaData: entity.MetaData,
-            Source: source
+            Source: source,
+            Numbers: numbers
         );
         return result;
     }

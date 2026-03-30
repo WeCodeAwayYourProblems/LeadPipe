@@ -27,7 +27,9 @@ internal class LabDtoToPlumbing : IDtoToVo<LabDto, Plumbing>
             Contents: contents, 
             Branch: branch, 
             MetaData: metaData, 
-            Source: Source.Lab);
+            Source: Source.Lab,
+            null
+            );
         
         return result;
     }

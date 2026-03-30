@@ -17,14 +17,12 @@ public partial class PhoneNumber
         return $"({digits[0..3]}) {digits[3..6]}-{digits[6..10]}";
     }
 
-    public bool CanParticipateInDeduplication => !IsDefault;
-    private bool? _isDefault;
-    public bool IsDefault
-    {
-        get { return _isDefault ??= Number == Default || Number == 1111111111 || Number > 9999999999 || Number == 5555555555; }
-    }
+    public bool CanParticipateInDeduplication => !IsDefault && !IsJunk;
+    public bool IsDefault => Number == Default;
+    public bool IsJunk => Number == 1111111111 || Number == 5555555555;
 
     public const long Default = 0;
+    public readonly static PhoneNumber DefaultPhoneNumber = new(Default);
 
     public long Number { get; }
 
@@ -45,18 +43,29 @@ public partial class PhoneNumber
 
     public static bool TryParse(string? number, out PhoneNumber result)
     {
-        try
-        {
-            result = new(number);
-            if (result.Number == Default) return false;
-            return true;
-        }
-        catch
-        {
-            result = new(Default);
-            return false;
-        }
+        result = new(number);
+        return result.Number != Default;
     }
+
+    public static bool TryParseMany(string? input, out List<PhoneNumber> results)
+    {
+        results = [];
+
+        if (string.IsNullOrWhiteSpace(input))
+            return false;
+        HashSet<long> seen = [];
+        foreach (Match match in PhoneMatchRegex().Matches(input))
+        {
+            if (TryParse(match.Value, out var parsed) && seen.Add(parsed.Number))
+                results.Add(parsed);
+        }
+
+        if (results.Count == 0)
+            return false;
+
+        return true;
+    }
+
     #endregion
 
     #region Private
@@ -64,13 +73,12 @@ public partial class PhoneNumber
     {
         if (string.IsNullOrWhiteSpace(number))
             return Default;
-        var split = number.Split("ex");
-        if (split.Length == 0)
-            return Default;
 
-        string clean = NonDigitChar().Replace(split[0], string.Empty);
-        long result = StrToLong(clean);
-        return result;
+        number = ExtensionRegex().Replace(number, "");
+
+        string clean = NonDigitChar().Replace(number, string.Empty);
+
+        return StrToLong(clean);
     }
 
     static long ValidateNumericalInput(long number)
@@ -78,21 +86,40 @@ public partial class PhoneNumber
         return StrToLong(number.ToString());
     }
 
-    static readonly char[] _unacceptable = { '0', '1' };
     static long StrToLong(string number)
     {
-        bool small = number.Length < 10;
-        if (small) return Default;
+        if (number.Length < 10)
+            return Default;
 
-        bool unacceptable = _unacceptable.Contains(number[^10]);
-        bool parses = long.TryParse(number[^10..], out long result);
+        // Normalize to 10 digits
+        if (number.Length == 11 && number.StartsWith(value: '1'))
+            number = number[1..];
+        else if (number.Length > 10)
+            number = number[^10..];
 
-        if (parses && !unacceptable) return result;
-        return Default;
+        if (!long.TryParse(number, out long result))
+            return Default;
+
+        // NANP validation
+        if (number[0] is '0' or '1') return Default; // area code
+        if (number[3] is '0' or '1') return Default; // exchange
+
+        return result;
     }
+
 
     [GeneratedRegex(@"\D")]
     private static partial Regex NonDigitChar();
+
+    [GeneratedRegex(@"\s*(x|ext\.?|#)\s*\d+", RegexOptions.IgnoreCase)]
+    private static partial Regex ExtensionRegex();
+
+    [GeneratedRegex(
+    @"(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}(?:\s*(?:x|ext\.?|#)\s*\d+)?",
+    RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex PhoneMatchRegex();
+
+
     #endregion
 
     #region Equality

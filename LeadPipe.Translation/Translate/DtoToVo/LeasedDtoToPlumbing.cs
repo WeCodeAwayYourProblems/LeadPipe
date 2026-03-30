@@ -42,7 +42,8 @@ public class LeasedDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeasedDto, Pl
                 Contents: contents,
                 Branch: data.Branch,
                 MetaData: metadata,
-                Source: Source.Leased
+                Source: Source.Leased,
+                null
             );
         return result;
     }

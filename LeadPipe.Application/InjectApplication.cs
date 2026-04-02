@@ -14,6 +14,9 @@ public static class InjectApplication
         services.AddScoped<IUpdateManager, UpdateManager>();
         services.AddScoped<IFileRWManager, FileRWManager>();
         services.AddScoped<ICatManManager, CatManManager>();
+        services.AddScoped<IAssociationManager, AssociationManager>();
+        services.AddScoped<ICoreDataUpdateManager, CoreDataUpdateManager>();
+        services.AddScoped<ISourceDataUpdateManager, SourceDataUpdateManager>();
 
         return services;
     }

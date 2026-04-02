@@ -14,5 +14,5 @@ internal sealed class CalliUpdateFromFileService(
     IDtoToVo<CalliDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<CalliDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+    ) : UpdateService<CalliDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence, SyncKey.Plumbing), IUpdateService<Plumbing>
 { }

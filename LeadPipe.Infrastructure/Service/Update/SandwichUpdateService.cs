@@ -10,5 +10,5 @@ internal sealed class SandwichUpdateService(
     IDataSourceAsync<SandMySqlEntity> sand,
     IEntityToVo<SandMySqlEntity, Sandwich> eToVo,
     IDataPersistence<Sandwich> persist
-    ) : ValueObjectUpdateService<SandMySqlEntity, Sandwich>(sand, eToVo, persist), IUpdateService<Sandwich>
+    ) : ValueObjectUpdateService<SandMySqlEntity, Sandwich>(sand, eToVo, persist, SyncKey.Sandwich), IUpdateService<Sandwich>
 { }

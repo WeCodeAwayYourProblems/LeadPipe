@@ -14,7 +14,7 @@ public class SourceDataUpdateManager(
     ISyncGate syncGate
     ) : ISourceDataUpdateManager
 {
-    private readonly IUpdateService<Plumbing> _plumbing = updateFactory.GetService<Plumbing>();
+    private readonly IUpdateFactory _updateFactory = updateFactory;
     private readonly ISyncGate _syncGate = syncGate;
     private static readonly Source[] ValidSources = [.. Enum.GetValues<Source>().Except([Source.Test,Source.Test2])];
 
@@ -26,7 +26,7 @@ public class SourceDataUpdateManager(
         {
             if (source == Source.Test || source == Source.Test2)
                 continue;
-            var result = await RunIfDue(source, refresh, _plumbing, _syncGate);
+            var result = await RunIfDue(source, refresh, _updateFactory.GetService<Plumbing>(source), _syncGate);
             if (result.IsFailure)
                 return result;
         }

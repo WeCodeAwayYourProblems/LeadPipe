@@ -14,29 +14,23 @@ public interface ICoreDataUpdateManager
 internal class CoreDataUpdateManager : ICoreDataUpdateManager
 {
     private readonly Dictionary<SyncKey, Func<bool, Task<Result>>> _handlers;
-    private readonly IUpdateService<Caliper> _caliper;
-    private readonly IUpdateService<Custard> _custard;
-    private readonly IUpdateService<Sandwich> _sandwich;
-    private readonly IUpdateService<CornFormula> _corn;
-    private readonly ISyncGate _syncGate;
 
     public CoreDataUpdateManager(
         ISyncGate syncGate,
         IUpdateFactory updateFactory
     )
     {
-        _syncGate = syncGate;
-        _caliper = updateFactory.GetService<Caliper>();
-        _custard = updateFactory.GetService<Custard>();
-        _sandwich = updateFactory.GetService<Sandwich>();
-        _corn = updateFactory.GetService<CornFormula>();
+        var caliper = updateFactory.GetService<Caliper>();
+        var custard = updateFactory.GetService<Custard>();
+        var sandwich = updateFactory.GetService<Sandwich>();
+        var cornFormula = updateFactory.GetService<CornFormula>();
 
         _handlers = new()
         {
-            { SyncKey.Caliper, refresh => RunIfDue(refresh, false, _caliper, _syncGate) },
-            { SyncKey.Custard, refresh => RunIfDue(refresh, true, _custard, _syncGate) },
-            { SyncKey.Sandwich, refresh => RunIfDue(refresh, true, _sandwich, _syncGate) },
-            { SyncKey.CornFormula, refresh => RunIfDue(refresh, false, _corn, _syncGate) }
+            { SyncKey.Caliper, refresh => RunIfDue(refresh, false, caliper, syncGate) },
+            { SyncKey.Custard, refresh => RunIfDue(refresh, true, custard, syncGate) },
+            { SyncKey.Sandwich, refresh => RunIfDue(refresh, true, sandwich, syncGate) },
+            { SyncKey.CornFormula, refresh => RunIfDue(refresh, false, cornFormula, syncGate) },
         };
     }
     

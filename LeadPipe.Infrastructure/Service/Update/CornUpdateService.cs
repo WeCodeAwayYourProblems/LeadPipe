@@ -10,5 +10,5 @@ internal sealed class CornUpdateService(
     IDataSourceAsync<CornMySqlEntity> corn,
     IEntityToVo<CornMySqlEntity, CornFormula> eToVo,
     IDataPersistence<CornFormula> persist
-    ) : ValueObjectUpdateService<CornMySqlEntity, CornFormula>(corn, eToVo, persist), IUpdateService<CornFormula>
+    ) : ValueObjectUpdateService<CornMySqlEntity, CornFormula>(corn, eToVo, persist, SyncKey.CornFormula), IUpdateService<CornFormula>
 { }

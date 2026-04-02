@@ -10,6 +10,6 @@ internal sealed class CalipersUpdateService(
     IDataSourceAsync<CaliperMySqlEntity> call,
     IEntityToVo<CaliperMySqlEntity, Caliper> eToVo,
     IDataPersistence<Caliper> persistence
-    ) : ValueObjectUpdateService<CaliperMySqlEntity, Caliper>(call, eToVo, persistence), IUpdateService<Caliper>
+    ) : ValueObjectUpdateService<CaliperMySqlEntity, Caliper>(call, eToVo, persistence, SyncKey.Caliper), IUpdateService<Caliper>
 { }
 

@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -8,12 +9,16 @@ namespace LeadPipe.Infrastructure.Service.Update;
 internal abstract class ValueObjectUpdateService<TEntity, TVo>(
     IDataSourceAsync<TEntity> source,
     IEntityToVo<TEntity, TVo> eToVo,
-    IDataPersistence<TVo> persistence
+    IDataPersistence<TVo> persistence,
+    SyncKey key
     ) : IUpdateService<TVo>
 {
     private readonly IDataSourceAsync<TEntity> _source = source;
     private readonly IEntityToVo<TEntity, TVo> _eToVo = eToVo;
     private readonly IDataPersistence<TVo> _persistence = persistence;
+
+    public SyncKey SyncKey => key;
+
     public async Task<Result<List<TVo>>> GetDataAsync(bool withDetails)
     {
         // Retrieve all data from source

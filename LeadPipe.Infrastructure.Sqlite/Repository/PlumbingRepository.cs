@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,9 +11,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public class PlumbingRepository
     (
         PlumbingContext context,
+        IMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> metaTranslator,
         ILogger<PlumbingRepository> logger
     ) : PlumbingContextEntityRepository<PlumbingEntity, PlumbingRepository>(context, logger), IRepository<PlumbingEntity>
 {
+    private readonly IMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> _metaTranslator = metaTranslator;
     protected override IQueryable<PlumbingEntity> WithIncludes(IQueryable<PlumbingEntity> q)
     {
         return q
@@ -115,7 +118,7 @@ public class PlumbingRepository
             values.Add(e.UnixDate);
             values.Add(e.Contents);
             values.Add(e.Source.ToString()); // Ensure Enum is passed as string
-            values.Add(e.MetaData ?? string.Empty);
+            values.Add(_metaTranslator.Translate(e));
             values.Add(e.Branch);
         }
 

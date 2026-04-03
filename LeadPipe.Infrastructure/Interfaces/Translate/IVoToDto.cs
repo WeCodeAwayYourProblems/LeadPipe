@@ -1,6 +1,3 @@
 ﻿namespace LeadPipe.Infrastructure.Interfaces.Translate;
 
-public interface IVoToDto<TVo, TDto>
-{
-    TDto Translate(TVo data);
-}
+public interface IVoToDto<TVo, TDto> : ITranslate<TVo, TDto> { }

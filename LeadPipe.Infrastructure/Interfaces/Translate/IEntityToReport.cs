@@ -1,6 +1,3 @@
 ﻿namespace LeadPipe.Infrastructure.Interfaces.Translate;
 
-public interface IEntityToReport<TEntity, TReport>
-{
-    TReport Translate(TEntity data);
-}
+public interface IEntityToReport<TEntity, TReport> : ITranslate<TEntity, TReport> { }

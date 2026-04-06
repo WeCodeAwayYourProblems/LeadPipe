@@ -17,7 +17,7 @@ public sealed class ReportManager(
     public async Task<Result> Manage(Source source)
     {
         IReportService<Plumbing> reporter = _report.GetService(source);
-        Result<List<Plumbing>> reportData = await reporter.GetDataAsync(false);
+        Result<List<Plumbing>> reportData = await reporter.GetDataAsync();
         Result reported = reportData.IsSuccess
             ? await reporter.ReportAsync(reportData.Value)
             : reportData;

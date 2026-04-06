@@ -16,7 +16,7 @@ internal sealed class ReportBothYeller(
     private readonly IReportService<Plumbing> _twoDays = twoDays;
     private List<Plumbing>? DailyData { get; set; }
     private List<Plumbing>? TwoDaysData { get; set; }
-    public Task<Result<List<Plumbing>>> GetDataAsync() => GetDataAsync();
+    public Task<Result<List<Plumbing>>> GetDataAsync() => GetDataAsync(false);
     public async Task<Result<List<Plumbing>>> GetDataAsync(bool withDetails = false)
     {
         // Daily Data

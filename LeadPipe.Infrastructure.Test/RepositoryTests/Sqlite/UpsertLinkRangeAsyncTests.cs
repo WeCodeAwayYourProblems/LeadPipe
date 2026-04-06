@@ -10,6 +10,7 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 public class UpsertLinkRangeAsyncTests
 {
     private readonly static PlumbingContext _context = SqliteTestContextFactory.Create(out _);
+    const string _empty = "";
 
     [Fact]
     public async Task UpsertLinkRangeAsync_InsertsAndUpdatesCorrectly_WithEarliestMatchWinning()
@@ -22,8 +23,8 @@ public class UpsertLinkRangeAsyncTests
         // Seed parents (required for FK EXISTS checks)
         PhoneNumber sharedNumber = new(5555555555);
         DateTimeOffset date = DateTimeOffset.UtcNow;
-        var corn = new CornEntity { Id = 1, PhoneNumber = sharedNumber, Date = date.UtcDateTime, UnixDate = date.ToUnixTimeSeconds(), MetaData = "", Payload = "", Source = "" };
-        var caliper = new CaliperEntity { Id = 2, PhoneNumber = sharedNumber, Note = "", Source = "", Location = "" };
+        var corn = new CornEntity { Id = 1, PhoneNumber = sharedNumber, Date = date.UtcDateTime, UnixDate = date.ToUnixTimeSeconds(), MetaData = _empty, Payload = _empty, Source = _empty };
+        var caliper = new CaliperEntity { Id = 2, PhoneNumber = sharedNumber, Note = _empty, Source = _empty, Location = _empty, Label = _empty};
 
         context.AddRange(corn, caliper);
         await context.SaveChangesAsync();

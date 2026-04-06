@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -186,9 +187,13 @@ public sealed class SandRepository
                 .Select(g => g.Last())
         ];
 
-        HashSet<long> neededCustardIds = [.. uniqueEntities.Select(e => e.CustardId)];
-        HashSet<long> existingCustardIds = [.. _context.CustardEntities
-            .Where(c => neededCustardIds.Contains(c.Id)).Select(c => c.Id)];
+        HashSet<long> neededCustardIds = uniqueEntities.ToHashSetFast(e => e.CustardId);
+        HashSet<long> existingCustardIds = 
+        [
+            .. _context.CustardEntities
+                .Where(c => neededCustardIds.Contains(c.Id))
+                .Select(c => c.Id)
+        ];
 
         List<SandEntity> validEntities = new(uniqueEntities.Count);
         List<SandEntity> rejectedEntities = new(uniqueEntities.Count);

@@ -3,6 +3,7 @@ using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Persistence;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.DataTests;
@@ -12,6 +13,7 @@ public class PersistenceTests
     #region PlumbingPersistence
     private readonly IRepository<PlumbingEntity> repo = Substitute.For<IRepository<PlumbingEntity>>();
     private readonly IRepository<PlumbingPhoneNumber> phoneRepo = Substitute.For<IRepository<PlumbingPhoneNumber>>();
+    private readonly IPlumbingMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> _metadataCanonicalPersistenceFormat = Substitute.For<IPlumbingMetaDataCanonicalPersistenceFormat<PlumbingEntity, string>>();
     [Fact]
     public async Task PlumbingPersistence_SaveAsync_ReturnsSuccess()
     {
@@ -19,7 +21,7 @@ public class PersistenceTests
         repo.UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<PlumbingEntity> { entity })));
 
-        var persistence = new PlumbingPersistence(repo, phoneRepo);
+        var persistence = new PlumbingPersistence(repo, _metadataCanonicalPersistenceFormat, phoneRepo);
 
         var result = await persistence.SaveAsync(new List<PlumbingEntity> { entity });
 
@@ -33,7 +35,7 @@ public class PersistenceTests
         repo.UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Failure<List<PlumbingEntity>>("error")));
 
-        var persistence = new PlumbingPersistence(repo, phoneRepo);
+        var persistence = new PlumbingPersistence(repo, _metadataCanonicalPersistenceFormat, phoneRepo);
 
         var result = await persistence.SaveAsync(new List<PlumbingEntity> { new PlumbingEntity() { Id = 0, MetaData = string.Empty, PhoneNumber = new(PhoneNumber.Default) } });
 

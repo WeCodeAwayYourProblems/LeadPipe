@@ -21,6 +21,7 @@ public abstract class UpdateService<TDto, TVo, TEntity>(
 
     public SyncKey SyncKey => key;
 
+    public Task<Result<List<TVo>>> GetDataAsync() => GetDataAsync(false);
     public async Task<Result<List<TVo>>> GetDataAsync(bool withDetails)
     {
         Result<List<TDto>> raw = await _source.LoadAsync(withDetails);
@@ -29,7 +30,7 @@ public abstract class UpdateService<TDto, TVo, TEntity>(
         List<TVo> result = [.. raw.Value.Select(_dtoToVo.Translate)];
         return result;
     }
-    
+
     public async Task<Result<List<TVo>>> UpdateDataAsync(bool withDetails)
     {
         Result<List<TDto>> raw = await _source.RefreshAsync(withDetails);

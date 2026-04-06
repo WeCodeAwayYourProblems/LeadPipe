@@ -19,6 +19,7 @@ internal abstract class ValueObjectUpdateService<TEntity, TVo>(
 
     public SyncKey SyncKey => key;
 
+    public Task<Result<List<TVo>>> GetDataAsync() => GetDataAsync(false);
     public async Task<Result<List<TVo>>> GetDataAsync(bool withDetails)
     {
         // Retrieve all data from source

@@ -6,6 +6,7 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Data.Transform;
@@ -43,7 +44,6 @@ internal sealed class TransformYellerReport(
                 c.Source == _settings.YellerCaliperSource2);
         if (corns.IsFailure) return Result.Failure<List<ReportYeller>>(corns.Error);
 
-
         Result<List<CaliperEntity>> calipers =
             await _caliperRepo.FindAsync(c =>
                 c.Source == _settings.YellerCaliperSource1 ||
@@ -55,12 +55,14 @@ internal sealed class TransformYellerReport(
                 c.Source == Source.Yeller);
         if (plumbs.IsFailure) return Result.Failure<List<ReportYeller>>(plumbs.Error);
 
-        HashSet<long> cornLookup = [.. corns.Value.Select(x => x.Id)];
-        HashSet<long> plumbLookup = [.. data.Select(x => x.Id)];
-        HashSet<long> caliperLookup = [.. calipers.Value.Select(x => x.Id)];
+        // Create Hashsets for fast lookup
+        HashSet<long> cornLookup = corns.Value.ToHashSetFast(c => c.Id);
+        HashSet<long> plumbLookup = data.ToHashSetFast(p => p.Id);
+        HashSet<long> caliperLookup = calipers.Value.ToHashSetFast(c => c.Id);
 
-        // Load custards with details
-        Result<List<CustardEntity>> custardsResult = await _custardRepo.FindWithDetailsAsync(c =>
+        // Load relevant custards with details
+        Result<List<CustardEntity>> custardsResult = await _custardRepo
+            .FindWithDetailsAsync(c =>
                 c.CustardPlumbingLinks.Any(link => plumbLookup.Contains(link.PlumbingId)) ||
                 c.CustardCaliperLinks.Any(link => caliperLookup.Contains(link.CaliperId)) ||
                 c.CustardCornLinks.Any(link => cornLookup.Contains(link.CornId))

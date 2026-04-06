@@ -30,6 +30,8 @@ internal class DataUpdateReportVerb : IVerbAsync
     public bool Update { get; set; } = false;
     [Option('R', "refresh", Required = false, HelpText = "Whether or not to perform a data refresh. If refresh, the process is likely to take less time, but the data may not be full.")]
     public bool Refresh { get; set; } = false;
+    [Option('f', "force", Required = false, HelpText = "Whether or not to force the run. Will run updates even if it was already run recently")]
+    public bool ForceRun { get; set; } = false;
 
     #endregion
 
@@ -39,9 +41,9 @@ internal class DataUpdateReportVerb : IVerbAsync
     {
         Result result = (Update, Report) switch
         {
-            (true, false) => await Updated(provider, Source, Refresh),
+            (true, false) => await Updated(provider, Source, Refresh, ForceRun),
             (false, true) => await Reported(provider, Source),
-            (true, true) or (false, false) => await Both(provider, Source, Refresh),
+            (true, true) or (false, false) => await Both(provider, Source, Refresh, ForceRun),
         };
 
         if (result.IsFailure)
@@ -56,12 +58,12 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     #region Private
 
-    private static async Task<Result> Updated(IServiceProvider service, Source source, bool refresh)
+    private static async Task<Result> Updated(IServiceProvider service, Source source, bool refresh, bool forceRun)
     {
         IUpdateManager update = service.GetRequiredService<IUpdateManager>();
         Result updated = source == Source.Test
-            ? await update.Manage(refresh)
-            : await update.Manage(source, refresh);
+            ? await update.Manage(refresh, forceRun)
+            : await update.Manage(source, refresh, forceRun);
         return updated;
     }
     private static async Task<Result> Reported(IServiceProvider service, Source source)
@@ -72,15 +74,15 @@ internal class DataUpdateReportVerb : IVerbAsync
             : await report.Manage(source);
         return reported;
     }
-    private static async Task<Result> Both(IServiceProvider service, Source source, bool refresh)
+    private static async Task<Result> Both(IServiceProvider service, Source source, bool refresh, bool forceRun)
     {
-        Result updated = await Updated(service, source, refresh);
+        Result updated = await Updated(service, source, refresh, forceRun);
         if (updated.IsFailure)
             return updated;
 
         Result reported = await Reported(service, source);
         return reported;
     }
-    
+
     #endregion
 }

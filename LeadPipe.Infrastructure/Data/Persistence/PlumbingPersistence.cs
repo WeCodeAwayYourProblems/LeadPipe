@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
@@ -21,7 +22,7 @@ internal class PlumbingPersistence(
     {
         var phonesToUpsert = t
             .Where(p => p.PhoneNumbers is not null && p.PhoneNumbers.Count > 0)
-            .ToDictionary(
+            .ToDictionaryFast(
                 p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, _metaTranslate.Translate(p)),
                 p => p.PhoneNumbers);
 
@@ -33,7 +34,7 @@ internal class PlumbingPersistence(
 
         Dictionary<PlumbingKey, PlumbingEntity> inputMap = t
             .GroupBy(p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, _metaTranslate.Translate(p)))
-            .ToDictionary(g => g.Key, g => g.First());
+            .ToDictionaryFast(g => g.Key, g => g.First());
 
         List<PhoneNumber> inputNumbers = [.. t.Select(t => t.PhoneNumber).Distinct()];
         List<Source> inputSources = [.. t.Select(t => t.Source).Distinct()];
@@ -47,7 +48,7 @@ internal class PlumbingPersistence(
         if (retrieved.IsFailure)
             return Result.Failure($"Failed to retrieve {nameof(PlumbingEntity)} list for {nameof(PlumbingPhoneNumber)} attribution sequence: {retrieved.Error}");
 
-        Dictionary<PlumbingKey, PlumbingEntity> dbMap = retrieved.Value.ToDictionary(r =>
+        Dictionary<PlumbingKey, PlumbingEntity> dbMap = retrieved.Value.ToDictionaryFast(r =>
             new PlumbingKey(r.PhoneNumber, r.UnixDate, r.Source, _metaTranslate.Translate(r))
         );
 

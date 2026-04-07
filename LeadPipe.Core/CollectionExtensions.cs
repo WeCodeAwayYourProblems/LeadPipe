@@ -12,10 +12,12 @@ public static class CollectionExtensions
 
         return result;
     }
+
     public static Dictionary<TKey, TValue> ToDictionaryFast<TSource, TKey, TValue>(
         this ICollection<TSource> source,
         Func<TSource, TKey> key,
-        Func<TSource, TValue> value) where TKey : notnull
+        Func<TSource, TValue> value
+    ) where TKey : notnull
     {
         Dictionary<TKey, TValue> result = new(source.Count);
         foreach (var item in source)
@@ -23,4 +25,17 @@ public static class CollectionExtensions
 
         return result;
     }
+
+    public static Dictionary<TKey, TSource> ToDictionaryFast<TSource, TKey>(
+        this ICollection<TSource> source,
+        Func<TSource, TKey> keySelector
+    ) where TKey : notnull
+    {
+        Dictionary<TKey, TSource> result = new(source.Count);
+        foreach (var item in source)
+            result.Add(keySelector(item), item);
+
+        return result;
+    }
+
 }

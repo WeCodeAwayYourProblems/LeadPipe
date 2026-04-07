@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
@@ -119,7 +120,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = corns
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );
@@ -156,7 +157,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = plumbings
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );
@@ -193,7 +194,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = calipers
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );
@@ -230,7 +231,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = plumbings
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );
@@ -269,7 +270,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = calipers
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );
@@ -310,7 +311,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = calipers
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );
@@ -349,7 +350,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = plumbings
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );
@@ -388,7 +389,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         var byPhone = calipers
             .Where(c => c.PhoneNumber != null && c.PhoneNumber.CanParticipateInDeduplication)
             .GroupBy(c => c.PhoneNumber)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key!,
                 g => g.OrderBy(c => c.Date).First() // Finds the chronologically first item by phonenumber
             );

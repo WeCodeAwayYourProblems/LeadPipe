@@ -100,9 +100,9 @@ internal sealed class TransformYellerReport(
 
         // We've loaded all the custards, regardless of how they're associated, and we've loaded all calipers, corns, and plumbs regardless of association
         // Here, we're putting custards and calipers together in a record
-        Dictionary<long, CaliperEntity> caliperById = calipers.Value.ToDictionary(c => c.Id);
-        Dictionary<long, CornEntity> cornById = corns.Value.ToDictionary(c => c.Id);
-        Dictionary<long, PlumbingEntity> plumbById = plumbs.Value.ToDictionary(c => c.Id);
+        Dictionary<long, CaliperEntity> caliperById = calipers.Value.ToDictionaryFast(c => c.Id);
+        Dictionary<long, CornEntity> cornById = corns.Value.ToDictionaryFast(c => c.Id);
+        Dictionary<long, PlumbingEntity> plumbById = plumbs.Value.ToDictionaryFast(c => c.Id);
 
         // For every custard,
         // And every link in every custard,
@@ -160,7 +160,7 @@ internal sealed class TransformYellerReport(
         // Get the first effectiveDateAssociated by phone number. This gives us first touch by phone number
         Dictionary<long, List<EffectiveDateAssociated>> firstTouchesByPhone = touchesWithEffectiveDate
             .GroupBy(t => t.MatchingPhone)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key,
                 g =>
                 {
@@ -206,7 +206,7 @@ internal sealed class TransformYellerReport(
         // Group by phone number and find the first one
         Dictionary<long, CaliperEntity> firstCalipers = calipers.Value
             .GroupBy(c => c.PhoneNumber.Number)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key,
                 g => g
                     .OrderBy(c => c.UnixDate)
@@ -216,7 +216,7 @@ internal sealed class TransformYellerReport(
 
         Dictionary<long, CornEntity> firstCorns = corns.Value
             .GroupBy(c => c.PhoneNumber.Number)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key,
                 g => g
                     .OrderBy(c => c.UnixDate)
@@ -226,7 +226,7 @@ internal sealed class TransformYellerReport(
 
         Dictionary<long, PlumbingEntity> firstPlumbing = plumbs.Value
             .GroupBy(c => c.PhoneNumber.Number)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key,
                 g => g
                     .OrderBy(c => c.UnixDate)
@@ -241,7 +241,7 @@ internal sealed class TransformYellerReport(
             .Concat(firstCorns.Values)
             .Concat(firstPlumbing.Values)
             .GroupBy(e => e.PhoneNumber.Number)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key,
                 g => g
                     .OrderBy(e => e.UnixDate)
@@ -253,7 +253,7 @@ internal sealed class TransformYellerReport(
         // This allows us to create a partition between attributed vs non attributed
         var attributionByPhone = attributions
             .GroupBy(a => a.MatchingPhone)
-            .ToDictionary(g => g.Key, g => g.ToList());
+            .ToDictionaryFast(g => g.Key, g => g.ToList());
 
         List<ReportYeller> reports = [.. crossEntityFirstTouches.Keys
             .SelectMany(phone =>

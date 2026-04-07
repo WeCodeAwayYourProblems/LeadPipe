@@ -66,7 +66,7 @@ internal class JsonRwService : IJsonRwService
 
     #region Private
     private static readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
-    internal/*fortestingonly*/ static Result<List<T>> Deserialize<T>(string jsonStr)
+    internal/*InternalForTestingOnly*/ static Result<List<T>> Deserialize<T>(string jsonStr)
     {
         try
         {

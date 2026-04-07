@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 
 namespace LeadPipe.Application.Manager;
@@ -22,7 +23,7 @@ public class SourceDataUpdateManager : ISourceDataUpdateManager
     {
         _syncGate = syncGate;
         _validSources = [.. Enum.GetValues<Source>().Except([Source.Test, Source.Test2])];
-        _services = _validSources.ToDictionary(
+        _services = _validSources.ToDictionaryFast(
         s => s,
         updateFactory.GetService<Plumbing>
     );

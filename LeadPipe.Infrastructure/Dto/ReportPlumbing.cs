@@ -3,32 +3,32 @@ using CsvHelper.Configuration.Attributes;
 
 namespace LeadPipe.Infrastructure.Dto;
 
-public class ReportFilePlumbingMap : ClassMap<ReportPlumbing>
+public class ReportFilePlumbingMap : ClassMap<ReportPlumbing_Old>
 {
     public ReportFilePlumbingMap()
     {
         int index = 0;
-        Map(m => m.PhoneNumber).Index(index++).Name(ReportPlumbing.PhoneNumberName);
-        Map(m => m.Date).Index(index++).Name(ReportPlumbing.DateName);
-        Map(m => m.FormattedDate).Index(index++).Name(ReportPlumbing.FormattedDateName);
-        Map(m => m.Message).Index(index++).Name(ReportPlumbing.MessageName);
-        Map(m => m.Source).Index(index++).Name(ReportPlumbing.SourceName);
-        Map(m => m.MetaData).Index(index++).Name(ReportPlumbing.MetaDataName);
-        Map(m => m.MsgBeforeCust).Index(index++).Name(ReportPlumbing.MsgBeforeCustName);
-        Map(m => m.IsSale).Index(index++).Name(ReportPlumbing.IsSaleName);
-        Map(m => m.CustomerId).Index(index++).Name(ReportPlumbing.CustomerIdName);
-        Map(m => m.SubId).Index(index++).Name(ReportPlumbing.SubIdName);
-        Map(m => m.SubActive).Index(index++).Name(ReportPlumbing.SubActiveName);
-        Map(m => m.Completed).Index(index++).Name(ReportPlumbing.CompletedName);
-        Map(m => m.CustDate).Index(index++).Name(ReportPlumbing.CustDateName);
-        Map(m => m.FormattedCustDate).Index(index++).Name(ReportPlumbing.FormattedCustDateName);
-        Map(m => m.CustCxlDate).Index(index++).Name(ReportPlumbing.CustCxlDateName);
-        Map(m => m.SubDate).Index(index++).Name(ReportPlumbing.SubDateName);
-        Map(m => m.FormattedSubDate).Index(index++).Name(ReportPlumbing.FormattedSubDateName);
-        Map(m => m.SubCxlDate).Index(index++).Name(ReportPlumbing.SubCxlDateName);
+        Map(m => m.PhoneNumber).Index(index++).Name(ReportPlumbing_Old.PhoneNumberName);
+        Map(m => m.Date).Index(index++).Name(ReportPlumbing_Old.DateName);
+        Map(m => m.FormattedDate).Index(index++).Name(ReportPlumbing_Old.FormattedDateName);
+        Map(m => m.Message).Index(index++).Name(ReportPlumbing_Old.MessageName);
+        Map(m => m.Source).Index(index++).Name(ReportPlumbing_Old.SourceName);
+        Map(m => m.MetaData).Index(index++).Name(ReportPlumbing_Old.MetaDataName);
+        Map(m => m.MsgBeforeCust).Index(index++).Name(ReportPlumbing_Old.MsgBeforeCustName);
+        Map(m => m.IsSale).Index(index++).Name(ReportPlumbing_Old.IsSaleName);
+        Map(m => m.CustomerId).Index(index++).Name(ReportPlumbing_Old.CustomerIdName);
+        Map(m => m.SubId).Index(index++).Name(ReportPlumbing_Old.SubIdName);
+        Map(m => m.SubActive).Index(index++).Name(ReportPlumbing_Old.SubActiveName);
+        Map(m => m.Completed).Index(index++).Name(ReportPlumbing_Old.CompletedName);
+        Map(m => m.CustDate).Index(index++).Name(ReportPlumbing_Old.CustDateName);
+        Map(m => m.FormattedCustDate).Index(index++).Name(ReportPlumbing_Old.FormattedCustDateName);
+        Map(m => m.CustCxlDate).Index(index++).Name(ReportPlumbing_Old.CustCxlDateName);
+        Map(m => m.SubDate).Index(index++).Name(ReportPlumbing_Old.SubDateName);
+        Map(m => m.FormattedSubDate).Index(index++).Name(ReportPlumbing_Old.FormattedSubDateName);
+        Map(m => m.SubCxlDate).Index(index++).Name(ReportPlumbing_Old.SubCxlDateName);
     }
 }
-public class ReportPlumbing
+public class ReportPlumbing_Old
 {
     [Name(PhoneNumberName)]
     public long PhoneNumber { get; set; }
@@ -104,4 +104,41 @@ public class ReportPlumbing
     [Name(SubCxlDateName)]
     public DateTimeOffset SubCxlDate { get; set; }
     public const string SubCxlDateName = "Sub Cxl Date";
+}
+public sealed class ReportPlumbing
+{
+    [Name(ReportPlumbingColumnNames.PhoneNumberName)]
+    public long PhoneNumber { get; set; }
+    [Name(ReportPlumbingColumnNames.DateName)]
+    public DateTimeOffset Date { get; set; }
+    [Name(ReportPlumbingColumnNames.ContentsName)]
+    public required string Contents { get; set; }
+    [Name(ReportPlumbingColumnNames.SourceName)]
+    public required string Source { get; set; }
+    [Name(ReportPlumbingColumnNames.MsgBCName)]
+    public bool? MsgBC { get; set; }
+    [Name(ReportPlumbingColumnNames.IsSName)]
+    public bool? IsS { get; set; }
+    [Name(ReportPlumbingColumnNames.CustardIdName)]
+    public long CustardId { get; set; }
+    [Name(ReportPlumbingColumnNames.SandActiveName)]
+    public bool? SandActive { get; set; }
+    [Name(ReportPlumbingColumnNames.CustardDateName)]
+    public DateTimeOffset? CustardDate { get; set; }
+    [Name(ReportPlumbingColumnNames.CustardCxlDateName)]
+    public DateTimeOffset? CustardCxlDate { get; set; }
+    [Name(ReportPlumbingColumnNames.SandIdName)]
+    public long SandId { get; set; }
+    [Name(ReportPlumbingColumnNames.CompletedName)]
+    public bool Completed { get; set; }
+    [Name(ReportPlumbingColumnNames.ValueName)]
+    public decimal Value { get; set; }
+    [Name(ReportPlumbingColumnNames.SandDateName)]
+    public DateTimeOffset? SandDate { get; set; }
+    [Name(ReportPlumbingColumnNames.SandCxlDateName)]
+    public DateTimeOffset? SandCxlDate { get; set; }
+    [Name(ReportPlumbingColumnNames.SellersName)]
+    public string? Sellers { get; set; }
+    [Name(ReportPlumbingColumnNames.MetaDataName)]
+    public string? MetaData { get; set; }
 }

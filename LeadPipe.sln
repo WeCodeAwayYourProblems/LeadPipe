@@ -65,6 +65,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{03C7DCE2
 		Batch\TrackReportChanges.bat = Batch\TrackReportChanges.bat
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadPipe.Core", "LeadPipe.Core\LeadPipe.Core.csproj", "{C7EDD816-600E-4643-9FF9-BD10AAE88E1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,10 @@ Global
 		{FD5120D2-1804-49BD-B87A-C9462D683799}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD5120D2-1804-49BD-B87A-C9462D683799}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD5120D2-1804-49BD-B87A-C9462D683799}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7EDD816-600E-4643-9FF9-BD10AAE88E1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7EDD816-600E-4643-9FF9-BD10AAE88E1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7EDD816-600E-4643-9FF9-BD10AAE88E1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7EDD816-600E-4643-9FF9-BD10AAE88E1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -126,6 +132,7 @@ Global
 		{2F28FEA4-7F14-4EDE-A9C1-C416A7CF79A5} = {D81ED4CD-E2EF-45F4-A860-E7DADD9C9BC6}
 		{C4F33022-BA5F-40C8-8286-EBE97BB12462} = {9B2C1815-B7E2-46DA-B8CC-2D8BD536862C}
 		{FD5120D2-1804-49BD-B87A-C9462D683799} = {9B2C1815-B7E2-46DA-B8CC-2D8BD536862C}
+		{C7EDD816-600E-4643-9FF9-BD10AAE88E1C} = {9B2C1815-B7E2-46DA-B8CC-2D8BD536862C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5297C95E-C3F4-4CF1-BA5C-8ED512BFBFCD}

@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;

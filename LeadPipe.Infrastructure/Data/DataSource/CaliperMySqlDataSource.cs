@@ -59,7 +59,7 @@ public sealed class CaliperMySqlDataSource(
 
 }
 
-public sealed class SyncedCaliperMySqlDataSource(
+internal sealed class SyncedCaliperMySqlDataSource(
     ICaliperMySqlRepository repo,
     ISyncStateRepository sync,
     IClock clock

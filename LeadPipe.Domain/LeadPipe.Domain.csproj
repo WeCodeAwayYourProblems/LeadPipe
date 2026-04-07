@@ -10,4 +10,8 @@
     <PackageReference Include="CSharpFunctionalExtensions" Version="*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LeadPipe.Core\LeadPipe.Core.csproj" />
+  </ItemGroup>
+
 </Project>

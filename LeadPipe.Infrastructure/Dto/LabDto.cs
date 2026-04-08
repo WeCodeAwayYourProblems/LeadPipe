@@ -1,5 +1,4 @@
-﻿
-namespace LeadPipe.Infrastructure.Dto;
+﻿namespace LeadPipe.Infrastructure.Dto;
 
 #pragma warning disable IDE1006 // Naming Styles
 public class LabHelperDto

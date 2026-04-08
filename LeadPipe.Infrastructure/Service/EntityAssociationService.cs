@@ -63,14 +63,14 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         if (linksCombined.IsFailure) return linksCombined;
 
         // Convert existing links to hashsets
-        HashSet<(long, long)> existingCornCaliper = [.. cornCaliperLinksResult.Value.Select(l => (l.CornId, l.CaliperId))];
-        HashSet<(long, long)> existingPlumbingCaliper = [.. plumbingCaliperLinksResult.Value.Select(l => (l.PlumbingId, l.CaliperId))];
-        HashSet<(long, long)> existingSandCaliper = [.. sandCaliperLinksResult.Value.Select(l => (l.SandId, l.CaliperId))];
-        HashSet<(long, long)> existingCornPlumbing = [.. cornPlumbingLinksResult.Value.Select(l => (l.CornId, l.PlumbingId))];
-        HashSet<(long, long)> existingSandPlumbing = [.. sandPlumbingLinksResult.Value.Select(l => (l.SandId, l.PlumbingId))];
-        HashSet<(long, long)> existingCustardCaliper = [.. custardCaliperLinksResult.Value.Select(l => (l.CustardId, l.CaliperId))];
-        HashSet<(long, long)> existingCustardCorn = [.. custardCornLinksResult.Value.Select(l => (l.CustardId, l.CornId))];
-        HashSet<(long, long)> existingCustardPlumbing = [.. custardPlumbingLinksResult.Value.Select(l => (l.CustardId, l.PlumbingId))];
+        HashSet<(long, long)> existingCornCaliper = cornCaliperLinksResult.Value.ToHashSetFast(l => (l.CornId, l.CaliperId));
+        HashSet<(long, long)> existingPlumbingCaliper = plumbingCaliperLinksResult.Value.ToHashSetFast(l => (l.PlumbingId, l.CaliperId));
+        HashSet<(long, long)> existingSandCaliper = sandCaliperLinksResult.Value.ToHashSetFast(l => (l.SandId, l.CaliperId));
+        HashSet<(long, long)> existingCornPlumbing = cornPlumbingLinksResult.Value.ToHashSetFast(l => (l.CornId, l.PlumbingId));
+        HashSet<(long, long)> existingSandPlumbing = sandPlumbingLinksResult.Value.ToHashSetFast(l => (l.SandId, l.PlumbingId));
+        HashSet<(long, long)> existingCustardCaliper = custardCaliperLinksResult.Value.ToHashSetFast(l => (l.CustardId, l.CaliperId));
+        HashSet<(long, long)> existingCustardCorn = custardCornLinksResult.Value.ToHashSetFast(l => (l.CustardId, l.CornId));
+        HashSet<(long, long)> existingCustardPlumbing = custardPlumbingLinksResult.Value.ToHashSetFast(l => (l.CustardId, l.PlumbingId));
 
         // Generate new links
         List<CornCaliperLink> cornCaliperLinks = GenerateCornCaliperLinks(corns.Value, calipers.Value, existingCornCaliper);

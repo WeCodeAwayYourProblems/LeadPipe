@@ -4,7 +4,6 @@ using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel.DataAnnotations;
 
 namespace LeadPipe.Infrastructure.Data.DataSource;
 

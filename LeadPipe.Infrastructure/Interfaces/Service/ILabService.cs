@@ -1,10 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Dto;
 
 namespace LeadPipe.Infrastructure.Interfaces.Service;
 
 public interface ILabService
 {
-    Task<Result<List<Plumbing>>> GetLabsAsync(int errorLimit = 5, CancellationToken ct = default);
-    Task<Result<List<Plumbing>>> UpdateDataAsync(int errorLimit = 5, CancellationToken ct = default);
+    Task<Result<List<LabDto>>> GetLabsAsync(int errorLimit = 5, CancellationToken ct = default);
+    Task<Result<List<LabDto>>> UpdateDataAsync(int errorLimit = 5, CancellationToken ct = default);
 }

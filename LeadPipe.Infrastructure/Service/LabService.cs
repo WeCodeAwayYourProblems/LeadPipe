@@ -15,7 +15,6 @@ internal class LabService : ILabService
 
     private readonly HttpClient _client;
     private readonly ILogger<LabService> _logger;
-    private readonly IDtoToVo<LabDto, Plumbing> _dtoToVo;
     private readonly ILabSettings _settings;
     private readonly SemaphoreSlim _throttle;
     private readonly JsonSerializerOptions _options;
@@ -23,12 +22,10 @@ internal class LabService : ILabService
     public LabService(
         IHttpClientFactory httpClientFactory,
         ILabSettings settings,
-        ILogger<LabService> logger,
-        IDtoToVo<LabDto, Plumbing> dtoToVo)
+        ILogger<LabService> logger)
     {
         _client = httpClientFactory.CreateClient(settings.LabName!);
         _logger = logger;
-        _dtoToVo = dtoToVo;
         _settings = settings;
         _throttle = new(_settings.LabConcurrentMax!);
         _options = new()
@@ -39,7 +36,7 @@ internal class LabService : ILabService
 
     #endregion
 
-    public async Task<Result<List<Plumbing>>> UpdateDataAsync(int errorLimit = 5, CancellationToken ct = default)
+    public async Task<Result<List<LabDto>>> UpdateDataAsync(int errorLimit = 5, CancellationToken ct = default)
     {
         List<LabDto> allDtos = [];
         int totalErrors = 0;
@@ -59,7 +56,7 @@ internal class LabService : ILabService
                     pageErrors,
                     totalErrors);
                 if (totalErrors >= errorLimit)
-                    return Result.Failure<List<Plumbing>>($"{nameof(UpdateDataAsync)} failed after {totalErrors} errors. Last error: {pageResult.Error}");
+                    return Result.Failure<List<LabDto>>($"{nameof(UpdateDataAsync)} failed after {totalErrors} errors. Last error: {pageResult.Error}");
                 continue;
             }
 
@@ -76,9 +73,7 @@ internal class LabService : ILabService
             page++;
         }
 
-        // Translate all DTOs to Plumbing
-        List<Plumbing> allPlumbings = [.. allDtos.Select(_dtoToVo.Translate)];
-        return Result.Success(allPlumbings);
+        return Result.Success(allDtos);
     }
 
     internal async Task<Result<LabHelperDto>> GetLabAsync(int page = 1, CancellationToken ct = default)
@@ -114,7 +109,7 @@ internal class LabService : ILabService
         return Result.Success(dtos ?? new());
     }
 
-    public async Task<Result<List<Plumbing>>> GetLabsAsync(int errorLimit = 5, CancellationToken ct = default)
+    public async Task<Result<List<LabDto>>> GetLabsAsync(int errorLimit = 5, CancellationToken ct = default)
     {
         List<LabDto> allDtos = [];
         int page = 1;
@@ -135,7 +130,7 @@ internal class LabService : ILabService
                     pageErrors,
                     totalErrors);
                 if (totalErrors >= errorLimit || result.Error.Contains("unauthorized", StringComparison.InvariantCultureIgnoreCase))
-                    return Result.Failure<List<Plumbing>>($"{nameof(GetLabsAsync)} failed after {totalErrors} errors. Last error: {result.Error}");
+                    return Result.Failure<List<LabDto>>($"{nameof(GetLabsAsync)} failed after {totalErrors} errors. Last error: {result.Error}");
                 page++;
                 continue;
             }
@@ -153,8 +148,7 @@ internal class LabService : ILabService
             }
         }
 
-        List<Plumbing> allPlumbings = [.. allDtos.Select(_dtoToVo.Translate)];
-        return Result.Success(allPlumbings);
+        return Result.Success(allDtos);
     }
 
 }

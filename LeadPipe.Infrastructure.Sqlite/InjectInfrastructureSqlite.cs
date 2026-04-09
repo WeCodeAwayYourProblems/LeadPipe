@@ -86,6 +86,7 @@ public static class InjectInfrastructureSqlite
         services.AddScoped<IRepository<SandEntity>, SandRepository>();
         services.AddScoped<ISyncStateRepository, SyncStateRepository>();
         services.AddScoped<ISyncStampRepository, SyncStampRepository>();
+        services.AddScoped<IOAuthTokenRepository, OAuthTokenRepository>();
 
         services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 

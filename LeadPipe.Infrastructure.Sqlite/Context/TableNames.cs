@@ -2,6 +2,7 @@
 
 internal class TableNames
 {
+    public const string OAuthTokensName = nameof(PlumbingContext.OAuthTokens);
     public const string SyncStateName = nameof(PlumbingContext.SyncState);
     public const string SyncStampName = nameof(PlumbingContext.SyncStamp);
     public const string CaliperEntitiesName = nameof(PlumbingContext.CaliperEntities);

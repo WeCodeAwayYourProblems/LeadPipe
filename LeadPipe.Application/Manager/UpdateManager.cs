@@ -5,9 +5,10 @@ namespace LeadPipe.Application.Manager;
 
 public interface IUpdateManager
 {
-    Task<Result> Manage(Source source, bool refresh, bool forceRun);
-    Task<Result> Manage(bool refresh, bool forceRun);
+    Task<Result> Manage(Source source, ForceRunRefresh frr);
+    Task<Result> Manage(ForceRunRefresh frr);
 }
+public record ForceRunRefresh(bool ForceRun, bool Refresh);
 internal sealed class UpdateManager(
     ISourceDataUpdateManager sourceData,
     ICoreDataUpdateManager coreData,
@@ -17,19 +18,19 @@ internal sealed class UpdateManager(
     readonly ISourceDataUpdateManager _source = sourceData;
     readonly ICoreDataUpdateManager _core = coreData;
     readonly IAssociationManager _associate = associate;
-    public async Task<Result> Manage(Source source, bool refresh, bool forceRun)
+    public async Task<Result> Manage(Source source, ForceRunRefresh frr)
     {
-        var core = await _core.Manage(refresh, forceRun);
-        var sourceData = await _source.Manage(refresh, source);
+        var core = await _core.Manage(frr);
+        var sourceData = await _source.Manage(refresh: frr.Refresh, source);
         var associate = await _associate.Manage();
         var combined = Result.Combine(core, sourceData, associate);
         return combined;
     }
 
-    public async Task<Result> Manage(bool refresh, bool forceRun)
+    public async Task<Result> Manage(ForceRunRefresh frr)
     {
-        var core = await _core.Manage(refresh, forceRun);
-        var sourceData = await _source.Manage(refresh);
+        var core = await _core.Manage(frr);
+        var sourceData = await _source.Manage(refresh: frr.Refresh);
         var associate = await _associate.Manage();
         var combined = Result.Combine(core, sourceData, associate);
         return combined;

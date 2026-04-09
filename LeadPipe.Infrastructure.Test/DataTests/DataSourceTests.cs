@@ -62,10 +62,10 @@ public class DataSourceTests
         var plumbings = new List<Plumbing> { new Plumbing(0, new(PhoneNumber.Default), DateTimeOffset.MaxValue, string.Empty, null, string.Empty, Source.Test, null) };
         var labDtos = new List<LabDto> { new LabDto() };
 
-        labServiceMock.GetLabsAsync().Returns(Task.FromResult(Result.Success(plumbings)));
+        labServiceMock.GetLabsAsync().Returns(Task.FromResult(Result.Success(labDtos)));
         voToDtoMock.Translate(Arg.Any<Plumbing>()).Returns(labDtos[0]);
 
-        var ds = new LabDataSource(labServiceMock, voToDtoMock);
+        var ds = new LabDataSource(labServiceMock);
 
         // Act
         var result = await ds.LoadAsync();
@@ -81,11 +81,10 @@ public class DataSourceTests
     {
         // Arrange
         var labServiceMock = Substitute.For<ILabService>();
-        var voToDtoMock = Substitute.For<IVoToDto<Plumbing, LabDto>>();
 
-        labServiceMock.GetLabsAsync().Returns(Task.FromResult(Result.Failure<List<Plumbing>>("error")));
+        labServiceMock.GetLabsAsync().Returns(Task.FromResult(Result.Failure<List<LabDto>>("error")));
 
-        var ds = new LabDataSource(labServiceMock, voToDtoMock);
+        var ds = new LabDataSource(labServiceMock);
 
         // Act
         var result = await ds.LoadAsync();

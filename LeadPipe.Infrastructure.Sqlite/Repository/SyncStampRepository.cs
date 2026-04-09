@@ -4,6 +4,7 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -27,10 +28,7 @@ public class SyncStampRepository(PlumbingContext context) : ISyncStampRepository
         }
         catch (Exception ex) { return Result.Failure<SyncStampEntity>($"Failed to retrieve {nameof(SyncStampEntity)} for {nameof(SyncKey)} '{key}'. Exception: {ex}"); }
 
-        static System.Linq.Expressions.Expression<Func<SyncStampEntity, bool>> Predicate(Source? source, SyncKey key)
-        {
-            return x => x.Key == key && x.Source == source;
-        }
+        static Expression<Func<SyncStampEntity, bool>> Predicate(Source? source, SyncKey key) => x => x.Key == key && x.Source == source;
     }
 
     public async Task<Result<SyncStampEntity>> UpsertAsync(SyncStampEntity entity)

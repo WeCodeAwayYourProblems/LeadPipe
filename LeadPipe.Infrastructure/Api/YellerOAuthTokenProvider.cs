@@ -99,6 +99,7 @@ internal sealed class YellerOAuthTokenProvider(
                 }
 
                 // Translate the token
+                tokenDto.Provider = _providerName;
                 OAuthTokenEntity e = _translate.Translate(tokenDto);
                 e.Provider = _providerName;
 

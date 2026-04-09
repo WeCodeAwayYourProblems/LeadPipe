@@ -6,7 +6,6 @@ public interface ILeafSettings
 {
     string? LeafOAuthName { get; set; }
     string? LeafName { get; set; }
-    TokenDto? LeafToken { get; set; }
     string? LeafBase { get; set; }
     string? LeafAcctUuid { get; set; }
     string? LeafUuid { get; set; }

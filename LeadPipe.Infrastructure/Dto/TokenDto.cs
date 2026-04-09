@@ -12,4 +12,5 @@ public class TokenDto
     public string? RefreshToken { get; set; }
     [JsonPropertyName("expires_in")]
     public int ExpiresIn { get; set; }
+    public string? Provider { get; set; }
 }

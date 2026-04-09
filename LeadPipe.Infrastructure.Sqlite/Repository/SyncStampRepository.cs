@@ -53,7 +53,7 @@ public class SyncStampRepository(PlumbingContext context) : ISyncStampRepository
         }
         catch (Exception ex) { return Result.Failure<SyncStampEntity>($"Failed to upsert {nameof(SyncStampEntity)}. Exception: {ex}"); }
 
-        static System.Linq.Expressions.Expression<Func<SyncStampEntity, bool>> Predicate(SyncStampEntity entity)
+        static Expression<Func<SyncStampEntity, bool>> Predicate(SyncStampEntity entity)
         {
             return entity.Id == default
                 ? x => x.Key == entity.Key && x.Source == entity.Source

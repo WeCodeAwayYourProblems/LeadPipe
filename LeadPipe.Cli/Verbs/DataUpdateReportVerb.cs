@@ -39,11 +39,12 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     public async Task<int> Run(IServiceProvider provider)
     {
+        ForceRunRefresh frr = new(ForceRun: ForceRun, Refresh: Refresh);
         Result result = (Update, Report) switch
         {
-            (true, false) => await Updated(provider, Source, Refresh, ForceRun),
+            (true, false) => await Updated(provider, Source, frr),
             (false, true) => await Reported(provider, Source),
-            (true, true) or (false, false) => await Both(provider, Source, Refresh, ForceRun),
+            (true, true) or (false, false) => await Both(provider, Source, frr),
         };
 
         if (result.IsFailure)
@@ -58,12 +59,12 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     #region Private
 
-    private static async Task<Result> Updated(IServiceProvider service, Source source, bool refresh, bool forceRun)
+    private static async Task<Result> Updated(IServiceProvider service, Source source, ForceRunRefresh frr)
     {
         IUpdateManager update = service.GetRequiredService<IUpdateManager>();
         Result updated = source == Source.Test
-            ? await update.Manage(refresh, forceRun)
-            : await update.Manage(source, refresh, forceRun);
+            ? await update.Manage(frr)
+            : await update.Manage(source, frr);
         return updated;
     }
     private static async Task<Result> Reported(IServiceProvider service, Source source)
@@ -74,9 +75,9 @@ internal class DataUpdateReportVerb : IVerbAsync
             : await report.Manage(source);
         return reported;
     }
-    private static async Task<Result> Both(IServiceProvider service, Source source, bool refresh, bool forceRun)
+    private static async Task<Result> Both(IServiceProvider service, Source source, ForceRunRefresh frr)
     {
-        Result updated = await Updated(service, source, refresh, forceRun);
+        Result updated = await Updated(service, source, frr);
         if (updated.IsFailure)
             return updated;
 

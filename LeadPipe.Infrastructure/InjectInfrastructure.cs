@@ -168,8 +168,8 @@ public static class InjectInfrastructure
                 sp.GetRequiredService<ILogger<YellerOAuthTokenProvider>>(),
                 key!.ToString()!
             ));
-        services.AddKeyedScoped<IOAuthTokenProvider, LabOAuthTokenProvider>(settings.LabName);
-        services.AddKeyedScoped<IOAuthTokenProvider, LeafOAuthTokenProvider>(settings.LeafName);
+        //services.AddKeyedScoped<IOAuthTokenProvider, LabOAuthTokenProvider>(settings.LabName);
+        //services.AddKeyedScoped<IOAuthTokenProvider, LeafOAuthTokenProvider>(settings.LeafName);
 
         bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
         bool useClientReporter = settings.HttpClients?.Yeller?.Reporter?.UseTestClients ?? useTestClientsGlobal;

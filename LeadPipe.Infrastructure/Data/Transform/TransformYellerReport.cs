@@ -7,7 +7,6 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
-using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Data.Transform;

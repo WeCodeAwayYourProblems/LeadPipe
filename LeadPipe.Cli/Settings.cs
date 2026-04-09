@@ -108,7 +108,4 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public LocationPair? PanLoc { get; set; }
     public LocationPair? LatherLoc { get; set; }
     public LocationPair? YellerLoc { get; set; }
-    public TokenDto? LabToken { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public TokenDto? LeafToken { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public TokenDto? YellerToken { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 }

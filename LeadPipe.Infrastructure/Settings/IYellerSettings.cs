@@ -8,7 +8,6 @@ public interface IYellerSettings
     string? YellerGetterName { get; set; }
     string? YellerReporterName { get; set; }
     string? YellerSecret { get; set; }
-    TokenDto? YellerToken { get; set; }
     string? YellerBase { get; set; }
     string? YellerPrelimEndpoint1 { get; set; }
     string? YellerPrelimEndpoint2 { get; set; }

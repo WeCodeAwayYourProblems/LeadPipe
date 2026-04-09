@@ -10,7 +10,9 @@ public interface ILabSettings
     string? LabBase { get; set; }
     string? LabPlumbing { get; set; }
     string? LabAuth { get; set; }
-    Token? LabToken { get; set; }
+    TokenDto? LabToken { get; set; }
     int LabConcurrentMax { get; set; }
     string? LabAccept { get; set; }
+    string? LabAuthorizationUrl { get; set; }
+    string? LabOAuthName { get; set; }
 }

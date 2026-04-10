@@ -28,6 +28,9 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public HttpClients? HttpClients { get; set; }
 
     // Leaf
+    public string? LeafAuthorizationUrl { get; set; }
+    public string? LeafU { get; set; }
+    public string? LeafP { get; set; }
     public string? LeafOAuthName { get; set; } = "leaf-oauth";
     public string? LeafName { get; set; }
     public string? LeafBase { get; set; }

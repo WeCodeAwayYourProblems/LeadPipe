@@ -68,6 +68,9 @@ internal class LabService : ILabService
                 break;
             allDtos.AddRange(pageDto.data.items);
 
+            if (pageDto.data?.next_page is null)
+                break;
+
             page++;
         }
 

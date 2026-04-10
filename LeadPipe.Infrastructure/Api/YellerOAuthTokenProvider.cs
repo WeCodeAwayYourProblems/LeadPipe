@@ -19,8 +19,9 @@ internal sealed class YellerOAuthTokenProvider(
     IHttpClientFactory httpClientFactory,
     ILogger<YellerOAuthTokenProvider> logger,
     string providerName
-    ) : IOAuthTokenProvider
+    ) : OAuthTokenProvider(repo, clock, providerName)
 {
+    #region Fields
     private readonly IYellerSettings _settings = settings;
     private readonly IOAuthTokenRepository _tokenPersistence = repo;
     private readonly IClock _clock = clock;
@@ -29,6 +30,7 @@ internal sealed class YellerOAuthTokenProvider(
     private readonly ILogger<YellerOAuthTokenProvider> _logger = logger;
     private readonly string _providerName = providerName;
     const int _errorLimit = 5;
+    #endregion
 
     /// <summary>
     /// Calls the api for a new token, persists the token, and then returns the token
@@ -36,7 +38,7 @@ internal sealed class YellerOAuthTokenProvider(
     /// <param name="_providerName"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<Result<string>> ForceRefreshAsync(CancellationToken ct)
+    public override async Task<Result<string>> ForceRefreshAsync(CancellationToken ct)
     {
         HttpClient client = _httpClientFactory.CreateClient(_settings.YellerOAuthName!);
         Result<OAuthTokenEntity> token = await _tokenPersistence.GetByProviderAsync(_providerName, ct);
@@ -134,26 +136,4 @@ internal sealed class YellerOAuthTokenProvider(
         return Result.Failure<string>($"{_providerName} failed to fetch token");
     }
 
-    /// <summary>
-    /// Checks persistence for existing token. If the token is not expired, it returns the existing token. If the token is expired or about to expire, calls api for a new token, persists the token, and returns the new token.
-    /// </summary>
-    /// <param name="_providerName"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public async Task<Result<string>> GetValidAccessTokenAsync(CancellationToken ct)
-    {
-        // Retrieve existing token
-        var entity = await _tokenPersistence.GetByProviderAsync(_providerName, ct);
-        if (entity.IsFailure)
-            return Result.Failure<string>(entity.Error);
-
-        // If token is expired, refresh it
-        var now = _clock.UtcNow.ToUnixTimeSeconds();
-        long bufferSeconds = 60;
-        if (entity.Value.UnixExpiresAtUtc <= now + bufferSeconds)
-            return await ForceRefreshAsync(ct);
-
-        return entity.Value.AccessToken;
-    }
 }

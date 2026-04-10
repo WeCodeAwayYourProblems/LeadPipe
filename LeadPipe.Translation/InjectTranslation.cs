@@ -9,6 +9,7 @@ using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.DtoToVo;
 using LeadPipe.Translation.Translate.EntityToReport;
 using LeadPipe.Translation.Translate.EntityToVo;
+using LeadPipe.Translation.Translate.Translate;
 using LeadPipe.Translation.Translate.VoToDto;
 using LeadPipe.Translation.Translate.VoToEntity;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,9 @@ public static class InjectTranslation
     public static IServiceCollection AddTranslation(this IServiceCollection services, IInfrastructureSettings settings)
     {
         // Format: services.AddScoped<Interface, Class>();
+
+        // Translate
+        services.AddScoped<ITranslate<TokenDto, OAuthTokenEntity>, TokenDtoToOAuthTokenEntity>();
 
         // Primitives
         services.AddScoped<IDateTimeTranslate, DateTimeTranslate>();

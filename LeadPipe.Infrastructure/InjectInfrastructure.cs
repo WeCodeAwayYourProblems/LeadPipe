@@ -158,7 +158,7 @@ public static class InjectInfrastructure
 
         // *****************************************
         #region ADD CLIENTS
-        services.AddKeyedScoped<IOAuthTokenProvider>(settings.YellerGetterName, (sp, key)=>
+        services.AddKeyedScoped<IOAuthTokenProvider>(settings.YellerGetterName, (sp, key) =>
             new YellerOAuthTokenProvider(
                 sp.GetRequiredService<IYellerSettings>(),
                 sp.GetRequiredService<IOAuthTokenRepository>(),
@@ -168,8 +168,26 @@ public static class InjectInfrastructure
                 sp.GetRequiredService<ILogger<YellerOAuthTokenProvider>>(),
                 key!.ToString()!
             ));
-        //services.AddKeyedScoped<IOAuthTokenProvider, LabOAuthTokenProvider>(settings.LabName);
-        //services.AddKeyedScoped<IOAuthTokenProvider, LeafOAuthTokenProvider>(settings.LeafName);
+        services.AddKeyedScoped<IOAuthTokenProvider, LabOAuthTokenProvider>(settings.LabName, (sp, key) =>
+            new LabOAuthTokenProvider(
+                sp.GetRequiredService<ILabSettings>(),
+                sp.GetRequiredService<IHttpClientFactory>(),
+                sp.GetRequiredService<ILogger<LabOAuthTokenProvider>>(),
+                sp.GetRequiredService<IClock>(),
+                sp.GetRequiredService<ITranslate<TokenDto, OAuthTokenEntity>>(),
+                sp.GetRequiredService<IOAuthTokenRepository>(),
+                key!.ToString()!
+            ));
+        services.AddKeyedScoped<IOAuthTokenProvider, LeafOAuthTokenProvider>(settings.LeafName, (sp, key) =>
+            new LeafOAuthTokenProvider(
+                sp.GetRequiredService<ILeafSettings>(),
+                sp.GetRequiredService<IHttpClientFactory>(),
+                sp.GetRequiredService<ILogger<LeafOAuthTokenProvider>>(),
+                sp.GetRequiredService<IClock>(),
+                sp.GetRequiredService<ITranslate<TokenDto, OAuthTokenEntity>>(),
+                sp.GetRequiredService<IOAuthTokenRepository>(),
+                key!.ToString()!
+            ));
 
         bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
         bool useClientReporter = settings.HttpClients?.Yeller?.Reporter?.UseTestClients ?? useTestClientsGlobal;
@@ -215,6 +233,7 @@ public static class InjectInfrastructure
         // Add Oauth Clients
         services.AddHttpClient(settings.YellerOAuthName!);
         services.AddHttpClient(settings.LabOAuthName!);
+        services.AddHttpClient(settings.LeafOAuthName!);
 
         #endregion
         // *****************************************

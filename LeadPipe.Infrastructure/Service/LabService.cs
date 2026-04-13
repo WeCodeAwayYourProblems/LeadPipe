@@ -66,7 +66,10 @@ internal class LabService : ILabService
             // Add records to list
             if (pageDto.data?.items is null)
                 break;
-            allDtos.AddRange(pageDto.data.items);
+            IEnumerable<LabDto> labs = pageDto.data.items
+                .Where(i => i?.labDto is not null)
+                .Select(i => i!.labDto!);
+            allDtos.AddRange(labs);
 
             if (pageDto.data?.next_page is null)
                 break;
@@ -138,7 +141,7 @@ internal class LabService : ILabService
 
             pageErrors = 0;
             List<LabDto> pageDtos = result.Value.data?.items is not null
-                ? [.. result.Value.data.items]
+                ? [.. result.Value.data.items.Where(i => i!.labDto is not null).Select(i => i!.labDto!)]
                 : [];
             if (pageDtos == null || pageDtos.Count == 0)
                 morePages = false;

@@ -11,17 +11,28 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 
 public sealed class TransformPlumbingReport(
     IRepository<SandPlumbingLink> repo,
-    IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
+    IRepository<PlumbingEntity> plumbs,
     IEntityToReport<SandPlumbingLink, ReportPlumbing> eToR
     ) : ITransform<Plumbing, ReportPlumbing>
 {
     private readonly IRepository<SandPlumbingLink> _repo = repo;
-    private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = voToEntity;
+    private readonly IRepository<PlumbingEntity> _plumbs = plumbs;
     private readonly IEntityToReport<SandPlumbingLink, ReportPlumbing> _eToR = eToR;
     public async Task<Result<List<ReportPlumbing>>> TransformAsync(List<Plumbing> data)
     {
-        // Translate plumbing to plumbingentity
-        List<PlumbingEntity> plumbingEntities = [.. data.Select(_voToEntity.Translate)];
+        // Retrieve relevant plumbing entities
+        List<Source> sources = [.. data.Select(d => d.Source).Distinct()];
+
+        Result<List<PlumbingEntity>> plumbs = await _plumbs.FindAsync(p => sources.Contains(p.Source));
+        if (plumbs.IsFailure) return Result.Failure<List<ReportPlumbing>>(plumbs.Error);
+
+        var keys = data.Select(d =>
+        {
+            var UnixDate = d.Date.ToUnixTimeSeconds();
+            return new { d.PhoneNumber, UnixDate, d.Source, d.MetaData };
+        }).ToList();
+        var keySet = keys.ToHashSetFast(k => (k.PhoneNumber, k.UnixDate, k.Source, k.MetaData));
+        List<PlumbingEntity> plumbingEntities = [.. plumbs.Value.Where(p => keySet.Contains((p.PhoneNumber, p.UnixDate, p.Source, p.MetaData)))];
 
         // Get links to the plumbing
         List<long> plumbingIds = [.. plumbingEntities.Select(e => e.Id)];

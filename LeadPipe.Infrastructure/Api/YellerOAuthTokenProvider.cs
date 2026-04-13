@@ -22,12 +22,10 @@ internal sealed class YellerOAuthTokenProvider(
     ) : OAuthTokenProvider<YellerOAuthTokenProvider>(cache, tokenRepository, httpClientFactory, clock, translate, logger, providerName)
 {
     readonly IYellerSettings _settings = settings;
-    readonly IOAuthTokenRepository _tokenPersistence = tokenRepository;
-    readonly ILogger<YellerOAuthTokenProvider> _logger = logger;
-    readonly string _providerName = providerName;
+
     protected override Uri AuthorizationUri => new(_settings.YellerAuthUrl!);
 
-    protected override string OAuthClientName => new(_settings.YellerOAuthName!);
+    protected override string OAuthClientName => _settings.YellerOAuthName!;
 
     protected override long BufferSeconds => 172_800;
 

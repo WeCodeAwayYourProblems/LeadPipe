@@ -20,12 +20,12 @@ internal abstract class OAuthTokenProvider<T>(
     string providerName) : IOAuthTokenProvider
 {
     readonly ITokenCacheService _cache = cache;
-    readonly IOAuthTokenRepository _tokenPersistence = tokenRepository;
+    protected readonly IOAuthTokenRepository _tokenPersistence = tokenRepository;
     readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     readonly IClock _clock = clock;
     readonly ITranslate<TokenDto, OAuthTokenEntity> _translate = translate;
-    readonly ILogger<T> _logger = logger;
-    readonly string _providerName = providerName;
+    protected readonly ILogger<T> _logger = logger;
+    protected readonly string _providerName = providerName;
     protected abstract Task<Result<FormUrlEncodedContent>> Content(CancellationToken ct);
     protected abstract Uri AuthorizationUri { get; }
     protected abstract string OAuthClientName { get; }
@@ -60,45 +60,11 @@ internal abstract class OAuthTokenProvider<T>(
                     continue;
                 }
 
-                // Convert the response
-                // Cancellation.None is necessary because if we've reached this point, this operation is CRITICAL; without it, we have to manually reset the token, 
-                // a process that is manual and error-prone
-                string responseString = await response.Content.ReadAsStringAsync(CancellationToken.None);
-                TokenDto? tokenDto = JsonSerializer.Deserialize<TokenDto>(responseString);
-                if (tokenDto is null)
-                {
-                    _logger.LogError("Deserialization Error. Provider={Provider}. Total Errors={Errors}. Response String={ResponseString}",
-                        _providerName,
-                        attempt + 1,
-                        responseString
-                        );
-                    if (attempt == ErrorLimit - 1)
-                        return Result.Failure<AccessToken>($"{nameof(ForceRefreshAsync)}: Failed to deserialize token.");
-                    continue;
-                }
+                var commitResult = await CommitTokenAsync(response, ct);
+                if (commitResult.IsFailure)
+                    return Result.Failure<AccessToken>(commitResult.Error);
 
-                // Translate the token
-                tokenDto.Provider = _providerName;
-                OAuthTokenEntity e = _translate.Translate(tokenDto);
-                e.Provider = _providerName;
-
-                // Persist the token
-                // Cancellation.None is necessary because if we've reached this point, this operation is CRITICAL; without it, we have to manually reset the token, 
-                // a process that is manual and error-prone
-                Result<OAuthTokenEntity> persisted = await _tokenPersistence.UpsertAsync(e, CancellationToken.None);
-                if (persisted.IsFailure)
-                {
-                    _logger.LogError("Provider failed to persist the token. Provider={Provider}. Token={Token}. Total Errors={Errors}. Error Message={ErrorMessage}",
-                        _providerName,
-                        tokenDto,
-                        attempt + 1,
-                        persisted.Error);
-                    if (attempt == ErrorLimit - 1)
-                        return Result.Failure<AccessToken>(persisted.Error);
-                    continue;
-                }
-
-                return FromEntity(persisted.Value);
+                return commitResult;
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)
@@ -149,4 +115,80 @@ internal abstract class OAuthTokenProvider<T>(
     }
 
     protected static AccessToken FromEntity(OAuthTokenEntity e) => new(e.AccessToken, e.UnixExpiresAtUtc);
+    private async Task<Result<AccessToken>> CommitTokenAsync(
+        HttpResponseMessage response,
+        CancellationToken originalCt)
+    {
+        // Create bounded commit token
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(originalCt);
+        cts.CancelAfter(TimeSpan.FromSeconds(10)); // tune this
+        var ct = cts.Token;
+
+        try
+        {
+            string responseString = await response.Content.ReadAsStringAsync(ct);
+
+            TokenDto? tokenDto = JsonSerializer.Deserialize<TokenDto>(responseString);
+            if (tokenDto is null)
+            {
+                _logger.LogError("Deserialization failed during commit phase. Provider={Provider}", _providerName);
+                return Result.Failure<AccessToken>("Failed to deserialize token");
+            }
+
+            tokenDto.Provider = _providerName;
+            OAuthTokenEntity entity = _translate.Translate(tokenDto);
+
+            // Retry persistence
+            var persisted = await PersistWithRetryAsync(entity, ct);
+            if (persisted.IsFailure)
+                return Result.Failure<AccessToken>(persisted.Error);
+
+            return FromEntity(persisted.Value);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogError("Commit phase timed out. Provider={Provider}", _providerName);
+            return Result.Failure<AccessToken>("Commit phase timed out");
+        }
+    }
+    private async Task<Result<OAuthTokenEntity>> PersistWithRetryAsync(
+        OAuthTokenEntity entity,
+        CancellationToken ct)
+    {
+        const int maxAttempts = 3;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                var result = await _tokenPersistence.UpsertAsync(entity, ct);
+
+                if (result.IsSuccess)
+                    return result;
+
+                _logger.LogWarning(
+                    "Token persistence failed (attempt {Attempt}/{Max}). Provider={Provider}. Error={Error}",
+                    attempt,
+                    maxAttempts,
+                    _providerName,
+                    result.Error);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Exception during token persistence (attempt {Attempt}/{Max}). Provider={Provider}",
+                    attempt,
+                    maxAttempts,
+                    _providerName);
+            }
+
+            // small backoff
+            await Task.Delay(TimeSpan.FromMilliseconds(200 * attempt), ct);
+        }
+
+        _logger.LogError("Failed to persist token after retries. Provider={Provider}", _providerName);
+
+        return Result.Failure<OAuthTokenEntity>("Failed to persist token after retries");
+    }
 }

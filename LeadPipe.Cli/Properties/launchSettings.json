@@ -53,6 +53,13 @@
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
+    "Data report only | Lab": {
+      "commandName": "Project",
+      "commandLineArgs": "data -r -s Lab",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
 
     // *******************************************
     // Data Updating

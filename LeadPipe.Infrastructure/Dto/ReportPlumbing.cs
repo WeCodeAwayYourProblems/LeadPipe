@@ -110,7 +110,7 @@ public sealed class ReportPlumbing
     [Name(ReportPlumbingColumnNames.PhoneNumberName)]
     public long PhoneNumber { get; set; }
     [Name(ReportPlumbingColumnNames.DateName)]
-    public DateTimeOffset Date { get; set; }
+    public DateTime DateUtc { get; set; }
     [Name(ReportPlumbingColumnNames.ContentsName)]
     public required string Contents { get; set; }
     [Name(ReportPlumbingColumnNames.SourceName)]
@@ -120,23 +120,23 @@ public sealed class ReportPlumbing
     [Name(ReportPlumbingColumnNames.IsSName)]
     public bool? IsS { get; set; }
     [Name(ReportPlumbingColumnNames.CustardIdName)]
-    public long CustardId { get; set; }
+    public long? CustardId { get; set; }
     [Name(ReportPlumbingColumnNames.SandActiveName)]
     public bool? SandActive { get; set; }
     [Name(ReportPlumbingColumnNames.CustardDateName)]
-    public DateTimeOffset? CustardDate { get; set; }
+    public DateTime? CustardDateUtc { get; set; }
     [Name(ReportPlumbingColumnNames.CustardCxlDateName)]
-    public DateTimeOffset? CustardCxlDate { get; set; }
+    public DateTime? CustardCxlDateUtc { get; set; }
     [Name(ReportPlumbingColumnNames.SandIdName)]
-    public long SandId { get; set; }
+    public long? SandId { get; set; }
     [Name(ReportPlumbingColumnNames.CompletedName)]
-    public bool Completed { get; set; }
+    public bool? Completed { get; set; }
     [Name(ReportPlumbingColumnNames.ValueName)]
-    public decimal Value { get; set; }
+    public decimal? Value { get; set; }
     [Name(ReportPlumbingColumnNames.SandDateName)]
-    public DateTimeOffset? SandDate { get; set; }
+    public DateTime? SandDateUtc { get; set; }
     [Name(ReportPlumbingColumnNames.SandCxlDateName)]
-    public DateTimeOffset? SandCxlDate { get; set; }
+    public DateTime? SandCxlDateUtc { get; set; }
     [Name(ReportPlumbingColumnNames.SellersName)]
     public string? Sellers { get; set; }
     [Name(ReportPlumbingColumnNames.MetaDataName)]

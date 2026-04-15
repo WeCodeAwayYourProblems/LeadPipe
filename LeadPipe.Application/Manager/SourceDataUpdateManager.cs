@@ -7,8 +7,8 @@ namespace LeadPipe.Application.Manager;
 
 public interface ISourceDataUpdateManager
 {
-    Task<Result> Manage(bool refresh);
-    Task<Result> Manage(bool refresh, params Source[] sources);
+    Task<Result> Manage(ForceRunRefresh frr);
+    Task<Result> Manage(ForceRunRefresh frr, params Source[] sources);
 }
 public class SourceDataUpdateManager : ISourceDataUpdateManager
 {
@@ -29,26 +29,26 @@ public class SourceDataUpdateManager : ISourceDataUpdateManager
     );
     }
 
-    public Task<Result> Manage(bool refresh) => Manage(refresh, _validSources);
+    public Task<Result> Manage(ForceRunRefresh frr) => Manage(frr, _validSources);
 
-    public async Task<Result> Manage(bool refresh, params Source[] sources)
+    public async Task<Result> Manage(ForceRunRefresh frr, params Source[] sources)
     {
         foreach (var source in sources)
         {
-            var result = await RunIfDue(source, refresh, _services[source], _syncGate);
+            var result = await RunIfDue(source, frr, _services[source], _syncGate);
             if (result.IsFailure)
                 return result;
         }
         return Result.Success();
     }
 
-    private static async Task<Result> RunIfDue<T>(Source source, bool refresh, IUpdateService<T> service, ISyncGate syncGate)
+    private static async Task<Result> RunIfDue<T>(Source source, ForceRunRefresh frr, IUpdateService<T> service, ISyncGate syncGate)
     {
         bool shouldRun = await syncGate.ShouldRunAsync(source, service.SyncKey);
-        if (!shouldRun)
+        if (!shouldRun && !frr.ForceRun)
             return Result.Success();
 
-        Result result = await UpdatedAndSaved(refresh, false, service);
+        Result result = await UpdatedAndSaved(frr.Refresh, false, service);
 
         if (result.IsSuccess)
             await syncGate.MarkSuccessAsync(source, service.SyncKey);

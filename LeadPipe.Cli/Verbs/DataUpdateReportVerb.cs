@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Cli.Verbs;
 
-[Verb("data", HelpText = "This updates and/or reports specific data.")]
+[Verb("data", HelpText = "This updates specific data.")]
 internal class DataUpdateReportVerb : IVerbAsync
 {
 
@@ -22,10 +22,9 @@ internal class DataUpdateReportVerb : IVerbAsync
         Libacion
         Pan
         Yeller
+        Lather
         """)]
     public Source Source { get; set; } = Source.Test;
-    [Option('r', "report", Required = false, HelpText = "Whether to perform the report.")]
-    public bool Report { get; set; } = false;
     [Option('u', "update", Required = false, HelpText = "Whether to update.")]
     public bool Update { get; set; } = false;
     [Option('R', "refresh", Required = false, HelpText = "Whether or not to perform a data refresh. If refresh, the process is likely to take less time, but the data may not be full.")]
@@ -40,12 +39,7 @@ internal class DataUpdateReportVerb : IVerbAsync
     public async Task<int> Run(IServiceProvider provider)
     {
         ForceRunRefresh frr = new(ForceRun: ForceRun, Refresh: Refresh);
-        Result result = (Update, Report) switch
-        {
-            (true, false) => await Updated(provider, Source, frr),
-            (false, true) => await Reported(provider, Source),
-            (true, true) or (false, false) => await Both(provider, Source, frr),
-        };
+        Result result = await Updated(provider, Source, frr);
 
         if (result.IsFailure)
             Console.WriteLine(result.Error);
@@ -66,23 +60,6 @@ internal class DataUpdateReportVerb : IVerbAsync
             ? await update.Manage(frr)
             : await update.Manage(source, frr);
         return updated;
-    }
-    private static async Task<Result> Reported(IServiceProvider service, Source source)
-    {
-        IReportManager report = service.GetRequiredService<IReportManager>();
-        Result reported = source == Source.Test
-            ? await report.Manage()
-            : await report.Manage(source);
-        return reported;
-    }
-    private static async Task<Result> Both(IServiceProvider service, Source source, ForceRunRefresh frr)
-    {
-        Result updated = await Updated(service, source, frr);
-        if (updated.IsFailure)
-            return updated;
-
-        Result reported = await Reported(service, source);
-        return reported;
     }
 
     #endregion

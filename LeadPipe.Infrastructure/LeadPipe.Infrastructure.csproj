@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include=".info\plumbing.db" />
+	  <None Include=".info\YellerReport.sql" />
 	</ItemGroup>
 
 </Project>

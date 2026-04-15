@@ -6,7 +6,7 @@ namespace LeadPipe.Application.Manager;
 
 public interface IAssociationManager
 {
-    Task<Result> Manage();
+    Task<Result> Manage(ForceRunRefresh frr);
 }
 internal class AssociationManager(
     ISyncGate syncGate,
@@ -15,12 +15,12 @@ internal class AssociationManager(
 {
     readonly ISyncGate _syncGate = syncGate;
     readonly IEntityAssociationService _associate = associationService;
-    public Task<Result> Manage() => AssociateIfDue();
-    private async Task<Result> AssociateIfDue()
+    public Task<Result> Manage(ForceRunRefresh frr) => AssociateIfDue(frr);
+    private async Task<Result> AssociateIfDue(ForceRunRefresh frr)
     {
         var key = SyncKey.Associate;
         bool shouldRun = await _syncGate.ShouldRunAsync(null, key);
-        if (!shouldRun)
+        if (!shouldRun && !frr.ForceRun)
             return Result.Success();
 
         Result result = await _associate.AssociateAsync();

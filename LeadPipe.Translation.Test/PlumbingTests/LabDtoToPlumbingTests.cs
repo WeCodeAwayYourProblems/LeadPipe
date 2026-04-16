@@ -22,13 +22,13 @@ public class LabDtoToPlumbingTests
             {
                 text = "Test contents"
             },
-            entities = new Entities
+            entities = [new Entities
             {
                 buyer = new Buyer
                 {
                     telephone = "2345678901"
                 }
-            },
+            }],
             metadata = new Metadata
             {
                 location = new LabLocation
@@ -61,13 +61,13 @@ public class LabDtoToPlumbingTests
     {
         var dto = new LabDto
         {
-            entities = new Entities
+            entities = [new Entities
             {
                 buyer = new Buyer
                 {
                     telephone = "not-a-phone"
                 }
-            }
+            }]
         };
 
         var result = _translator.Translate(dto);

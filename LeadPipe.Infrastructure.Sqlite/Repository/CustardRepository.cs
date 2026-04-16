@@ -27,7 +27,7 @@ public sealed class CustardRepository
         TableName: TableNames.CustardEntitiesName,
         TempTable: $"temp_{TableNames.CustardEntitiesName}",
         EntityName: nameof(CustardEntity),
-        ColumnCount: 8);
+        ColumnCount: 7);
 
     protected override string CreateTempTable => $"""
         CREATE TEMP TABLE IF NOT EXISTS {EntityDetails.TempTable} (
@@ -37,7 +37,6 @@ public sealed class CustardRepository
             {nameof(CustardEntity.PhoneNumber2)} INTEGER,
             {nameof(CustardEntity.Date)} TEXT,
             {nameof(CustardEntity.UnixDate)} INTEGER,
-            {nameof(CustardEntity.CancelDate)} TEXT,
             {nameof(CustardEntity.UnixCancelDate)} INTEGER
         ) WITHOUT ROWID;
         DELETE FROM {EntityDetails.TempTable};
@@ -51,7 +50,6 @@ public sealed class CustardRepository
             {nameof(CustardEntity.PhoneNumber2)} = temp.{nameof(CustardEntity.PhoneNumber2)},
             {nameof(CustardEntity.Date)} = temp.{nameof(CustardEntity.Date)},
             {nameof(CustardEntity.UnixDate)} = temp.{nameof(CustardEntity.UnixDate)},
-            {nameof(CustardEntity.CancelDate)} = temp.{nameof(CustardEntity.CancelDate)},
             {nameof(CustardEntity.UnixCancelDate)} = temp.{nameof(CustardEntity.UnixCancelDate)}
         FROM {EntityDetails.TempTable} temp
         WHERE temp.{nameof(CustardEntity.Id)} = {TableNames.CustardEntitiesName}.{nameof(CustardEntity.Id)};
@@ -65,7 +63,6 @@ public sealed class CustardRepository
             {nameof(CustardEntity.PhoneNumber2)}, 
             {nameof(CustardEntity.Date)}, 
             {nameof(CustardEntity.UnixDate)}, 
-            {nameof(CustardEntity.CancelDate)}, 
             {nameof(CustardEntity.UnixCancelDate)}
         )
         SELECT 
@@ -75,7 +72,6 @@ public sealed class CustardRepository
             temp.{nameof(CustardEntity.PhoneNumber2)}, 
             temp.{nameof(CustardEntity.Date)}, 
             temp.{nameof(CustardEntity.UnixDate)}, 
-            temp.{nameof(CustardEntity.CancelDate)}, 
             temp.{nameof(CustardEntity.UnixCancelDate)}
         FROM {EntityDetails.TempTable} temp
         WHERE NOT EXISTS (
@@ -103,12 +99,6 @@ public sealed class CustardRepository
             var placeholders = ColumnIndexes.Select(ci => $"{{{offset + ci}}}");
             rows.Add($"({string.Join(", ", placeholders)})");
 
-            // Handle potentially uninitialized or null DateTime
-            var etCancelDate =
-                e.CancelDate == default
-                ? null // Null is fine because we're executing Sql. EF core understands how to convert null. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
-                : e.CancelDate.ToString(IsoString);
-
             // Order here must match order below
             values.Add(e.Id);
             values.Add(e.Active ? 1 : 0);
@@ -116,7 +106,6 @@ public sealed class CustardRepository
             values.Add(e.PhoneNumber2?.Number); // Null is fine because we're executing Sql. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
             values.Add(e.Date.ToString(IsoString));
             values.Add(e.UnixDate);
-            values.Add(etCancelDate);
             values.Add(e.UnixCancelDate);
         }
 
@@ -129,11 +118,10 @@ public sealed class CustardRepository
                 {nameof(CustardEntity.PhoneNumber2)},
                 {nameof(CustardEntity.Date)},
                 {nameof(CustardEntity.UnixDate)},
-                {nameof(CustardEntity.CancelDate)},
                 {nameof(CustardEntity.UnixCancelDate)}
             )
             VALUES {string.Join(",", rows)};
-            """;
+        """;
         _context.Database.ExecuteSqlRaw(sql, [.. values]);
 #pragma warning restore CS8604
     }

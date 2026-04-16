@@ -134,7 +134,6 @@ public class RepositoryEntityTests
             PhoneNumber2 = null,
             Date = now,
             UnixDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
-            CancelDate = now.AddDays(10),
             UnixCancelDate = new DateTimeOffset(now.AddDays(10)).ToUnixTimeSeconds()
         };
 
@@ -160,7 +159,6 @@ public class RepositoryEntityTests
             PhoneNumber2 = new PhoneNumber(8888888888),
             Date = now.AddDays(1),
             UnixDate = new DateTimeOffset(now.AddDays(1)).ToUnixTimeSeconds(),
-            CancelDate = now.AddDays(20),
             UnixCancelDate = new DateTimeOffset(now.AddDays(20)).ToUnixTimeSeconds()
         };
 
@@ -256,7 +254,6 @@ public class RepositoryEntityTests
             PhoneNumber = new PhoneNumber(5555555555),
             Date = now,
             UnixDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
-            CancelDate = now,
             UnixCancelDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
             Active = true,
         };
@@ -271,7 +268,6 @@ public class RepositoryEntityTests
             CustardId = 1, // exists
             Date = now,
             UnixDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
-            CancelDate = now,
             UnixCancelDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
             Active = true,
             Complete = false,
@@ -289,7 +285,6 @@ public class RepositoryEntityTests
             CustardId = 1,
             Date = now.AddHours(1),
             UnixDate = new DateTimeOffset(now.AddHours(1)).ToUnixTimeSeconds(),
-            CancelDate = now,
             UnixCancelDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
             Active = false,
             Complete = true,
@@ -307,7 +302,6 @@ public class RepositoryEntityTests
             CustardId = 999, // does not exist
             Date = now,
             UnixDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
-            CancelDate = now,
             UnixCancelDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
             Active = true,
             Complete = false,

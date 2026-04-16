@@ -3,6 +3,7 @@ using System;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LeadPipe.Infrastructure.Sqlite.Migrations
 {
     [DbContext(typeof(PlumbingContext))]
-    partial class PlumbingContextModelSnapshot : ModelSnapshot
+    [Migration("20260416210609_MakeCancelDateNullable")]
+    partial class MakeCancelDateNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
@@ -234,6 +237,9 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations
 
                     b.Property<bool>("Active")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CancelDate")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
@@ -491,6 +497,9 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations
 
                     b.Property<bool>("Active")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CancelDate")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("Complete")
                         .HasColumnType("INTEGER");

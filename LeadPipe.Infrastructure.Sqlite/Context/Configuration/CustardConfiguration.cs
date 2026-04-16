@@ -23,5 +23,6 @@ internal sealed class CustardConfiguration : IEntityTypeConfiguration<CustardEnt
         builder.Property(c => c.PhoneNumber2)
             .HasConversion(PlumbingConversionsHelper.PhoneNumberNullableConverter)
             .Metadata.SetValueComparer(PlumbingConversionsHelper.NullablePhoneNumberComparer);
+        builder.Ignore(c => c.CancelDate);
     }
 }

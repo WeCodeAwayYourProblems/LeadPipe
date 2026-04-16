@@ -164,7 +164,7 @@ public class TranslatorBackAndForthFullTests
         Assert.Equal(5551002000, vo.Phone1.Number);
         Assert.Equal(5551003000, vo.Phone2?.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, vo.DateCancelled?.Offset);
     }
 
     #endregion
@@ -243,7 +243,7 @@ public class TranslatorBackAndForthFullTests
         Assert.Equal(sandwichVo.SandId, result.SandId);
         Assert.Equal(sandwichVo.Custard.Phone1.Number, result.Custard.Phone1.Number);
         Assert.Equal(TimeSpan.Zero, result.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, result.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, result.DateCancelled?.Offset);
     }
 
     #endregion
@@ -268,7 +268,6 @@ public class TranslatorBackAndForthFullTests
             PhoneNumber2 = new(5551003000),
             Date = dt,
             UnixDate = d.ToUnixTimeMilliseconds(),
-            CancelDate = cxl,
             UnixCancelDate = c.ToUnixTimeSeconds()
         };
 
@@ -279,7 +278,6 @@ public class TranslatorBackAndForthFullTests
             CustardEntity = custardEntity,
             Date = dt,
             UnixDate = d.ToUnixTimeSeconds(),
-            CancelDate = cxl,
             UnixCancelDate = c.ToUnixTimeSeconds(),
             Active = true,
             Complete = true,
@@ -299,7 +297,7 @@ public class TranslatorBackAndForthFullTests
         Assert.Equal(entity.Id, vo.SandId);
         Assert.Equal(entity.CustardEntity.PhoneNumber.Number, vo.Custard.Phone1.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, vo.DateCancelled?.Offset);
     }
 
     #endregion

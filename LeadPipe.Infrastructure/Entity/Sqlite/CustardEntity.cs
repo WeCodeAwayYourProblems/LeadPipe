@@ -15,7 +15,6 @@ public class CustardEntity : IEntity, IPhoneDateIdEntity
         PhoneNumber2 = entity.PhoneNumber2;
         Date = entity.Date;
         UnixDate = entity.UnixDate;
-        CancelDate = entity.CancelDate;
         UnixCancelDate = entity.UnixCancelDate;
         SandEntities = [.. entity.SandEntities.Select(s => s)];
         CustardCaliperLinks = [.. entity.CustardCaliperLinks.Select(c => c)];
@@ -32,8 +31,9 @@ public class CustardEntity : IEntity, IPhoneDateIdEntity
     public PhoneNumber? PhoneNumber2 { get; set; }
     public DateTime Date { get; set; }
     public required long UnixDate { get; set; }
-    public DateTime CancelDate { get; set; }
-    public long UnixCancelDate { get; set; }
+    private DateTime? _cancelDate;
+    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeSeconds(UnixCancelDate.Value).UtcDateTime;
+    public long? UnixCancelDate { get; set; }
 
     // Navigation    
     public ICollection<SandEntity> SandEntities { get; set; } = [];

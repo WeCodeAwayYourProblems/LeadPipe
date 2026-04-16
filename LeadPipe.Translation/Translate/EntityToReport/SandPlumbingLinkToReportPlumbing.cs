@@ -25,7 +25,7 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
                 Active = false,
                 Complete = false,
                 Date = DateTime.MinValue,
-                CancelDate = DateTime.MinValue,
+                UnixCancelDate = null,
                 Offerman = string.Empty
             };
 
@@ -52,15 +52,19 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
                 : DateTimeOffset.FromUnixTimeSeconds(sand.UnixDate).UtcDateTime;
 
         DateTime? custCxlDate =
-            _twentyTwelve.ToUnixTimeSeconds() >= sand.UnixCancelDate || _clock.UtcNow.ToUnixTimeSeconds() <= sand.UnixCancelDate
+            sand.UnixCancelDate is null || _twentyTwelve.ToUnixTimeSeconds() >= sand.UnixCancelDate || _clock.UtcNow.ToUnixTimeSeconds() <= sand.UnixCancelDate
                 ? null
-                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixCancelDate).UtcDateTime;
+                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixCancelDate.Value).UtcDateTime;
 
         DateTime? subDate = custDate;
 
         DateTime? subCxlDate = custCxlDate;
 
-        bool msgBeforeCust = date < custDate && date < subDate;
+        bool msgBeforeCust =
+            custDate is not null &&
+            subDate is not null &&
+            date < custDate &&
+            date < subDate;
         bool isSale = msgBeforeCust && sand.Complete;
 
         string s1 = sand.Seller == 0 ? string.Empty : sand.Seller.ToString();

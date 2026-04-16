@@ -14,7 +14,6 @@ public class SandEntity : IEntity
         CustardId = s.CustardId;
         Date = s.Date;
         UnixDate = s.UnixDate;
-        CancelDate = s.CancelDate;
         UnixCancelDate = s.UnixCancelDate;
         Active = s.Active;
         Complete = s.Complete;
@@ -35,8 +34,9 @@ public class SandEntity : IEntity
     public required long CustardId { get; set; }
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }
-    public DateTime CancelDate { get; set; }
-    public long UnixCancelDate { get; set; }
+    private DateTime? _cancelDate;
+    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeSeconds(UnixCancelDate.Value).UtcDateTime;
+    public long? UnixCancelDate { get; set; }
     public bool Active { get; set; }
     public bool Complete { get; set; }
     public decimal Value { get; set; }

@@ -13,7 +13,7 @@ internal sealed class CustardEntityToCustard : IEntityToVo<CustardEntity, Custar
 
         DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(entity.UnixDate);
 
-        DateTimeOffset cxlDate = DateTimeOffset.FromUnixTimeSeconds(entity.UnixCancelDate);
+        DateTimeOffset? cxlDate = entity.UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeSeconds((long)entity.UnixCancelDate);
 
         Custard result = new
             (

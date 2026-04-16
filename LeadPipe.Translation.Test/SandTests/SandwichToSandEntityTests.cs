@@ -65,7 +65,6 @@ public sealed class SandwichToSandEntityTests
             Id = vo.SandId,
             CustardId = vo.CustardId,
             Date = vo.Date.UtcDateTime,
-            CancelDate = vo.DateCancelled.UtcDateTime,
             Active = vo.Active,
             Complete = vo.Complete,
             Type = vo.Type,
@@ -81,7 +80,6 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
                 UnixDate = vo.Custard.Date.ToUnixTimeSeconds(),
-                CancelDate = vo.Custard.DateCancelled.UtcDateTime
             },
             Offerman= vo.Offerman
         };
@@ -98,7 +96,7 @@ public sealed class SandwichToSandEntityTests
         Assert.Equal(vo.Value, result.Value);
         Assert.Equal(vo.Custard.Phone1.Number, result.Custard.Phone1.Number);
         Assert.Equal(TimeSpan.Zero, result.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, result.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, result.DateCancelled?.Offset);
     }
 
     [Fact]
@@ -110,7 +108,6 @@ public sealed class SandwichToSandEntityTests
             Id = vo.SandId,
             CustardId = vo.CustardId,
             Date = vo.Date.UtcDateTime,
-            CancelDate = vo.DateCancelled.UtcDateTime,
             Active = vo.Active,
             Complete = vo.Complete,
             Type = vo.Type,
@@ -126,7 +123,6 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
                 UnixDate = vo.Custard.Date.ToUnixTimeSeconds(),
-                CancelDate = vo.Custard.DateCancelled.UtcDateTime
             },
             Offerman = vo.Offerman
         };
@@ -148,6 +144,6 @@ public sealed class SandwichToSandEntityTests
         Assert.Equal(5551002000, current.Custard.Phone1.Number);
         Assert.Equal(5551003000, current.Custard.Phone2?.Number);
         Assert.Equal(TimeSpan.Zero, current.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, current.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, current.DateCancelled?.Offset);
     }
 }

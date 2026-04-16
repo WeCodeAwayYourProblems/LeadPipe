@@ -59,7 +59,6 @@ public class AllLinkRepositoryTests
             PhoneNumber = TestNumber,
             Date = Now,
             UnixDate = UnixNow,
-            CancelDate = Now,
             UnixCancelDate = UnixNow
         };
 
@@ -70,7 +69,6 @@ public class AllLinkRepositoryTests
             CustardId = custardId,
             Date = Now,
             UnixDate = UnixNow,
-            CancelDate = Now,
             UnixCancelDate = UnixNow,
             Active = true,
             Complete = false,

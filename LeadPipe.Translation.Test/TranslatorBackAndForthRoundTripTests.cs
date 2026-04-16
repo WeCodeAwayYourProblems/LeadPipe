@@ -154,7 +154,7 @@ public class TranslatorBackAndForthRoundTripTests
         Assert.Equal(numb1, vo.Phone1.Number);
         Assert.Equal(numb2, vo.Phone2?.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, vo.DateCancelled!.Value.Offset);
     }
 
     [Fact]
@@ -201,6 +201,6 @@ public class TranslatorBackAndForthRoundTripTests
         Assert.Equal(sandwichVo.SandId, result.SandId);
         Assert.Equal(sandwichVo.Custard.Phone1.Number, result.Custard.Phone1.Number);
         Assert.Equal(TimeSpan.Zero, result.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, result.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, result.DateCancelled!.Value.Offset);
     }
 }

@@ -82,7 +82,7 @@ public sealed class SandMySqlEntityToSandwichTests
 
         // Dates remain UTC
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, vo.DateCancelled!.Value.Offset);
     }
 
     [Fact]
@@ -98,9 +98,9 @@ public sealed class SandMySqlEntityToSandwichTests
 
         // UTC offset
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, vo.DateCancelled!.Value.Offset);
         Assert.Equal(TimeSpan.Zero, vo.Custard.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, vo.Custard.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, vo.Custard.DateCancelled!.Value.Offset);
     }
 
     [Fact]

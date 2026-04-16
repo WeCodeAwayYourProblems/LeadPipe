@@ -17,5 +17,6 @@ internal sealed class SandConfiguration : IEntityTypeConfiguration<SandEntity>
         sub.HasKey(s => s.Id);
         sub.Property(s => s.Id).ValueGeneratedNever(); // External id
         sub.Property(s => s.Type);
+        builder.Ignore(c => c.CancelDate);
     }
 }

@@ -36,9 +36,9 @@ public sealed class CustardMySqlEntityToCustardTests
         Assert.Equal(5551112222, vo.Phone1.Number);
         Assert.Equal(5553334444, vo.Phone2?.Number);
         Assert.Equal(entity.dateAdded, vo.Date.UtcDateTime);
-        Assert.Equal(entity.dateCancelled, vo.DateCancelled.UtcDateTime);
+        Assert.Equal(entity.dateCancelled, vo.DateCancelled?.UtcDateTime);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
-        Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
+        Assert.Equal(TimeSpan.Zero, vo.DateCancelled?.Offset);
     }
 
     [Fact]

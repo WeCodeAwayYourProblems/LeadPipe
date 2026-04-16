@@ -7,5 +7,5 @@ public record Custard
     PhoneNumber Phone1,
     PhoneNumber? Phone2,
     DateTimeOffset Date,
-    DateTimeOffset DateCancelled
+    DateTimeOffset? DateCancelled
 );

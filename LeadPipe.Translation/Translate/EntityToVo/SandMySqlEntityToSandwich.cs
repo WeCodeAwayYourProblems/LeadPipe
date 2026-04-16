@@ -39,9 +39,9 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
         DateTimeOffset subDate = entity.dateAdded is DateTime added
             ? _dt.Convert(added, ETimeZone.Pacific)
             : DateTime.MinValue;
-        DateTimeOffset cancelDate = entity.dateCancelled is not null && entity.dateCancelled != DateTime.MinValue
+        DateTimeOffset? cancelDate = entity.dateCancelled is not null && entity.dateCancelled != DateTime.MinValue
             ? _dt.Convert((DateTime)entity.dateCancelled, ETimeZone.Pacific)
-            : DateTime.MinValue;
+            : null;
 
         // Get offerman
         string offerman = entity.offerman.branchName is null ? "Unknown" : entity.offerman.branchName;

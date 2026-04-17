@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace LeadPipe.Infrastructure.Sqlite.Context.Configuration;
+namespace LeadPipe.Infrastructure.Database.Configuration;
 
 internal static class PlumbingConversionsHelper
 {

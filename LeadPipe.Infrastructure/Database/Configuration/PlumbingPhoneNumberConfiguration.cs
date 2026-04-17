@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LeadPipe.Infrastructure.Sqlite.Context.Configuration;
+namespace LeadPipe.Infrastructure.Database.Configuration;
 
 internal sealed class PlumbingPhoneNumberConfiguration : IEntityTypeConfiguration<PlumbingPhoneNumber>
 {

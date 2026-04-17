@@ -12,7 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.6" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.6" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
@@ -25,6 +25,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".info\ContactForms.bat" />
+	  <None Include=".info\ContactForms.sql" />
+	  <None Include=".info\LabReport.sql" />
+	  <None Include=".info\ScratchPaper.sql" />
 	  <None Include=".info\YellerReport.sql" />
 	</ItemGroup>
 

@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Database.Configuration;
 
-internal class TableNames
+public class TableNames
 {
     public const string OAuthTokensName = "OAuthTokens";
     public const string SyncStateName = "SyncState";

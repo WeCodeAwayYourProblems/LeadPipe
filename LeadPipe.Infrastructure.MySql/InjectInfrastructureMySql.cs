@@ -31,7 +31,7 @@ public static class InjectInfrastructureMySql
         bool useInMemory = requestedInMemory;
         if (!useInMemory)
         {
-            bool isDevelopment = config.GetValue("ASPNETCORE_ENVIRONMENT", "Production") == "Development";
+            bool isDevelopment = config.GetValue("DOTNET_ENVIRONMENT", "Production") == "Development";
             bool canConnect = CanConnect(settings.Schema1ConnectionString);
 
             if (!canConnect && !isDevelopment)

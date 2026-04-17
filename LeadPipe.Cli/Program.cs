@@ -17,9 +17,7 @@ internal class Program
         IHostBuilder builder = Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((context, config) =>
             {
-                // Only load 1Password secrets in Production
-                if (!context.HostingEnvironment.IsDevelopment())
-                    config.AddOnePasswordDocumentJson(documentTitle: "LeadPipe.secrets.json");
+                context.AddSecrets(config);
             })
             .UseSerilog((context, services, configuration) =>
                 configuration.ReadFrom.Configuration(context.Configuration))
@@ -111,6 +109,6 @@ internal class Program
             mysql3Ctx.Database.EnsureCreated();
         }
     }
-    
+
     #endregion
 }

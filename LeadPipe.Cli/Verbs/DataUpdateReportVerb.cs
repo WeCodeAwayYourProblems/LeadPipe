@@ -39,27 +39,17 @@ internal class DataUpdateReportVerb : IVerbAsync
     public async Task<int> Run(IServiceProvider provider)
     {
         ForceRunRefresh frr = new(ForceRun: ForceRun, Refresh: Refresh);
-        Result result = await Updated(provider, Source, frr);
-
-        if (result.IsFailure)
-            Console.WriteLine(result.Error);
-
-        int code = result.IsSuccess ? 0 : 1;
-        Environment.ExitCode = code; // Setting the exit code here helps for cli usage
-        return code;
-    }
-
-    #endregion
-
-    #region Private
-
-    private static async Task<Result> Updated(IServiceProvider service, Source source, ForceRunRefresh frr)
-    {
-        IUpdateManager update = service.GetRequiredService<IUpdateManager>();
-        Result updated = source == Source.Test
+        IUpdateManager update = provider.GetRequiredService<IUpdateManager>();
+        Result updated = Source == Source.Test
             ? await update.Manage(frr)
-            : await update.Manage(source, frr);
-        return updated;
+            : await update.Manage(Source, frr);
+
+        if (updated.IsFailure)
+            Console.WriteLine(updated.Error);
+
+        int code = updated.IsSuccess ? 0 : 1;
+        Environment.ExitCode = code; // Setting the exit code here helps with cli usage
+        return code;
     }
 
     #endregion

@@ -29,6 +29,9 @@ internal partial class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
                     : []
             ) ?? []);
 
+        if (data.phone_number is not null && PhoneNumber.TryParse(data.phone_number, out var ph) && seen.Add(ph.Number))
+            collectedNumbers.Add(ph);
+
         PhoneNumber canonicalPhoneNumber = collectedNumbers.Count == 0
             ? PhoneNumber.DefaultPhoneNumber
             : collectedNumbers[^1];
@@ -53,6 +56,9 @@ internal partial class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
                         : [question, .. answers]
                 );
             })];
+
+        if (data.ilq?.summary is not null)
+            contentsStr.Add(data.ilq.summary);
 
         if (data.events?.events is Event[] events)
         {

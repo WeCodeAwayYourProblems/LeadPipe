@@ -26,15 +26,17 @@ internal class PlumbingPersistence(
                 p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, _metaTranslate.Translate(p)),
                 p => p.PhoneNumbers);
 
-        Result<List<PlumbingEntity>> result = await _plumbing.UpsertRangeAsync(t);
+        Dictionary<PlumbingKey, PlumbingEntity> inputMap = t
+            .GroupBy(p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, _metaTranslate.Translate(p)))
+            .ToDictionaryFast(g => g.Key, g => g.First());
+        
+        List<PlumbingEntity> uniqueEntities = [.. inputMap.Values];
+
+        Result<List<PlumbingEntity>> result = await _plumbing.UpsertRangeAsync(uniqueEntities);
 
         // If there are no phones to upsert, no need to proceed.
         if (result.IsFailure || phonesToUpsert.Count == 0)
             return result;
-
-        Dictionary<PlumbingKey, PlumbingEntity> inputMap = t
-            .GroupBy(p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, _metaTranslate.Translate(p)))
-            .ToDictionaryFast(g => g.Key, g => g.First());
 
         List<PhoneNumber> inputNumbers = [.. t.Select(t => t.PhoneNumber).Distinct()];
         List<Source> inputSources = [.. t.Select(t => t.Source).Distinct()];

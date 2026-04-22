@@ -10,9 +10,8 @@ internal class CalliDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<CalliDto, Pl
     private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(CalliDto v)
     {
-        PhoneNumber phone = new(v.Phone);
-        DateTime datetime = DateTime.TryParse(v.Date + " " + v.Time, 
-            out DateTime dt)
+        PhoneNumber phone = PhoneNumber.TryParse(v.Phone, out var p) ? p : new(PhoneNumber.Default);
+        DateTime datetime = DateTime.TryParse(v.Date + " " + v.Time, out DateTime dt)
             ? dt
             : DateTime.MaxValue;
         string rawZone = v.TimeZone is null ? "mst" : v.TimeZone.ToLowerInvariant();
@@ -38,7 +37,7 @@ internal class CalliDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<CalliDto, Pl
             Branch: null,
             MetaData: meta,
             Source: Source.Calli,
-            null
+            [phone]
         );
     }
 }

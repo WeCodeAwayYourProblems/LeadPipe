@@ -60,12 +60,9 @@ internal class LabService : ILabService
 
             pageErrors = 0;
             LabHelperDto? pageDto = pageResult.Value;
-            if (pageDto is null)
+            if (pageDto is null || pageDto.data?.items is null)
                 break;
 
-            // Add records to list
-            if (pageDto.data?.items is null)
-                break;
             IEnumerable<LabDto> labs = pageDto.data.items
                 .Where(i => i?.labDto is not null)
                 .Select(i => i!.labDto!);

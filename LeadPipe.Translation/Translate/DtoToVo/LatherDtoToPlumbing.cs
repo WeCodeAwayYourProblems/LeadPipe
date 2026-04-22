@@ -27,7 +27,7 @@ internal class LatherDtoToPlumbing(IDateTimeTranslate translate) : IDtoToVo<Lath
         string metaData = $"Lead Id: {id}";
 
         Plumbing result = new(
-            Id: id,
+            Id: 0,
             PhoneNumber: phoneNumber,
             Date: date,
             Contents: null,

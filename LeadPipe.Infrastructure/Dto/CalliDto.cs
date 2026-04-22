@@ -5,7 +5,7 @@ namespace LeadPipe.Infrastructure.Dto;
 public class CalliDto
 {
     [Name("Phone")]
-    public long Phone { get; set; }
+    public string? Phone { get; set; }
     [Name("Date")]
     public string? Date { get; set; }
     [Name("Time")]

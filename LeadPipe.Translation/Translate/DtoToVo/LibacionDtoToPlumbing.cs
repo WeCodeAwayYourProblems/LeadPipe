@@ -10,7 +10,7 @@ public sealed class LibacionDtoToPlumbing : IDtoToVo<LibacionDto, Plumbing>
     {
         PhoneNumber number = PhoneNumber.TryParse(data.PhoneNumber, out PhoneNumber r)
             ? r
-            : new(PhoneNumber.Default);
+            : PhoneNumber.DefaultPhoneNumber;
         DateTimeKind kind = DateTimeKind.Utc;
         DateTime d = DateTime.TryParse(data.Date, out DateTime dt)
             ? DateTime.SpecifyKind(dt, kind)

@@ -27,6 +27,7 @@ internal class PlumbingToPlumbingEntity : IVoToEntity<Plumbing, PlumbingEntity>
             Contents = plumbing.Contents,
             MetaData = plumbing.MetaData,
             Source = plumbing.Source,
+            Branch = plumbing.Branch,
             PhoneNumbers = numbers
         };
         return result;

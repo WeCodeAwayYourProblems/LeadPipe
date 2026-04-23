@@ -25,8 +25,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".info\AllSources.bat" />
 	  <None Include=".info\ContactForms.bat" />
 	  <None Include=".info\ContactForms.sql" />
+	  <None Include=".info\AllSources.sql" />
 	  <None Include=".info\LabReport.sql" />
 	  <None Include=".info\ScratchPaper.sql" />
 	  <None Include=".info\YellerReport.sql" />

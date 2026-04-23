@@ -10,7 +10,7 @@ internal class PanDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<PanDto, Plumbi
     private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(PanDto data)
     {
-        PhoneNumber number = new(data.Number);
+        PhoneNumber number = PhoneNumber.TryParse(data.Number, out var ph) ? ph : PhoneNumber.DefaultPhoneNumber;
         DateTime d = DateTime.TryParse(data.Date, out DateTime r)
             ? r
             : DateTime.MaxValue;

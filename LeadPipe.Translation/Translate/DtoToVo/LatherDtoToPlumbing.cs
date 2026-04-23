@@ -11,7 +11,7 @@ internal class LatherDtoToPlumbing(IDateTimeTranslate translate) : IDtoToVo<Lath
     public Plumbing Translate(LatherDto data)
     {
         long id = long.TryParse(data.LeadId, out long i) ? i : 0;
-        PhoneNumber phoneNumber = PhoneNumber.TryParse(data.Phone, out PhoneNumber p) ? p : new(PhoneNumber.Default);
+        PhoneNumber phoneNumber = PhoneNumber.TryParse(data.Phone, out PhoneNumber p) ? p : PhoneNumber.DefaultPhoneNumber;
 
         DateTime dt = DateTime.TryParse(string.Join(" ", [data.Date, data.Time]), out DateTime d) ? d : DateTime.MinValue;
         ETimeZone zone = data.TimeZone?.ToLowerInvariant() switch
@@ -34,7 +34,7 @@ internal class LatherDtoToPlumbing(IDateTimeTranslate translate) : IDtoToVo<Lath
             Branch: null,
             MetaData: metaData,
             Source: Source.Lather,
-            null
+            [phoneNumber]
             );
 
         return result;

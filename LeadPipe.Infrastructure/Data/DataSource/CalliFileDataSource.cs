@@ -15,11 +15,11 @@ public sealed class CalliFileDataSource(IInfrastructureSettings settings, ICsvRw
         if (fileContents.IsFailure) return fileContents;
 
         return fileContents.Value.Where(
-        v => 
-            !string.IsNullOrWhiteSpace(v.Phone) && 
-            v.Phone.Length >= 10 && 
-            long.TryParse(v.Phone, out var phone) && 
-            phone > 0
+            v => 
+                !string.IsNullOrWhiteSpace(v.Phone) && 
+                v.Phone.Length >= 10 && 
+                long.TryParse(v.Phone, out var phone) && 
+                phone > 0
         ).ToList();
     }
 }

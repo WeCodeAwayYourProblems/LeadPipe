@@ -10,7 +10,7 @@ internal class CalliDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<CalliDto, Pl
     private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(CalliDto v)
     {
-        PhoneNumber phone = PhoneNumber.TryParse(v.Phone, out var p) ? p : new(PhoneNumber.Default);
+        PhoneNumber phone = PhoneNumber.TryParse(v.Phone, out var p) ? p : PhoneNumber.DefaultPhoneNumber;
         DateTime datetime = DateTime.TryParse(v.Date + " " + v.Time, out DateTime dt)
             ? dt
             : DateTime.MaxValue;

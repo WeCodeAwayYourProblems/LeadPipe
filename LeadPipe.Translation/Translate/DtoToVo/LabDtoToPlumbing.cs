@@ -20,7 +20,8 @@ internal class LabDtoToPlumbing : IDtoToVo<LabDto, Plumbing>
             .ToArray();
         var numbers = PhoneNumber.TryParseMany(input, out List<PhoneNumber>? p) && p.Count > 0
             ? p.ToArray()
-            : [new(PhoneNumber.Default)];
+            : [PhoneNumber.DefaultPhoneNumber];
+        var canonicalPhoneNumber = numbers[^1];
 
         DateTimeOffset date = DateTimeOffset.TryParse(dto.created_at?.date_utc, out DateTimeOffset r) ? r : DateTimeOffset.MinValue;
 
@@ -32,7 +33,7 @@ internal class LabDtoToPlumbing : IDtoToVo<LabDto, Plumbing>
 
         Plumbing result = new(
             Id: 0,
-            PhoneNumber: numbers[^1],
+            PhoneNumber: canonicalPhoneNumber,
             Date: date,
             Contents: contents,
             Branch: branch,

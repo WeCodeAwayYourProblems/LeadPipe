@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
 

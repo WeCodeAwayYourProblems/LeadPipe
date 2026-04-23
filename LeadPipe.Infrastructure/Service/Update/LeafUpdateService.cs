@@ -2,7 +2,7 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Attributes;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 

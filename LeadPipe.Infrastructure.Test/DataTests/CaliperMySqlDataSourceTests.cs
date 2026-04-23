@@ -1,8 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.DataSource;
-using LeadPipe.Infrastructure.Entity.MySql;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;

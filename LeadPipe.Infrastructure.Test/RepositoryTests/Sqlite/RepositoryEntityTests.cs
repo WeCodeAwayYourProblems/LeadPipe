@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.EntityFrameworkCore;

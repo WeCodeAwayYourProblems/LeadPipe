@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 
-namespace LeadPipe.Infrastructure.Entity.Sqlite;
+namespace LeadPipe.Infrastructure.Entity;
 
 public sealed class OAuthTokenEntity
 {

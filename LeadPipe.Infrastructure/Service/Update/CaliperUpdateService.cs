@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 

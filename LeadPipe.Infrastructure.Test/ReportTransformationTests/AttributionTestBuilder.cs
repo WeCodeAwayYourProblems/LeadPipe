@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 
 namespace LeadPipe.Infrastructure.Test.ReportTransformationTests;
 

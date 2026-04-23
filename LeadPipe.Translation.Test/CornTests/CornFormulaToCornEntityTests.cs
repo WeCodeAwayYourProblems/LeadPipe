@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Translation.Translate.VoToEntity;
 
 namespace LeadPipe.Translation.Test.Corn;

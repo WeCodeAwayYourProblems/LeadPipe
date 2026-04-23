@@ -5,8 +5,6 @@ using LeadPipe.Infrastructure.Data.Persistence;
 using LeadPipe.Infrastructure.Data.DataSource;
 using LeadPipe.Infrastructure.Data.Transform;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Entity.MySql;
-using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Factory;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
@@ -25,6 +23,7 @@ using LeadPipe.Infrastructure.Interfaces.Api;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using Microsoft.Extensions.Logging;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 
 namespace LeadPipe.Infrastructure;
 

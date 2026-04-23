@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 
 namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 

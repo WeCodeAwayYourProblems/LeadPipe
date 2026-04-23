@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Infrastructure.Interfaces.Core;
 
-namespace LeadPipe.Infrastructure.Entity.Sqlite;
+namespace LeadPipe.Infrastructure.Entity;
 
 public class SyncStateEntity : IEntity
 {

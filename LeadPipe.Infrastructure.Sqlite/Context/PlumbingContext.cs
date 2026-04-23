@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Database.Configuration;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.Sqlite.Context;

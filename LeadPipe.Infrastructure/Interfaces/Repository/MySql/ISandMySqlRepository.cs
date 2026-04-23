@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Entity;
 using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Interfaces.Repository.MySql;

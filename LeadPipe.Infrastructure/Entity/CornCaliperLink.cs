@@ -1,7 +1,7 @@
 ﻿using LeadPipe.Infrastructure.Interfaces.Core;
 using System.Diagnostics.CodeAnalysis;
 
-namespace LeadPipe.Infrastructure.Entity.Sqlite;
+namespace LeadPipe.Infrastructure.Entity;
 
 public class CornCaliperLink : IEntity, IHasUnixMatchDate
 {

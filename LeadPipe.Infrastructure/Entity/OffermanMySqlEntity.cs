@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LeadPipe.Infrastructure.Entity.MySql;
+namespace LeadPipe.Infrastructure.Entity;
 
 public class OffermanMySqlEntity
 {

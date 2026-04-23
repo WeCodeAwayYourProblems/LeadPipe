@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Translation.Translate.EntityToVo;
 using NSubstitute;

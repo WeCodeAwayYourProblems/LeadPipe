@@ -1,4 +1,4 @@
-﻿namespace LeadPipe.Infrastructure.Entity.MySql;
+﻿namespace LeadPipe.Infrastructure.Entity;
 
 public class CornMySqlEntity
 {

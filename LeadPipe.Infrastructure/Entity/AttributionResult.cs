@@ -1,5 +1,4 @@
-﻿using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Interfaces.Core;
+﻿using LeadPipe.Infrastructure.Interfaces.Core;
 
 namespace LeadPipe.Infrastructure.Entity;
 

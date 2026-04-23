@@ -1,4 +1,4 @@
-﻿using LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;

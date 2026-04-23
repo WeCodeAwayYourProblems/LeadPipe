@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Entity;
 using System.Linq.Expressions;
 
-namespace LeadPipe.Infrastructure.Interfaces.Repository.MySql;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 public interface ISandMySqlRepository
 {

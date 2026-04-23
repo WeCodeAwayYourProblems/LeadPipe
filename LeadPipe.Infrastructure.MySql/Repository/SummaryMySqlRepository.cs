@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
+using LeadPipe.Infrastructure.Interfaces.Repository;
 using LeadPipe.Infrastructure.MySql.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

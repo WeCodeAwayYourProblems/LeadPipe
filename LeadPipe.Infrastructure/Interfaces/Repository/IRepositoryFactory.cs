@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Infrastructure.Interfaces.Core;
 
-namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 public interface IRepositoryFactory
 {

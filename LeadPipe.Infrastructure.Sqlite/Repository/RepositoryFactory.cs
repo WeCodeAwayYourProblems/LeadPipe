@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Repository;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;

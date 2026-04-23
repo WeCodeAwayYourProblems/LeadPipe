@@ -22,8 +22,8 @@ using LeadPipe.Infrastructure.Api;
 using LeadPipe.Infrastructure.Interfaces.Api;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using Microsoft.Extensions.Logging;
-using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Entity;
+using LeadPipe.Infrastructure.Interfaces.Repository;
 
 namespace LeadPipe.Infrastructure;
 

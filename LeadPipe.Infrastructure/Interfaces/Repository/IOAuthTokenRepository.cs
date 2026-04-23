@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity;
 
-namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 public interface IOAuthTokenRepository
 {

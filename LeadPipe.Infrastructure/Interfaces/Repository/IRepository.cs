@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Interfaces.Core;
 using System.Linq.Expressions;
 
-namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 public interface IRepository<TEntity>
     where TEntity : class, IEntity

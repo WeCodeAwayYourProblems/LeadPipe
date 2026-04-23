@@ -2,7 +2,7 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 
-namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 /// <summary>
 /// Saves the timestamp and success state of the last run for a particular <see cref="SyncKey"/>

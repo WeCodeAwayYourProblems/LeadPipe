@@ -2,7 +2,7 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 
-namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+namespace LeadPipe.Infrastructure.Interfaces.Repository;
 
 /// <summary>
 /// Saves the date of the actual piece of data, which is identified by a <see cref="BusinessId"/>

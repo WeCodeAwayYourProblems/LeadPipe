@@ -3,8 +3,7 @@ using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.DataSource;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
-using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Repository;
 using NSubstitute;
 using System.Linq.Expressions;
 

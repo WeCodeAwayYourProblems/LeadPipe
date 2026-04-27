@@ -6,7 +6,7 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Load;
 
-[SourceKey(Domain.ValueObjects.Source.Libacion)]
+[SourceKey(Source.Libacion)]
 public sealed class LoadLibacion(IRepository<PlumbingEntity> repo, IEntityToVo<PlumbingEntity, Plumbing> eToVo) :
-    LoadData<Plumbing, PlumbingEntity>(repo, eToVo, Domain.ValueObjects.Source.Libacion)
+    LoadData<Plumbing, PlumbingEntity>(repo, eToVo, Source.Libacion)
 { }

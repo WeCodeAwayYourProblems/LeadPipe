@@ -1,6 +1,5 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Translation.Translate.EntityToVo;
 
 namespace LeadPipe.Translation.Test.CaliperTests;

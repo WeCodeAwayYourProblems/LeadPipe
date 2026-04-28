@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -13,8 +14,8 @@ internal class SandwichToSandEntity : IVoToEntity<Sandwich, SandEntity>
             Id = s.SandId,
             CustardId = s.CustardId,
             Date = s.Date.UtcDateTime,
-            UnixDate = s.Date.ToUnixTimeMilliseconds(),
-            UnixCancelDate = s.DateCancelled?.ToUnixTimeMilliseconds(),
+            UnixDate = s.Date.ToUnixTime(),
+            UnixCancelDate = s.DateCancelled?.ToUnixTime(),
             Active = s.Active,
             Complete = s.Complete,
             Type = s.Type,

@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Repository;
@@ -278,7 +279,7 @@ internal class YellerClientService(
                 BusinessId = BusinessId.From(bId),
                 LastProcessedId = finalIds[bId],
                 LastSyncUtc = DateTime.UtcNow,
-                UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTime()
             };
             states.Add(state);
         }

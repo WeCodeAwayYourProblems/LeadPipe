@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Infrastructure.Interfaces.Api;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using Microsoft.Extensions.Caching.Memory;
@@ -19,7 +20,7 @@ internal sealed class TokenCacheService(
     {
         if (_cache.TryGetValue(key, out AccessToken cached))
         {
-            var n1 = _clock.UtcNow.ToUnixTimeMilliseconds();
+            var n1 = _clock.UtcNow.ToUnixTime();
             if (!cached.IsExpired(n1, bufferSeconds))
                 return cached.Value;
         }
@@ -31,7 +32,7 @@ internal sealed class TokenCacheService(
         {
             if (_cache.TryGetValue(key, out cached))
             {
-                var n1 = _clock.UtcNow.ToUnixTimeMilliseconds();
+                var n1 = _clock.UtcNow.ToUnixTime();
                 if (!cached.IsExpired(n1, bufferSeconds))
                     return cached.Value;
             }
@@ -41,7 +42,7 @@ internal sealed class TokenCacheService(
                 return Result.Failure<string>(result.Error);
 
             var token = result.Value;
-            var now = _clock.UtcNow.ToUnixTimeMilliseconds();
+            var now = _clock.UtcNow.ToUnixTime();
             var ttl = token.GetTtlSeconds(now, bufferSeconds);
 
             if (ttl > 0)

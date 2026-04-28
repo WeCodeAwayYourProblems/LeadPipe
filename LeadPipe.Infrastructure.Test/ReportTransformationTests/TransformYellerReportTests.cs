@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Transform;
 using LeadPipe.Infrastructure.Dto;
@@ -139,8 +140,8 @@ public class TransformYellerReportTests
 
         List<Plumbing> input =
             [
-                new Plumbing(p1.Id, p1.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(p1.UnixDate), Contents: null, Branch: null, MetaData: "null", p1.Source, [p1.PhoneNumber]),
-                new Plumbing(p2.Id, p2.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(p2.UnixDate), Contents: null, Branch: null, MetaData: "null", p2.Source, [p2.PhoneNumber])
+                new Plumbing(p1.Id, p1.PhoneNumber, DateTimeOffsetExt.FromUnixTime(p1.UnixDate), Contents: null, Branch: null, MetaData: "null", p1.Source, [p1.PhoneNumber]),
+                new Plumbing(p2.Id, p2.PhoneNumber, DateTimeOffsetExt.FromUnixTime(p2.UnixDate), Contents: null, Branch: null, MetaData: "null", p2.Source, [p2.PhoneNumber])
             ];
 
         var result = await sut.TransformAsync(input);
@@ -183,7 +184,7 @@ public class TransformYellerReportTests
             Enumerable.Empty<CaliperEntity>().AsQueryable(),
             captured);
 
-        List<Plumbing> input = [new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), Contents: null, Branch: null, MetaData: "null", plumbing.Source, [plumbing.PhoneNumber])];
+        List<Plumbing> input = [new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), Contents: null, Branch: null, MetaData: "null", plumbing.Source, [plumbing.PhoneNumber])];
 
         // Act
         var result = await sut.TransformAsync(input);
@@ -228,7 +229,7 @@ public class TransformYellerReportTests
 
         var input = new List<Plumbing>
     {
-        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), null, null, "x", plumbing.Source, [plumbing.PhoneNumber])
+        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), null, null, "x", plumbing.Source, [plumbing.PhoneNumber])
     };
 
         var result = await sut.TransformAsync(input);
@@ -260,7 +261,7 @@ public class TransformYellerReportTests
 
         var input = new List<Plumbing>
     {
-        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
+        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
     };
 
         var result = await sut.TransformAsync(input);
@@ -291,7 +292,7 @@ public class TransformYellerReportTests
 
         var input = new List<Plumbing>
     {
-        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
+        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
     };
 
         var result = await sut.TransformAsync(input);
@@ -324,7 +325,7 @@ public class TransformYellerReportTests
 
         var input = new List<Plumbing>
     {
-        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
+        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
     };
 
         var result = await sut.TransformAsync(input);
@@ -369,7 +370,7 @@ public class TransformYellerReportTests
 
         var input = new List<Plumbing>
     {
-        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
+        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
     };
 
         var result = await sut.TransformAsync(input);
@@ -405,7 +406,7 @@ public class TransformYellerReportTests
 
         var input = new List<Plumbing>
     {
-        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
+        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
     };
 
         var result = await sut.TransformAsync(input);
@@ -441,7 +442,7 @@ public class TransformYellerReportTests
 
         var input = new List<Plumbing>
     {
-        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffset.FromUnixTimeMilliseconds(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
+        new Plumbing(plumbing.Id, plumbing.PhoneNumber, DateTimeOffsetExt.FromUnixTime(plumbing.UnixDate), null, null, "x", plumbing.Source,[plumbing.PhoneNumber])
     };
 
         var result = await sut.TransformAsync(input);

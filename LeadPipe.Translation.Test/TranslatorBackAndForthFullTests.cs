@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
@@ -266,8 +267,8 @@ public class TranslatorBackAndForthFullTests
             PhoneNumber = new(5551002000),
             PhoneNumber2 = new(5551003000),
             Date = dt,
-            UnixDate = d.ToUnixTimeMilliseconds(),
-            UnixCancelDate = c.ToUnixTimeMilliseconds()
+            UnixDate = d.ToUnixTime(),
+            UnixCancelDate = c.ToUnixTime()
         };
 
         var entity = new SandEntity
@@ -276,8 +277,8 @@ public class TranslatorBackAndForthFullTests
             CustardId = 10,
             CustardEntity = custardEntity,
             Date = dt,
-            UnixDate = d.ToUnixTimeMilliseconds(),
-            UnixCancelDate = c.ToUnixTimeMilliseconds(),
+            UnixDate = d.ToUnixTime(),
+            UnixCancelDate = c.ToUnixTime(),
             Active = true,
             Complete = true,
             Type = "Premium",

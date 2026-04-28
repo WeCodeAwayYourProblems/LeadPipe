@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -9,7 +10,7 @@ internal sealed class CornEntityToCornFormula : IEntityToVo<CornEntity, CornForm
     public CornFormula Translate(CornEntity entity)
     {
         PhoneNumber phoneNumber = new(entity.PhoneNumber);
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(entity.UnixDate);
+        DateTimeOffset date = DateTimeOffsetExt.FromUnixTime(entity.UnixDate);
         CornFormula result = new
             (
                 Id: entity.Id,

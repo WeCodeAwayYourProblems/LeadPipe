@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Core;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
@@ -27,7 +28,7 @@ internal abstract class EntityToReportYeller<TEntity> : IEntityToReport<TEntity,
     public ReportYeller Translate(TEntity data)
     {
         var phone = GetPhoneNumber(data);
-        var eventDate = DateTimeOffset.FromUnixTimeMilliseconds(GetUnixDate(data)).UtcDateTime;
+        var eventDate = DateTimeOffsetExt.FromUnixTime(GetUnixDate(data)).UtcDateTime;
         var entityId = GetEntityId(data);
 
         var result = new ReportYeller

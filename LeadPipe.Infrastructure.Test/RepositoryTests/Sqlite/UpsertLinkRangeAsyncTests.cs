@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using LeadPipe.Infrastructure.Sqlite.Repository;
@@ -23,7 +24,7 @@ public class UpsertLinkRangeAsyncTests
         // Seed parents (required for FK EXISTS checks)
         PhoneNumber sharedNumber = new(5555555555);
         DateTimeOffset date = DateTimeOffset.UtcNow;
-        var corn = new CornEntity { Id = 1, PhoneNumber = sharedNumber, Date = date.UtcDateTime, UnixDate = date.ToUnixTimeMilliseconds(), MetaData = _empty, Payload = _empty, Source = _empty };
+        var corn = new CornEntity { Id = 1, PhoneNumber = sharedNumber, Date = date.UtcDateTime, UnixDate = date.ToUnixTime(), MetaData = _empty, Payload = _empty, Source = _empty };
         var caliper = new CaliperEntity { Id = 2, PhoneNumber = sharedNumber, Note = _empty, Source = _empty, Location = _empty, Label = _empty};
 
         context.AddRange(corn, caliper);

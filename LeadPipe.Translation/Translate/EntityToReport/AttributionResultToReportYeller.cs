@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Core;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
@@ -28,9 +29,9 @@ internal sealed class AttributionResultToReportYeller(IYellerSettings settings) 
 
         long phone = attr.MatchingPhone;
 
-        DateTime eventDate = DateTimeOffset.FromUnixTimeMilliseconds(attr.Entity.UnixDate).UtcDateTime;
+        DateTime eventDate = DateTimeOffsetExt.FromUnixTime(attr.Entity.UnixDate).UtcDateTime;
         long unixCloseDate = attr.Custard.UnixDate < attr.Sand.UnixDate ? attr.Custard.UnixDate : attr.Sand.UnixDate;
-        DateTime closeDate = DateTimeOffset.FromUnixTimeMilliseconds(unixCloseDate).UtcDateTime;
+        DateTime closeDate = DateTimeOffsetExt.FromUnixTime(unixCloseDate).UtcDateTime;
 
         var result = new ReportYeller()
         {

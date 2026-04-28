@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -23,7 +24,7 @@ internal class PlumbingToPlumbingEntity : IVoToEntity<Plumbing, PlumbingEntity>
             Id = plumbing.Id,
             PhoneNumber = plumbing.PhoneNumber,
             Date = plumbing.Date.UtcDateTime,
-            UnixDate = plumbing.Date.ToUnixTimeMilliseconds(),
+            UnixDate = plumbing.Date.ToUnixTime(),
             Contents = plumbing.Contents,
             MetaData = plumbing.MetaData,
             Source = plumbing.Source,

@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.DataSource;
 using LeadPipe.Infrastructure.Entity;
@@ -63,7 +64,7 @@ public class CaliperMySqlDataSourceTests
             .Returns(Result.Success(new SyncStateEntity
             {
                 BusinessId = BusinessId.From(SyncKey.Caliper.Value),
-                UnixLastSyncUtc = lastSync.ToUnixTimeMilliseconds()
+                UnixLastSyncUtc = lastSync.ToUnixTime()
             }));
 
         var refreshed = new List<CaliperMySqlEntity>

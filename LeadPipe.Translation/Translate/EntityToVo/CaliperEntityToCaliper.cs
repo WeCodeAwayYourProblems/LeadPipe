@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -8,7 +9,7 @@ internal class CaliperEntityToCaliper : IEntityToVo<CaliperEntity, Caliper>
 {
     public Caliper Translate(CaliperEntity c)
     {
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(c.UnixDate);
+        DateTimeOffset date = DateTimeOffsetExt.FromUnixTime(c.UnixDate);
         PhoneNumber number = new(c.PhoneNumber);
         TimeSpan duration = TimeSpan.FromSeconds(c.Duration);
         string note = c.Note;

@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Translation.Translate.VoToEntity;
 
@@ -28,7 +29,7 @@ public sealed class PlumbingToPlumbingEntityTests
         PlumbingEntity entity = translator.Translate(vo);
 
         Assert.Equal(date.UtcDateTime, entity.Date);
-        Assert.Equal(date.ToUnixTimeMilliseconds(), entity.UnixDate);
+        Assert.Equal(date.ToUnixTime(), entity.UnixDate);
         Assert.Equal(DateTimeKind.Utc, entity.Date.Kind);
     }
 
@@ -83,6 +84,6 @@ public sealed class PlumbingToPlumbingEntityTests
         }
 
         Assert.Equal(vo.Date.UtcDateTime, current.Date);
-        Assert.Equal(vo.Date.ToUnixTimeMilliseconds(), current.UnixDate);
+        Assert.Equal(vo.Date.ToUnixTime(), current.UnixDate);
     }
 }

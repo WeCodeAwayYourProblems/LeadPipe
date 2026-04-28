@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -11,7 +12,7 @@ internal sealed class CatManDtoToCaliper : IDtoToVo<CatManDto, Caliper>
         long id = data.id;
 
         long unix = (long)(data.unix_time is null ? 0 : data.unix_time);
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(unix);
+        DateTimeOffset date = DateTimeOffsetExt.FromUnixTime(unix);
 
         PhoneNumber number = new(data.caller_number_bare);
 

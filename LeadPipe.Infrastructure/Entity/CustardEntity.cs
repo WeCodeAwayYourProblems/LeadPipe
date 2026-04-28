@@ -32,7 +32,7 @@ public class CustardEntity : IEntity, IPhoneDateIdEntity
     public DateTime Date { get; set; }
     public required long UnixDate { get; set; }
     private DateTime? _cancelDate;
-    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeSeconds(UnixCancelDate.Value).UtcDateTime;
+    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeMilliseconds(UnixCancelDate.Value).UtcDateTime;
     public long? UnixCancelDate { get; set; }
 
     // Navigation    

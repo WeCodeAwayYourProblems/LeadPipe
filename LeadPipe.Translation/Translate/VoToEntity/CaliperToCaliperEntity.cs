@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -13,7 +14,7 @@ internal class CaliperToCaliperEntity : IVoToEntity<Caliper, CaliperEntity>
             Id = c.Id,
             PhoneNumber = c.Number,
             Date = c.Date.UtcDateTime,
-            UnixDate = c.Date.ToUnixTimeMilliseconds(),
+            UnixDate = c.Date.ToUnixTime(),
             Note = c.Note,
             Source = c.Source,
             Label = c.Label,

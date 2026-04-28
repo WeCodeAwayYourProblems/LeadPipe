@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Infrastructure.Data.DataSource;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Repository;
@@ -17,13 +18,13 @@ public class TestDateGetter
     {
         // Assemble
         DateTimeOffset expected = DateTimeOffset.UtcNow;
-        long unixTime = expected.ToUnixTimeMilliseconds();
+        long unixTime = expected.ToUnixTime();
         Result<List<CatManDto>> setup = Result.Success<List<CatManDto>>([new CatManDto() { unix_time = unixTime }]);
 
         // Act
         DateTimeOffset actual = Source.GetDate(setup);
 
         // Assert
-        Assert.Equal(expected.ToUnixTimeMilliseconds(), actual.ToUnixTimeMilliseconds());
+        Assert.Equal(expected.ToUnixTime(), actual.ToUnixTime());
     }
 }

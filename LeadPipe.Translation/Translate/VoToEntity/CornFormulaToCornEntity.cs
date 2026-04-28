@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -13,7 +14,7 @@ internal sealed class CornFormulaToCornEntity : IVoToEntity<CornFormula, CornEnt
             Id = c.Id,
             PhoneNumber = c.PhoneNumber,
             Date = c.Date.UtcDateTime,
-            UnixDate = c.Date.ToUnixTimeMilliseconds(),
+            UnixDate = c.Date.ToUnixTime(),
             Payload = c.PayLoad,
             MetaData = c.MetaData,
             Source = c.Source

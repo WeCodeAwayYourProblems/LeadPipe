@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -15,8 +16,8 @@ internal sealed class CustardToCustardEntity : IVoToEntity<Custard, CustardEntit
             PhoneNumber = s.Phone1,
             PhoneNumber2 = s.Phone2,
             Date = s.Date.UtcDateTime,
-            UnixDate = s.Date.ToUnixTimeMilliseconds(),
-            UnixCancelDate = s.DateCancelled?.ToUnixTimeMilliseconds(),
+            UnixDate = s.Date.ToUnixTime(),
+            UnixCancelDate = s.DateCancelled?.ToUnixTime(),
         };
         return result;
     }

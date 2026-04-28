@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using LeadPipe.Infrastructure.Sqlite.Repository;
@@ -13,7 +14,7 @@ public class AllLinkRepositoryTests
     #region Setup
     private static readonly PlumbingContext context = SqliteTestContextFactory.Create(out _);
     private static DateTime Now => DateTime.UtcNow;
-    private static long UnixNow => new DateTimeOffset(Now).ToUnixTimeMilliseconds();
+    private static long UnixNow => new DateTimeOffset(Now).ToUnixTime();
 
     private static PhoneNumber TestNumber => new(5555555555);
 

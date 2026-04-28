@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Core;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
@@ -14,7 +15,7 @@ internal class TokenDtoToOAuthTokenEntity(IClock clock) : ITranslate<TokenDto, O
             throw new InvalidOperationException($"{nameof(t.Provider)} cannot be null");
 
         var now = _clock.UtcNow;
-        var expiresAt = DateTimeOffset.FromUnixTimeMilliseconds(now.ToUnixTimeMilliseconds() + t.ExpiresIn);
+        var expiresAt = DateTimeOffsetExt.FromUnixTime(now.ToUnixTime() + t.ExpiresIn);
         var result = new OAuthTokenEntity
         {
             Provider = t.Provider,
@@ -22,9 +23,9 @@ internal class TokenDtoToOAuthTokenEntity(IClock clock) : ITranslate<TokenDto, O
             TokenType = t.TokenType,
             RefreshToken = t.RefreshToken,
             ExpiresAtUtc = expiresAt,
-            UnixExpiresAtUtc = expiresAt.ToUnixTimeMilliseconds(),
+            UnixExpiresAtUtc = expiresAt.ToUnixTime(),
             UpdatedAtUtc = now,
-            UnixUpdatedAtUtc = now.ToUnixTimeMilliseconds()
+            UnixUpdatedAtUtc = now.ToUnixTime()
         };
         return result;
     }

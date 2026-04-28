@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -14,14 +15,14 @@ internal class SandEntityToSandwich(IEntityToVo<CustardEntity, Custard> eToVo) :
 
         CustardEntity ce = entity.CustardEntity;
         var custard = _eToVo.Translate(ce);
-        DateTimeOffset? dateCancelled = entity.UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeMilliseconds((long)entity.UnixCancelDate);
+        DateTimeOffset? dateCancelled = entity.UnixCancelDate is null ? null : DateTimeOffsetExt.FromUnixTime((long)entity.UnixCancelDate);
 
         Sandwich result = new
         (
             SandId: entity.Id,
             CustardId: entity.CustardId,
             Custard: custard,
-            Date: DateTimeOffset.FromUnixTimeMilliseconds(entity.UnixDate),
+            Date: DateTimeOffsetExt.FromUnixTime(entity.UnixDate),
             DateCancelled: dateCancelled,
             Active: entity.Active,
             Complete: entity.Complete,

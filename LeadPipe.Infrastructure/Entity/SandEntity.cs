@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using System.Diagnostics.CodeAnalysis;
 
@@ -35,7 +36,7 @@ public class SandEntity : IEntity
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }
     private DateTime? _cancelDate;
-    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeSeconds(UnixCancelDate.Value).UtcDateTime;
+    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffsetExt.FromUnixTime(UnixCancelDate.Value).UtcDateTime;
     public long? UnixCancelDate { get; set; }
     public bool Active { get; set; }
     public bool Complete { get; set; }

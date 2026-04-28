@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Core;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
@@ -31,7 +32,7 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
 
         long phoneNumber = plumb.PhoneNumber.Number;
 
-        DateTime date = DateTimeOffset.FromUnixTimeMilliseconds(plumb.UnixDate).UtcDateTime;
+        DateTime date = DateTimeOffsetExt.FromUnixTime(plumb.UnixDate).UtcDateTime;
 
         string contents = plumb.Contents is string c
             ? NewLineRegex().Replace(
@@ -47,14 +48,14 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
 
         // Dates
         DateTime? custDate =
-            _twentyTwelve.ToUnixTimeMilliseconds() >= sand.UnixDate || _clock.UtcNow.ToUnixTimeMilliseconds() <= sand.UnixDate
+            _twentyTwelve.ToUnixTime() >= sand.UnixDate || _clock.UtcNow.ToUnixTime() <= sand.UnixDate
                 ? null
-                : DateTimeOffset.FromUnixTimeMilliseconds(sand.UnixDate).UtcDateTime;
+                : DateTimeOffsetExt.FromUnixTime(sand.UnixDate).UtcDateTime;
 
         DateTime? custCxlDate =
-            sand.UnixCancelDate is null || _twentyTwelve.ToUnixTimeMilliseconds() >= sand.UnixCancelDate || _clock.UtcNow.ToUnixTimeMilliseconds() <= sand.UnixCancelDate
+            sand.UnixCancelDate is null || _twentyTwelve.ToUnixTime() >= sand.UnixCancelDate || _clock.UtcNow.ToUnixTime() <= sand.UnixCancelDate
                 ? null
-                : DateTimeOffset.FromUnixTimeMilliseconds(sand.UnixCancelDate.Value).UtcDateTime;
+                : DateTimeOffsetExt.FromUnixTime(sand.UnixCancelDate.Value).UtcDateTime;
 
         DateTime? subDate = custDate;
 

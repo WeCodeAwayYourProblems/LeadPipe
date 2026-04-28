@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Core;
@@ -80,7 +81,7 @@ public abstract class SyncedFileDataSource<TDto>(
         {
             BusinessId = BusinessId.BuildBusinessId(Source, SyncKey),
             LastSyncUtc = latest.UtcDateTime,
-            UnixLastSyncUtc = latest.ToUnixTimeMilliseconds()
+            UnixLastSyncUtc = latest.ToUnixTime()
         };
 
         await _state.UpsertRangeAsync([state]);

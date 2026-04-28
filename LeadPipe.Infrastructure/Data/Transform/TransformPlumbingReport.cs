@@ -27,7 +27,7 @@ public sealed class TransformPlumbingReport(
         if (plumbs.IsFailure) return Result.Failure<List<ReportPlumbing>>(plumbs.Error);
 
         HashSet<(PhoneNumber PhoneNumber, long UnixDate, Source Source, string MetaData)> keySet = 
-            data.ToHashSetFast(k => (k.PhoneNumber, UnixDate: k.Date.ToUnixTimeMilliseconds(), k.Source, k.MetaData));
+            data.ToHashSetFast(k => (k.PhoneNumber, UnixDate: k.Date.ToUnixTime(), k.Source, k.MetaData));
         List<PlumbingEntity> plumbingEntities = [.. plumbs.Value.Where(p => keySet.Contains((p.PhoneNumber, p.UnixDate, p.Source, p.MetaData)))];
 
         // Get links to the plumbing

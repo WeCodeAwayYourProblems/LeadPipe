@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Sqlite.Repository;
@@ -25,7 +26,7 @@ public class RepositoryEntityTests
             Id = 1,
             PhoneNumber = number,
             Date = DateTime.UtcNow,
-            UnixDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            UnixDate = DateTimeOffset.UtcNow.ToUnixTime(),
             Note = "Note1",
             Label = "label",
             Source = "Source1",
@@ -71,7 +72,7 @@ public class RepositoryEntityTests
             Id = 1,
             PhoneNumber = number,
             Date = now,
-            UnixDate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            UnixDate = DateTimeOffset.UtcNow.ToUnixTime(),
             Payload = "InitialPayload",
             MetaData = "InitialMeta",
             Source = "Source1"
@@ -96,7 +97,7 @@ public class RepositoryEntityTests
             Id = 1,
             PhoneNumber = new PhoneNumber(9999999999),
             Date = now.AddDays(1),
-            UnixDate = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeMilliseconds(),
+            UnixDate = DateTimeOffset.UtcNow.AddDays(1).ToUnixTime(),
             Payload = "UpdatedPayload",
             MetaData = "UpdatedMeta",
             Source = "SourceUpdated"
@@ -133,8 +134,8 @@ public class RepositoryEntityTests
             PhoneNumber = number,
             PhoneNumber2 = null,
             Date = now,
-            UnixDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
-            UnixCancelDate = new DateTimeOffset(now.AddDays(10)).ToUnixTimeMilliseconds()
+            UnixDate = new DateTimeOffset(now).ToUnixTime(),
+            UnixCancelDate = new DateTimeOffset(now.AddDays(10)).ToUnixTime()
         };
 
         var entities = new List<CustardEntity> { entity };
@@ -158,8 +159,8 @@ public class RepositoryEntityTests
             PhoneNumber = new PhoneNumber(9999999999),
             PhoneNumber2 = new PhoneNumber(8888888888),
             Date = now.AddDays(1),
-            UnixDate = new DateTimeOffset(now.AddDays(1)).ToUnixTimeMilliseconds(),
-            UnixCancelDate = new DateTimeOffset(now.AddDays(20)).ToUnixTimeMilliseconds()
+            UnixDate = new DateTimeOffset(now.AddDays(1)).ToUnixTime(),
+            UnixCancelDate = new DateTimeOffset(now.AddDays(20)).ToUnixTime()
         };
 
         var updateResult = await repo.UpsertRangeAsync(new List<CustardEntity> { updatedEntity });
@@ -192,7 +193,7 @@ public class RepositoryEntityTests
             Id = 1,
             PhoneNumber = number,
             Date = now,
-            UnixDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
+            UnixDate = new DateTimeOffset(now).ToUnixTime(),
             MetaData = "Meta1",
             Source = Source.Test, // assuming Source is a valid instance
             Contents = "Initial contents",
@@ -219,7 +220,7 @@ public class RepositoryEntityTests
             Id = 1,
             PhoneNumber = number,
             Date = now,
-            UnixDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
+            UnixDate = new DateTimeOffset(now).ToUnixTime(),
             MetaData = "Meta1",
             Source = Source.Test,
             Contents = "Updated contents",
@@ -253,8 +254,8 @@ public class RepositoryEntityTests
             Id = 1,
             PhoneNumber = new PhoneNumber(5555555555),
             Date = now,
-            UnixDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
-            UnixCancelDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
+            UnixDate = new DateTimeOffset(now).ToUnixTime(),
+            UnixCancelDate = new DateTimeOffset(now).ToUnixTime(),
             Active = true,
         };
 
@@ -267,8 +268,8 @@ public class RepositoryEntityTests
             Id = 1,
             CustardId = 1, // exists
             Date = now,
-            UnixDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
-            UnixCancelDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
+            UnixDate = new DateTimeOffset(now).ToUnixTime(),
+            UnixCancelDate = new DateTimeOffset(now).ToUnixTime(),
             Active = true,
             Complete = false,
             Value = 123.45m,
@@ -284,8 +285,8 @@ public class RepositoryEntityTests
             Id = 1,
             CustardId = 1,
             Date = now.AddHours(1),
-            UnixDate = new DateTimeOffset(now.AddHours(1)).ToUnixTimeMilliseconds(),
-            UnixCancelDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
+            UnixDate = new DateTimeOffset(now.AddHours(1)).ToUnixTime(),
+            UnixCancelDate = new DateTimeOffset(now).ToUnixTime(),
             Active = false,
             Complete = true,
             Value = 999.99m,
@@ -301,8 +302,8 @@ public class RepositoryEntityTests
             Id = 2,
             CustardId = 999, // does not exist
             Date = now,
-            UnixDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
-            UnixCancelDate = new DateTimeOffset(now).ToUnixTimeMilliseconds(),
+            UnixDate = new DateTimeOffset(now).ToUnixTime(),
+            UnixCancelDate = new DateTimeOffset(now).ToUnixTime(),
             Active = true,
             Complete = false,
             Value = 111.11m,

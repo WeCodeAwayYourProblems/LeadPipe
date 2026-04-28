@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -11,9 +12,9 @@ internal sealed class CustardEntityToCustard : IEntityToVo<CustardEntity, Custar
         PhoneNumber number1 = new(entity.PhoneNumber);
         PhoneNumber? number2 = entity.PhoneNumber2 is not null ? new(entity.PhoneNumber2) : null;
 
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(entity.UnixDate);
+        DateTimeOffset date = DateTimeOffsetExt.FromUnixTime(entity.UnixDate);
 
-        DateTimeOffset? cxlDate = entity.UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeMilliseconds((long)entity.UnixCancelDate);
+        DateTimeOffset? cxlDate = entity.UnixCancelDate is null ? null : DateTimeOffsetExt.FromUnixTime((long)entity.UnixCancelDate);
 
         Custard result = new
             (

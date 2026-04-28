@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -9,7 +10,7 @@ internal class PlumbingEntityToPlumbing : IEntityToVo<PlumbingEntity, Plumbing>
     public Plumbing Translate(PlumbingEntity entity)
     {
         var number = new PhoneNumber(entity.PhoneNumber);
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(entity.UnixDate);
+        DateTimeOffset date = DateTimeOffsetExt.FromUnixTime(entity.UnixDate);
         var contents = entity.Contents;
         var source = entity.Source;
         PhoneNumber[] numbers = [.. entity.PhoneNumbers.Select(p => p.PhoneNumber)];

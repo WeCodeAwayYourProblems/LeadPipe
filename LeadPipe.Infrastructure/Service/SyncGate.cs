@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Repository;
@@ -71,7 +72,7 @@ public sealed class SyncGate(
             ? inter
             : _defaultSourceInterval;
 
-        DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeMilliseconds(found.UnixSyncUtc);
+        DateTimeOffset syncDate = DateTimeOffsetExt.FromUnixTime(found.UnixSyncUtc);
         TimeSpan timeSinceSync = now - syncDate;
 
         bool run = timeSinceSync >= resetInterval || found.SuccessState is false;
@@ -83,7 +84,7 @@ public sealed class SyncGate(
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
-        TimeSpan syncstatetiming = now - DateTimeOffset.FromUnixTimeMilliseconds(found.UnixSyncUtc);
+        TimeSpan syncstatetiming = now - DateTimeOffsetExt.FromUnixTime(found.UnixSyncUtc);
 
         TimeSpan interval = key.Value == SyncKey.Associate.Value
             ? _associationInterval
@@ -109,7 +110,7 @@ public sealed class SyncGate(
             Id = default,
             Key = entity,
             Source = source,
-            UnixSyncUtc = now.ToUnixTimeMilliseconds(),
+            UnixSyncUtc = now.ToUnixTime(),
             SuccessState = successState
         };
 

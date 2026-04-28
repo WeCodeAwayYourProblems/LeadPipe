@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Translation.Primitives;
@@ -79,7 +80,7 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber = vo.Custard.Phone1,
                 PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
-                UnixDate = vo.Custard.Date.ToUnixTimeMilliseconds(),
+                UnixDate = vo.Custard.Date.ToUnixTime(),
             },
             Offerman= vo.Offerman
         };
@@ -122,7 +123,7 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber = vo.Custard.Phone1,
                 PhoneNumber2 = vo.Custard.Phone2,
                 Date = vo.Custard.Date.UtcDateTime,
-                UnixDate = vo.Custard.Date.ToUnixTimeMilliseconds(),
+                UnixDate = vo.Custard.Date.ToUnixTime(),
             },
             Offerman = vo.Offerman
         };

@@ -23,13 +23,19 @@ internal class LabDtoToPlumbing : IDtoToVo<LabDto, Plumbing>
             : [PhoneNumber.DefaultPhoneNumber];
         var canonicalPhoneNumber = numbers[^1];
 
+        var email = buyers
+            .Where(v => v?.email is not null)
+            .Select(v => v!.email!)
+            .OfType<string>()
+            .ToList();
+
         DateTimeOffset date = DateTimeOffset.TryParse(dto.created_at?.date_utc, out DateTimeOffset r) ? r : DateTimeOffset.MinValue;
 
         string contents = dto.display?.text is null ? string.Empty : dto.display.text;
 
         string branch = _unk;
         string location = dto.metadata?.location?.name is null ? _unk : dto.metadata.location.name;
-        string metaData = $"Location: {location}";
+        string metaData = $"Location: {location}. Emails:{string.Join(',', email)}";
 
         Plumbing result = new(
             Id: 0,

@@ -11,7 +11,7 @@ public class LeasedDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeasedDto, Pl
     public Plumbing Translate(LeasedDto data)
     {
         PhoneNumber number = PhoneNumber.TryParse(data.PhoneNumber, out var ph) ? ph : PhoneNumber.DefaultPhoneNumber;
-        DateTime d = DateTime.TryParse(data.Date, out DateTime r)
+        DateTime d = DateTime.TryParse(data.Date?.Replace("at ", null), out DateTime r)
             ? r
             : DateTime.MaxValue;
         string zoneStr = data.CompletionDate is not null

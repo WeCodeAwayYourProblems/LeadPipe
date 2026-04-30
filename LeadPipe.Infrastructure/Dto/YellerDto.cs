@@ -130,8 +130,8 @@ public class Availability
 }
 public class Ilq
 {
-    public string summary { get; set; }
-    public string status { get; set; }
+    public string? summary { get; set; }
+    public string? status { get; set; }
 }
 public class YellerHelperDto
 {

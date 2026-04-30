@@ -1,19 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.7" />
+		<Analyzer Include="..\Analyzer\bin\Debug\netstandard2.0\Analyzer.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
-    <ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
-    <ProjectReference Include="..\LeadPipe.Infrastructure\LeadPipe.Infrastructure.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
+		<ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
+		<ProjectReference Include="..\LeadPipe.Infrastructure\LeadPipe.Infrastructure.csproj" />
+	</ItemGroup>
 
 </Project>

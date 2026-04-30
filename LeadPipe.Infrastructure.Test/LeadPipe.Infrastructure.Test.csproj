@@ -27,12 +27,13 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<Analyzer Include="..\Analyzer\bin\Debug\netstandard2.0\Analyzer.dll" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
-	  <ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
-	  <ProjectReference Include="..\LeadPipe.Translation\LeadPipe.Translation.csproj" />
+		<ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
+		<ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
+		<ProjectReference Include="..\LeadPipe.Translation\LeadPipe.Translation.csproj" />
 	</ItemGroup>
 
 </Project>

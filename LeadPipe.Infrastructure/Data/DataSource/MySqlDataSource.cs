@@ -30,7 +30,7 @@ public class MySqlDataSource(ISyncStateRepository sync)
         if (state.IsFailure)
             return Result.Failure<DateTimeOffset>(state.Error);
 
-        DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeMilliseconds(state.Value.UnixLastSyncUtc);
+        DateTimeOffset syncDate = DateTimeOffsetExt.FromUnixTime(state.Value.UnixLastSyncUtc);
 
         return syncDate;
     }
@@ -63,7 +63,7 @@ public abstract class SyncedDataSourceBase<TEntity>(
         if (state.IsFailure)
             return Result.Failure<DateTimeOffset>(state.Error);
 
-        DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeMilliseconds(state.Value.UnixLastSyncUtc);
+        DateTimeOffset syncDate = DateTimeOffsetExt.FromUnixTime(state.Value.UnixLastSyncUtc);
 
         return syncDate;
     }

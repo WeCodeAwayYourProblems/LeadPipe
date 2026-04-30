@@ -44,7 +44,7 @@ public class TranslatorBackAndForthTests
             // Convert VO back to DTO
             var roundDto = new CalliDto
             {
-                Phone = currentVo.PhoneNumber.Number,
+                Phone = currentVo.PhoneNumber.Number.ToString(),
                 Date = currentVo.Date.UtcDateTime.ToString("yyyy-MM-dd"),
                 Time = currentVo.Date.UtcDateTime.ToString("HH:mm"),
                 TimeZone = "utc", // already UTC

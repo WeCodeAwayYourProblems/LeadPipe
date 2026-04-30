@@ -93,7 +93,7 @@ public abstract class SyncedFileDataSource<TDto>(
         if (latest.IsFailure)
             return DefaultLatestDate;
 
-        DateTimeOffset result = DateTimeOffset.FromUnixTimeSeconds(latest.Value.UnixLastSyncUtc); // Use UnixLastSyncUtc to prevent date drift
+        DateTimeOffset result = DateTimeOffsetExt.FromUnixTime(latest.Value.UnixLastSyncUtc); // Use UnixLastSyncUtc to prevent date drift
 
         return result;
     }

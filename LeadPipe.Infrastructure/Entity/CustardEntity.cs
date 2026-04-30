@@ -1,4 +1,5 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Core;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using System.Diagnostics.CodeAnalysis;
 
@@ -32,7 +33,7 @@ public class CustardEntity : IEntity, IPhoneDateIdEntity
     public DateTime Date { get; set; }
     public required long UnixDate { get; set; }
     private DateTime? _cancelDate;
-    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeMilliseconds(UnixCancelDate.Value).UtcDateTime;
+    public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffsetExt.FromUnixTime(UnixCancelDate.Value).UtcDateTime;
     public long? UnixCancelDate { get; set; }
 
     // Navigation    

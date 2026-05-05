@@ -23,6 +23,8 @@ public sealed class CustardRepository
             .Include(q => q.CustardPlumbingLinks);
     }
 
+    protected override string? Type { get; set; } = "Custard";
+    
     protected override UpsertFields EntityDetails { get; } =
     new(
         TableName: TableNames.CustardEntitiesName,

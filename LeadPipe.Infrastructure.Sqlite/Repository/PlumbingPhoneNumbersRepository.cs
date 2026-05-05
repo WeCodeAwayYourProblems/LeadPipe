@@ -17,6 +17,8 @@ public class PlumbingPhoneNumbersRepository
         => q
             .Include(c => c.Plumbing);
 
+    protected override string? Type { get; set; } = "PhoneNumbers";
+    
     protected override UpsertFields EntityDetails { get; } =
         new(
             TableName: TableNames.PlumbingPhoneNumbersName,

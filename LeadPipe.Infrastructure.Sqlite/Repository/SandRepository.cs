@@ -23,6 +23,8 @@ public sealed class SandRepository
             .Include(c => c.SandCaliperLinks)
             .Include(c => c.SandCornLinks);
     }
+    
+    protected override string? Type { get; set; } = "Sand";
 
     protected override UpsertFields EntityDetails { get; } =
     new(

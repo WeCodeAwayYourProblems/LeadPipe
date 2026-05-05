@@ -16,6 +16,7 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
     protected record UpsertFields(string TableName, string TempTable, string EntityName, int ColumnCount);
     protected abstract UpsertFields EntityDetails { get; }
     protected virtual string DropTempTable => $"DROP TABLE IF EXISTS {EntityDetails.TempTable};";
+    protected abstract string? Type { get; set; }
     protected abstract string CreateTempTable { get; }
     protected abstract string UpdateSql { get; }
     protected abstract string InsertSql { get; }
@@ -97,8 +98,9 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: IsUpdatable={IsUpdatable}, Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "{Entity} upsert complete: Type={Type}, IsUpdatable={IsUpdatable}, Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 EntityDetails.EntityName,
+                Type,
                 IsUpdatable,
                 entities.Count,
                 stagedCount,

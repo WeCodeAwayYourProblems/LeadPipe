@@ -22,6 +22,8 @@ public sealed class CornRepository(
             .Include(c => c.CornPlumbingLinks);
     }
 
+    protected override string? Type { get; set; } = "Corn";
+
     protected override UpsertFields EntityDetails { get; } =
     new(
         TableName: TableNames.CornEntitiesName,

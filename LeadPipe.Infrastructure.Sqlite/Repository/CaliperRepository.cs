@@ -23,6 +23,8 @@ public sealed class CaliperRepository
             .Include(c => c.CornCaliperLinks);
     }
 
+    protected override string? Type { get; set; } = "Caliper";
+    
     protected override UpsertFields EntityDetails { get; } =
         new(
             TableName: TableNames.CaliperEntitiesName,

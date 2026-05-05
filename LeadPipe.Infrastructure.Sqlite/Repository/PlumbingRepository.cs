@@ -27,6 +27,8 @@ public class PlumbingRepository
             .Include(c => c.PhoneNumbers);
     }
 
+    protected override string? Type { get; set; }
+
     protected override UpsertFields EntityDetails { get; } =
     new(
         TableName: TableNames.PlumbingEntitiesName,
@@ -143,6 +145,9 @@ public class PlumbingRepository
 
     public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(
         List<PlumbingEntity> entities,
-        CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);
-
+        CancellationToken ct = default)
+    {
+        Type = entities.Count > 0 ? entities[0].Source.ToString() : "Unknown";
+        return await UpsertEntityRangeAsync(entities, ct);
+    }
 }

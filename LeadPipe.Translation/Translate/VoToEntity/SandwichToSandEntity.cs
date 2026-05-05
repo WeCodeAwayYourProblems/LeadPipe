@@ -9,7 +9,9 @@ internal class SandwichToSandEntity : IVoToEntity<Sandwich, SandEntity>
 {
     public SandEntity Translate(Sandwich s)
     {
-        long? dateCancelled = s.DateCancelled?.ToUnixTime() < 0 ? null : s.DateCancelled?.ToUnixTime();
+        long? dateCancelled = s.DateCancelled?.ToUnixTime() < 0 || s.DateCancelled?.ToUnixTime() == DateTimeOffset.MaxValue.ToUnixTime() 
+            ? null 
+            : s.DateCancelled?.ToUnixTime();
         return new SandEntity()
         {
             Id = s.SandId,

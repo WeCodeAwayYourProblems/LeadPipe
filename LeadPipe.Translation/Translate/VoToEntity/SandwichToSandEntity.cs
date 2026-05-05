@@ -9,13 +9,14 @@ internal class SandwichToSandEntity : IVoToEntity<Sandwich, SandEntity>
 {
     public SandEntity Translate(Sandwich s)
     {
+        long? dateCancelled = s.DateCancelled?.ToUnixTime() < 0 ? null : s.DateCancelled?.ToUnixTime();
         return new SandEntity()
         {
             Id = s.SandId,
             CustardId = s.CustardId,
             Date = s.Date.UtcDateTime,
             UnixDate = s.Date.ToUnixTime(),
-            UnixCancelDate = s.DateCancelled?.ToUnixTime(),
+            UnixCancelDate = dateCancelled,
             Active = s.Active,
             Complete = s.Complete,
             Type = s.Type,

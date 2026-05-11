@@ -8,26 +8,26 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 {
 #pragma warning disable IDE0079
     // Entities
-    public DbSet<OAuthTokenEntity> OAuthTokens { get; set; }
-    public DbSet<SyncStateEntity> SyncState { get; set; }
-    public DbSet<SyncStampEntity> SyncStamp { get; set; }
-    public DbSet<CaliperEntity> CaliperEntities { get; set; }
-    public DbSet<CornEntity> CornEntities { get; set; }
-    public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
-    public DbSet<PlumbingPhoneNumber> PlumbingPhoneNumbers { get; set; }
-    public DbSet<CustardEntity> CustardEntities { get; set; }
-    public DbSet<SandEntity> SandEntities { get; set; }
+    public DbSet<OAuthTokenEntity> OAuthTokens => Set<OAuthTokenEntity>();
+    public DbSet<SyncStateEntity> SyncState => Set<SyncStateEntity>();
+    public DbSet<SyncStampEntity> SyncStamp => Set<SyncStampEntity>();
+    public DbSet<CaliperEntity> CaliperEntities => Set<CaliperEntity>();
+    public DbSet<CornEntity> CornEntities => Set<CornEntity>();
+    public DbSet<PlumbingEntity> PlumbingEntities => Set<PlumbingEntity>();
+    public DbSet<PlumbingPhoneNumber> PlumbingPhoneNumbers => Set<PlumbingPhoneNumber>();
+    public DbSet<CustardEntity> CustardEntities => Set<CustardEntity>();
+    public DbSet<SandEntity> SandEntities => Set<SandEntity>();
 
     // Links
-    public DbSet<CornCaliperLink> CornCaliperLinks { get; set; }
-    public DbSet<CornPlumbingLink> CornPlumbingLinks { get; set; }
-    public DbSet<PlumbingCaliperLink> PlumbingCaliperLinks { get; set; }
-    public DbSet<CustardCaliperLink> CustardCaliperLinks { get; set; }
-    public DbSet<CustardCornLink> CustardCornLinks { get; set; }
-    public DbSet<CustardPlumbingLink> CustardPlumbingLinks { get; set; }
-    public DbSet<SandCaliperLink> SandCaliperLinks { get; set; }
-    public DbSet<SandCornLink> SandCornLinks { get; set; }
-    public DbSet<SandPlumbingLink> SandPlumbingLinks { get; set; }
+    public DbSet<CornCaliperLink> CornCaliperLinks => Set<CornCaliperLink>();
+    public DbSet<CornPlumbingLink> CornPlumbingLinks => Set<CornPlumbingLink>();
+    public DbSet<PlumbingCaliperLink> PlumbingCaliperLinks => Set<PlumbingCaliperLink>();
+    public DbSet<CustardCaliperLink> CustardCaliperLinks => Set<CustardCaliperLink>();
+    public DbSet<CustardCornLink> CustardCornLinks => Set<CustardCornLink>();
+    public DbSet<CustardPlumbingLink> CustardPlumbingLinks => Set<CustardPlumbingLink>();
+    public DbSet<SandCaliperLink> SandCaliperLinks => Set<SandCaliperLink>();
+    public DbSet<SandCornLink> SandCornLinks => Set<SandCornLink>();
+    public DbSet<SandPlumbingLink> SandPlumbingLinks => Set<SandPlumbingLink>();
 
 #pragma warning restore IDE0079
 

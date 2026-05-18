@@ -6,6 +6,7 @@ echo Please have your password ready
 set /p host="Please enter the url of the database: "
 set /p user="Please enter your username: "
 set /p pass="Please enter your password: "
+set failedQuery="None"
 
 rem Active Not Termite
 echo.
@@ -20,6 +21,7 @@ echo Not Termite output: %notTermiteOutput%
 rem error messages are placed in the output file
 if not "%notTermiteErr%"=="0" (
     type %notTermiteOutput% 
+    set failedQuery="Active not Termite query"
     goto :pauseExecution
 )
 echo.
@@ -37,6 +39,7 @@ echo Termite output: %termiteOutput%
 rem error messages are placed in the output file
 if not "%termiteErr%"=="0" (
     type %termiteOutput% 
+    set failedQuery="Active Termite Query"
     goto :pauseExecution
 )
 echo.
@@ -54,6 +57,7 @@ echo Corn output: %cornOutput%
 rem error messages are placed in the output file
 if not "%cornErr%"=="0" (
     type %cornOutput% 
+    set failedQuery="Corn Formation Query"
     goto :pauseExecution
 )
 echo.
@@ -71,6 +75,7 @@ echo Goon output: %goonOutput%
 rem error messages are placed in the output file
 if not "%goonErr%"=="0" (
     type %goonOutput% 
+    set failedQuery="GoonDoggle Query"
     goto :pauseExecution
 )
 echo.
@@ -88,6 +93,7 @@ echo MacBang output: %macBangOutput%
 rem error messages are placed in the output file
 if not "%macBangErr%"=="0" (
     type %macBangOutput% 
+    set failedQuery="MacBang Query"
     goto :pauseExecution
 )
 echo.
@@ -105,6 +111,7 @@ echo Pan output: %panOutput%
 rem error messages are placed in the output file
 if not "%panErr%"=="0" (
     type %panOutput% 
+    set failedQuery="Pan Fries Query"
     goto :pauseExecution
 )
 echo.
@@ -122,6 +129,7 @@ echo Lotus output: %lotusOutput%
 rem error messages are placed in the output file
 if not "%lotusErr%"=="0" (
     type %lotusOutput% 
+    set failedQuery="Lotus Query"
     goto :pauseExecution
 )
 echo.
@@ -139,6 +147,7 @@ echo KatharticSummary output: %katharticOutput%
 rem error messages are placed in the output file
 if not "%katharticErr%"=="0" (
     type %katharticOutput% 
+    set failedQuery="KatharticSummary Query"
     goto :pauseExecution
 )
 echo.
@@ -156,6 +165,7 @@ echo Upsilon output: %upsilonOutput%
 rem error messages are placed in the output file
 if not "%upsilonErr%"=="0" (
     type %upsilonOutput% 
+    set failedQuery="Upsilon Query"
     goto :pauseExecution
 )
 echo.
@@ -173,6 +183,7 @@ echo Custard output: %custardOutput%
 rem error messages are placed in the output file
 if not "%custardErr%"=="0" (
     type %custardOutput% 
+    set failedQuery="Giggle Custard"
     goto :pauseExecution
 )
 echo.
@@ -190,6 +201,7 @@ echo Custard Not output: %custardNotOutput%
 rem error messages are placed in the output file
 if not "%custardNotErr%"=="0" (
     type %custardNotOutput% 
+    set failedQuery="Giggle Custard Not"
     goto :pauseExecution
 )
 echo.
@@ -207,6 +219,7 @@ echo Leaf output: %leafOutput%
 rem error messages are placed in the output file
 if not "%leafErr%"=="0" (
     type %leafOutput% 
+    set failedQuery="LeafQuery"
     goto :pauseExecution
 )
 echo.
@@ -224,6 +237,7 @@ echo Code HepYepNoTerms output: %codeOutput%
 rem error messages are placed in the output file
 if not "%codeErr%"=="0" (
     type %codeOutput% 
+    set failedQuery="Code HepYepNoTerms"
     goto :pauseExecution
 )
 echo.
@@ -241,6 +255,7 @@ echo Code2 UnpurSubs output: %code2Output%
 rem error messages are placed in the output file
 if not "%code2Err%"=="0" (
     type %code2Output% 
+    set failedQuery="Code2 UnpuSubs"
     goto :pauseExecution
 )
 echo.
@@ -258,6 +273,7 @@ echo Code3 Winner output: %code3Output%
 rem error messages are placed in the output file
 if not "%code3Err%"=="0" (
     type %code3Output% 
+    set failedQuery="Code3 Winner"
     goto :pauseExecution
 )
 echo.
@@ -268,6 +284,7 @@ goto :end
 
 :pauseExecution
 echo At least one execution failed
+echo Failed Query: %failedQuery%
 pause
 
 :end

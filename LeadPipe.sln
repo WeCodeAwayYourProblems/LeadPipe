@@ -53,6 +53,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{03C7DCE2-95D1-40FD-8798-3DB89175F729}"
 	ProjectSection(SolutionItems) = preProject
 		Batch\ForceUpdateRepos.bat = Batch\ForceUpdateRepos.bat
+		Batch\LabReport.bat = Batch\LabReport.bat
 		Batch\LeafExclusion.bat = Batch\LeafExclusion.bat
 		Batch\LeafRepo Manual.bat = Batch\LeafRepo Manual.bat
 		Batch\LeafRepo.bat = Batch\LeafRepo.bat

@@ -1,47 +1,61 @@
 @echo off
-title Update Release build
-echo Ensure that the release build is up-to-date with debug
-
-:: Move into the correct folder location
+title Update Automate Release build
+set repo="Automate"
 cd %USERPROFILE%\Repos\Automate
 
-:: Move into the main branch of the repo
+:beginning
+echo Ensure that the %repo% release build is up-to-date with debug
+
 FOR /F "delims=" %%i IN ('git rev-parse --abbrev-ref HEAD') DO SET CURRENT_BRANCH=%%i
 IF "%CURRENT_BRANCH%"=="main" (
     ECHO Current branch is main
 ) ELSE (
-    ECHO Current branch is not main. It is %CURRENT_BRANCH%. Switching to main.
+    ECHO Switching to main from %CURRENT_BRANCH%.
     git checkout main
+    IF ERRORLEVEL 1 goto :gitfailure
 )
 
-:: Build release from main branch
 dotnet build --configuration Release
-set built=%errorlevel%
-
-echo Were there execution errors?
-echo %built%
-
-if not "%built%"=="0" goto :pauseExecution
-
+IF ERRORLEVEL 1 goto :pauseExecution
 echo Successfully built Release!
-goto :end
 
-:pauseExecution
-echo Build failure
-pause
-
-:gitfailure
-echo Git failed to checkout into main branch. Please check on that
-pause
-
-:end
-:: Move into the dev branch of the repo
+:: Switch back to dev before potentially moving on
 FOR /F "delims=" %%i IN ('git rev-parse --abbrev-ref HEAD') DO SET CURRENT_BRANCH=%%i
 IF "%CURRENT_BRANCH%"=="dev" (
     ECHO Current branch is dev
 ) ELSE (
-    ECHO Current branch is not dev. It is %CURRENT_BRANCH%. Switching to dev.
+    ECHO Switching back to dev.
     git checkout dev
+    IF ERRORLEVEL 1 goto :gitfailure
 )
-timeout /t 5
+
 echo.
+echo.
+
+IF %repo%=="LeadPipe" (
+    ECHO Finished LeadPipe build. Ending build process.
+    goto :end
+) ELSE (
+    ECHO Finished %repo% build.
+)
+
+:: For extensibility, various local builds with main and dev branches will go here
+title Update LeadPipe Release Build
+set repo="LeadPipe"
+echo Moving to %repo% build
+cd %USERPROFILE%\Repos\LeadPipe
+goto :beginning
+
+:pauseExecution
+echo Build failure in %repo%
+pause
+goto :end
+
+:gitfailure
+echo Git failed to switch branches in %repo%. Please check on that.
+pause
+goto :end
+
+:end
+echo.
+echo Done.

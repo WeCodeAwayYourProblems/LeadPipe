@@ -142,3 +142,24 @@ public sealed class ReportPlumbing
     [Name(ReportPlumbingColumnNames.MetaDataName)]
     public string? MetaData { get; set; }
 }
+public sealed class ReportPlumbingColumnNames
+
+{
+    public const string PhoneNumberName = "Phone Number";
+    public const string DateName = "Date";
+    public const string ContentsName = "Contents";
+    public const string SourceName = "Source";
+    public const string MsgBCName = "MsgBC";
+    public const string IsSName = "IsS";
+    public const string CustardIdName = "Custard Id";
+    public const string SandActiveName = "Sand Active";
+    public const string CustardDateName = "Custard Date";
+    public const string CustardCxlDateName = "Custard Cxl Date";
+    public const string SandIdName = "Sand Id";
+    public const string CompletedName = "Completed";
+    public const string ValueName = "Value";
+    public const string SandDateName = "Sand Date";
+    public const string SandCxlDateName = "Sand Cxl Date";
+    public const string SellersName = "Sellers";
+    public const string MetaDataName = "MetaData";
+}

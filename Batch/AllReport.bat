@@ -1,33 +1,43 @@
 @echo off
-
-set queryName=All Query
-title %queryName%
+title All Report
+echo Executing LeadPipe queries
 
 set base=%USERPROFILE%\Repos
+set outBase=%base%\Automate\Automate.Infrastructure\.info\Reports
+set common=%base%\LeadPipe\LeadPipe.Infrastructure\
+set queries=%common%\.queries
+set database=%common%\.info\leadpipe.test.db
 
-set database=%base%\LeadPipe\LeadPipe.Infrastructure\.info\leadpipe.test.db
-set output=%base%\Automate\Automate.Infrastructure\.info\Reports\AllReport_Test.csv
-set sql=%base%\LeadPipe\Batch\AllReport.sql
+:: --- Query 1 ---
+set queryName=All Query
+set output=%outBase%\AllReport_Test.csv
+set sql=%queries%\AllReport.sql
+call :runQuery
+if errorlevel 1 goto :pauseExecution
 
+:: --- Query 2 ---
+set queryName=Yeller Corn Query
+set output=%outBase%\YellerCorn_Test.csv
+set sql=%queries%\YellerCorns.sql
+call :runQuery
+if errorlevel 1 goto :pauseExecution
+
+echo All queries completed successfully!
+goto :EOF
+
+:runQuery
+title %queryName%
 sqlite3 -header -csv %database% < %sql% > %output%
-
-set error=%errorlevel%
-echo.
-echo %queryName% success: %error%
-:: Error messages are placed in the output file
-if not "%error%"="0" (
+if not "%errorlevel%"=="0" (
+    echo.
+    echo %queryName% failed!
     type %output%
-    goto :pauseExecution
+    exit /b 1
 )
-echo.
-
-:: Ending
 echo %queryName% execution successful!
-goto :end
+exit /b 0
 
 :pauseExecution
-echo %queryName% failed
-pause 
-
 echo.
-:end
+pause
+goto :EOF

@@ -36,6 +36,7 @@ if not "%errorlevel%"=="0" (
     exit /b 1
 )
 echo %queryName% execution successful!
+echo Result output to %output%
 exit /b 0
 
 :pauseExecution

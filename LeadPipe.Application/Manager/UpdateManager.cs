@@ -22,8 +22,12 @@ internal sealed class UpdateManager(
     {
         var core = await _core.Manage(frr);
         var sourceData = await _source.Manage(frr, source);
-        var associate = await _associate.Manage(frr);
-        var combined = Result.Combine(core, sourceData, associate);
+        //var associate = await _associate.Manage(frr);
+        var combined = Result.Combine(
+            core,
+            sourceData
+        //, associate
+        );
         return combined;
     }
 
@@ -31,8 +35,12 @@ internal sealed class UpdateManager(
     {
         var core = await _core.Manage(frr);
         var sourceData = await _source.Manage(frr);
-        var associate = await _associate.Manage(frr);
-        var combined = Result.Combine(core, sourceData, associate);
+        //var associate = await _associate.Manage(frr);
+        var combined = Result.Combine(
+            core,
+            sourceData
+        //, associate
+        );
         return combined;
     }
 }

@@ -1,4 +1,4 @@
-/*Lab Report*/
+/*All Report*/
 select 
     p.phonenumber as `Phone Number`, p.date as `Date of Message`, p.contents as `Message Contents`, p.source as `Message Source`,
     1 as `IM Lead`, 1 as `Sales Lead`, c.id as `Customer ID`, s.active as `Subscription is Active`, c.date as `Customer record start date`, c.unixcanceldate as `Customer cancel date Unix`,
@@ -8,9 +8,11 @@ select
         WHEN instr(p.metadata, 'Emails:') > 0 
         THEN substr(p.metadata, instr(p.metadata, 'Emails:') + 7)
         ELSE NULL
-    END AS Email
+    END AS Email,
+/*For debugging*/
+    p.id as PlumbingId, 
 from plumbingentities p
 left join custardentities c on p.phonenumber in (c.phonenumber, c.phonenumber2)
 left join sandentities s on s.custardid = c.id
-where p.phonenumber > 0 and p.source = 'Lab'
+where p.phonenumber > 0
 order by p.id asc;

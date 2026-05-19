@@ -1,10 +1,10 @@
-@echo off
+:: @echo off
 title All Report
 echo Executing LeadPipe queries
 
 set base=%USERPROFILE%\Repos
 set outBase=%base%\Automate\Automate.Infrastructure\.info\Reports
-set common=%base%\LeadPipe\LeadPipe.Infrastructure\
+set common=%base%\LeadPipe\LeadPipe.Infrastructure
 set queries=%common%\.queries
 set database=%common%\.info\leadpipe.test.db
 
@@ -26,7 +26,7 @@ echo All queries completed successfully!
 goto :EOF
 
 :runQuery
-title %queryName%
+echo Running %queryName%
 sqlite3 -header -csv %database% < %sql% > %output%
 if not "%errorlevel%"=="0" (
     echo.

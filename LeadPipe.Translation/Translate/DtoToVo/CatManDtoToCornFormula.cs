@@ -1,5 +1,4 @@
-﻿using LeadPipe.Core;
-using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Translation.Translate.VoToEntity;

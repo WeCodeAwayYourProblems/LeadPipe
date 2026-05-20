@@ -25,7 +25,8 @@ public class SourceDataUpdateManager : ISourceDataUpdateManager
         _validSources = [.. Enum.GetValues<Source>().Except([
             Source.Test, 
             Source.Test2, 
-            Source.Leaf
+            Source.Leaf,
+            Source.Yeller
         ])];
         _services = _validSources.ToDictionaryFast(
         s => s,

@@ -4,7 +4,7 @@ select
     p.date AS `Date of Message`, 
     p.contents AS `Message Contents`, 
     p.source AS `Message Source`,
-    if(p.unixdate < s.unixdate AND p.unixdate < c.unixdate, 1, 0) AS `IM Lead`, 
+    CASE WHEN p.unixdate < s.unixdate AND p.unixdate < c.unixdate THEN 1 ELSE 0 END AS `IM Lead`, 
     1 AS `Potential Sales Lead`, 
     c.id AS `Customer ID`, 
     s.active AS `Subscription is Active`, 
@@ -16,7 +16,7 @@ select
     s.date AS `Subscription Start Date`, 
     s.unixcanceldate AS `Subscription unix cxl date`,
     s.type AS `Service Type`, 
-    IF(p.unixdate < s.unixdate AND p.unixdate < c.unixdate AND s.active = 1, 1, 0) AS `Sale`,
+    CASE WHEN p.unixdate < s.unixdate AND p.unixdate < c.unixdate AND s.active = 1 THEN 1 ELSE 0 END AS `Sale`,
     CASE 
         WHEN instr(p.metadata, 'Emails:') > 0 
             THEN substr(p.metadata, instr(p.metadata, 'Emails:') + 7)

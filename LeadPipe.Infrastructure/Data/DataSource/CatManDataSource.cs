@@ -66,16 +66,19 @@ public sealed class CatManDataSourceBased(
 ) : SyncedDataSourceBase<CatManDto>(sync, clock)
 {
     private readonly ICatManService _cat = cat;
-    private long UnixNow => _clock.UtcNow.ToUnixTime();
+    private DateTimeOffset NowUtc => _clock.UtcNow;
     protected override SyncKey Key => SyncKey.Catman;
 
     protected override DateTimeOffset GetLatest(Result<List<CatManDto>> entities)
     {
-        long unixLatest = entities.IsSuccess && entities.Value.Count > 0
-            ? entities.Value.Max(v => v.unix_time) ?? UnixNow
-            : UnixNow;
-        var latest = DateTimeOffsetExt.FromUnixTime(unixLatest);
-        return latest;
+        DateTimeOffset latest = entities.IsSuccess && entities.Value.Count > 0
+            ? entities.Value
+                .Select(v => DateTimeOffset.TryParse(v.called_at, out var dt) ? dt : (DateTimeOffset?)null)
+                .Where(dt => dt.HasValue)
+                .Max(dt => dt!.Value)
+            : NowUtc;
+        var result = latest;
+        return result;
     }
 
     protected override async Task<Result<List<CatManDto>>> Load(bool withDetails)

@@ -27,12 +27,11 @@ goto :EOF
 
 :runQuery
 echo Running %queryName%
-sqlite3 -header -csv %database% < %sql% > %output%
-if not "%errorlevel%"=="0" (
+sqlite3 -header -csv %database% < %sql% > %output% 2>&1
+if errorlevel 1 (
     echo.
     echo %queryName% failed!
     echo See the error message in %output%
-    type %output%
     exit /b 1
 )
 echo %queryName% execution successful!

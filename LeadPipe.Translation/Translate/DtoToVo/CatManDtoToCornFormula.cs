@@ -10,8 +10,9 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
 {
     public CornFormula Translate(CatManDto data)
     {
-        long unix = (long)(data.unix_time is null ? 0 : data.unix_time);
-        DateTimeOffset date = DateTimeOffsetExt.FromUnixTime(unix);
+        DateTimeOffset date = DateTimeOffset.TryParse(data.called_at, out var d)
+            ? d
+            : DateTimeOffset.MinValue;
 
         PhoneNumber number = new(data.caller_number_bare);
 

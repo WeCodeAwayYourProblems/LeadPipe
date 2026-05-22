@@ -278,6 +278,78 @@ if not "%code3Err%"=="0" (
 )
 echo.
 
+rem HPP
+echo. 
+echo HPP
+set hppQuery="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\HPP Recurring.sql"
+set hppOutput="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\HPP Recurring.tsv"
+"C:\Program Files\MySQL\MySQl Workbench 8.0 CE\mysql.exe" -u %user% -p%pass% -h %host% -D dwh_reportsdb --batch < %hppQuery% > %hppOutput%
+set hppErr=%errorlevel%
+echo.
+echo HPP Query success: %hppErr%
+echo hpp output: %hppOutput%
+rem error messages are placed in the output file
+if not "%hppErr%"=="0" (
+    type %hppOutput%
+    set failedQuery="HPP"
+    goto :pauseExecution
+)
+echo.
+
+rem SS
+echo. 
+echo SS
+set ssQuery="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\SS Recurring.sql"
+set ssOutput="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\SS Recurring.tsv"
+"C:\Program Files\MySQL\MySQl Workbench 8.0 CE\mysql.exe" -u %user% -p%pass% -h %host% -D dwh_reportsdb --batch < %ssQuery% > %ssOutput%
+set ssErr=%errorlevel%
+echo.
+echo SS Query success: %ssErr%
+echo ss output: %ssOutput%
+rem error messages are placed in the output file
+if not "%ssErr%"=="0" (
+    type %ssOutput%
+    set failedQuery="SS"
+    goto :pauseExecution
+)
+echo.
+
+rem TDP
+echo. 
+echo TDP
+set tdpQuery="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\TDP Recurring.sql"
+set tdpOutput="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\TDP Recurring.tsv"
+"C:\Program Files\MySQL\MySQl Workbench 8.0 CE\mysql.exe" -u %user% -p%pass% -h %host% -D dwh_reportsdb --batch < %tdpQuery% > %tdpOutput%
+set tdpErr=%errorlevel%
+echo.
+echo Tdp Query success: %tdpErr%
+echo tdp output: %tdpOutput%
+rem error messages are placed in the output file
+if not "%tdpErr%"=="0" (
+    type %tdpOutput%
+    set failedQuery="TDP"
+    goto :pauseExecution
+)
+echo.
+
+rem YEP
+echo. 
+echo YEP
+set yepQuery="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\YEP Recurring.sql"
+set yepOutput="%USERPROFILE%\Repos\Sql-Queries\Code\Recurring\YEP Recurring.tsv"
+"C:\Program Files\MySQL\MySQl Workbench 8.0 CE\mysql.exe" -u %user% -p%payep% -h %host% -D dwh_reportsdb --batch < %yepQuery% > %yepOutput%
+set yepErr=%errorlevel%
+echo.
+echo YEP Query succeyep: %yepErr%
+echo yep output: %yepOutput%
+rem error messages are placed in the output file
+if not "%yepErr%"=="0" (
+    type %yepOutput%
+    set failedQuery="YEP"
+    goto :pauseExecution
+)
+echo.
+
 rem Ending
 echo All Executions were successful!
 goto :end

@@ -3,16 +3,25 @@ title Update repos and generate reports
 
 call ".\Queries.bat"
 set queries=%errorlevel%
+
 call ".\ReleaseBuild.bat"
 set build=%errorlevel%
+
 call ".\ForceUpdateRepos.bat"
 set repos=%errorlevel%
+
 call ".\ReportGeneration.bat"
 set reportGen=%errorlevel%
+
+call ".\AllReport.bat"
+set allreport=%errorlevel%
+
 call ".\OpenFiles.bat"
 set excelOpen=%errorlevel%
+
 call ".\LeafExclusion.bat"
 set exclusion=%errorlevel%
+
 call ".\TrackReportChanges.bat"
 set tracking=%errorlevel%
 

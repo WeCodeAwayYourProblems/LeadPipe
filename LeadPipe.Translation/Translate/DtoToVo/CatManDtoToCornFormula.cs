@@ -16,9 +16,24 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
         PhoneNumber number = new(data.caller_number_bare);
 
         string payLoad = data.ToString();
-        string referring = data.location ?? "None";
-        string metaData = $"{CornMySqlEntityTranslationHelper.ReferringValue}{referring}";
-        string source = data.source ?? "Unknown";
+
+        IEnumerable<string> meta = (data.form?.custom ?? [])
+            .Where(c => !string.IsNullOrWhiteSpace(c.id) && !string.IsNullOrWhiteSpace(c.value))
+            .Select(LabelIdValue);
+
+        IEnumerable<string> src = (data.form?.custom ?? [])
+            .Where(c => 
+                !string.IsNullOrWhiteSpace(c.id) && 
+                (
+                    c.id.Equals("utm_source", StringComparison.InvariantCultureIgnoreCase) ||
+                    c.id.Equals("utm_medium", StringComparison.InvariantCultureIgnoreCase) ||
+                    c.id.Equals("utm_campaign", StringComparison.InvariantCultureIgnoreCase)
+                )
+            )
+            .Select(LabelIdValue);
+
+        string source = string.Join(" | ", [data.source ?? "Unknown", src]);
+        string metaData = string.Join(" | ", meta.Where(v => !string.IsNullOrWhiteSpace(v)));
 
         var result = new CornFormula(
             Id: data.id,
@@ -31,5 +46,5 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
 
         return result;
     }
-
+    private static string LabelIdValue(Custom c) => $"Label: {c.label}, Id: {c.id}, Value: {c.value}";
 }

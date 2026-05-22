@@ -8,14 +8,14 @@ set common=%base%\LeadPipe\LeadPipe.Infrastructure
 set queries=%common%\.queries
 set database=%common%\.info\leadpipe.test.db
 
-:: --- Query 1 ---
+:: --- All Query ---
 set queryName=All Query
 set output=%outBase%\AllReport_Test.csv
 set sql=%queries%\AllReport.sql
 call :runQuery
 if errorlevel 1 goto :pauseExecution
 
-:: --- Query 2 ---
+:: --- Yeller Corn Query ---
 set queryName=Yeller Corn Query
 set output=%outBase%\YellerCorn_Test.csv
 set sql=%queries%\YellerCorns.sql

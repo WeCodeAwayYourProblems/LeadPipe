@@ -50,28 +50,28 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadPipe.Infrastructure.MyS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadPipe.Infrastructure.Sqlite", "LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj", "{FD5120D2-1804-49BD-B87A-C9462D683799}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{03C7DCE2-95D1-40FD-8798-3DB89175F729}"
-	ProjectSection(SolutionItems) = preProject
-		Batch\AllReport.bat = Batch\AllReport.bat
-		Batch\ForceUpdateRepos.bat = Batch\ForceUpdateRepos.bat
-		Batch\LeadPipe.bat = Batch\LeadPipe.bat
-		Batch\LeafExclusion.bat = Batch\LeafExclusion.bat
-		Batch\LeafRepo Manual.bat = Batch\LeafRepo Manual.bat
-		Batch\LeafRepo.bat = Batch\LeafRepo.bat
-		Batch\MasterTask.bat = Batch\MasterTask.bat
-		Batch\OpenFiles.bat = Batch\OpenFiles.bat
-		Batch\Queries.bat = Batch\Queries.bat
-		Batch\ReleaseBuild.bat = Batch\ReleaseBuild.bat
-		Batch\ReportGeneration.bat = Batch\ReportGeneration.bat
-		Batch\SaveAndCloseExcel.ps1 = Batch\SaveAndCloseExcel.ps1
-		Batch\TrackReportChanges.bat = Batch\TrackReportChanges.bat
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadPipe.Core", "LeadPipe.Core\LeadPipe.Core.csproj", "{C7EDD816-600E-4643-9FF9-BD10AAE88E1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analyzer", "Analyzer\Analyzer.csproj", "{96E7925F-0EFE-49B9-BC7C-C9F7682C8FA1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{D2A6DB4E-6B5D-4FF2-AB00-A11D0A438F6E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{37227541-9BD4-4BB5-B19D-705EA2E72B49}"
+	ProjectSection(SolutionItems) = preProject
+		..\Automate\AllReport.bat = ..\Automate\AllReport.bat
+		..\Automate\ForceUpdateRepos.bat = ..\Automate\ForceUpdateRepos.bat
+		..\Automate\LeadPipe.bat = ..\Automate\LeadPipe.bat
+		..\Automate\LeafExclusion.bat = ..\Automate\LeafExclusion.bat
+		..\Automate\LeafRepo Manual.bat = ..\Automate\LeafRepo Manual.bat
+		..\Automate\LeafRepo.bat = ..\Automate\LeafRepo.bat
+		..\Automate\MasterTask.bat = ..\Automate\MasterTask.bat
+		..\Automate\OpenFiles.bat = ..\Automate\OpenFiles.bat
+		..\Automate\Queries.bat = ..\Automate\Queries.bat
+		..\Automate\ReleaseBuild.bat = ..\Automate\ReleaseBuild.bat
+		..\Automate\ReportGeneration.bat = ..\Automate\ReportGeneration.bat
+		..\Automate\SaveAndCloseExcel.ps1 = ..\Automate\SaveAndCloseExcel.ps1
+		..\Automate\TrackReportChanges.bat = ..\Automate\TrackReportChanges.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

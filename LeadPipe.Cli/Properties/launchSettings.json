@@ -41,14 +41,14 @@
     // *******************************************
     "Data update | Get all data": {
       "commandName": "Project",
-      "commandLineArgs": "data -u",
+      "commandLineArgs": "data",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Refresh data": {
       "commandName": "Project",
-      "commandLineArgs": "data -Ru",
+      "commandLineArgs": "data -R",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
@@ -57,56 +57,56 @@
     // Update specific Source
     "Data update | Get all data | Yeller": {
       "commandName": "Project",
-      "commandLineArgs": "data -us Yeller",
+      "commandLineArgs": "data -s Yeller",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Refresh data | Yeller": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rus Yeller",
+      "commandLineArgs": "data -Rs Yeller",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Get all data | Lab": {
       "commandName": "Project",
-      "commandLineArgs": "data -us Lab",
+      "commandLineArgs": "data -s Lab",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Refresh data | Lab": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rus Lab",
+      "commandLineArgs": "data -Rs Lab",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Get all data | Lather": {
       "commandName": "Project",
-      "commandLineArgs": "data -us Lather",
+      "commandLineArgs": "data -s Lather",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Refresh data | Lather": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rus Lather",
+      "commandLineArgs": "data -Rs Lather",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Get all data | Leased": {
       "commandName": "Project",
-      "commandLineArgs": "data -us Leased",
+      "commandLineArgs": "data -s Leased",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
     "Data update | Refresh data | Leased": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rus Leased",
+      "commandLineArgs": "data -Rs Leased",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }

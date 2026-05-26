@@ -38,7 +38,7 @@ internal class DataUpdateReportVerb : IVerbAsync
     {
         ForceRunRefresh frr = new(ForceRun: ForceRun, Refresh: Refresh);
         IUpdateManager update = provider.GetRequiredService<IUpdateManager>();
-        Result updated = Source == Source.Test
+        Result updated = Source == Source.Test // When true, it means a source was not specified, which defaults to all valid sources
             ? await update.Manage(frr)
             : await update.Manage(Source, frr);
 

@@ -62,6 +62,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{03C7DCE2
 		Batch\OpenFiles.bat = Batch\OpenFiles.bat
 		Batch\Queries.bat = Batch\Queries.bat
 		Batch\ReleaseBuild.bat = Batch\ReleaseBuild.bat
+		Batch\ReportGeneration.bat = Batch\ReportGeneration.bat
 		Batch\SaveAndCloseExcel.ps1 = Batch\SaveAndCloseExcel.ps1
 		Batch\TrackReportChanges.bat = Batch\TrackReportChanges.bat
 	EndProjectSection

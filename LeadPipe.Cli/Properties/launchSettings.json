@@ -48,7 +48,7 @@
     },
     "Data update | Refresh data": {
       "commandName": "Project",
-      "commandLineArgs": "data -R",
+      "commandLineArgs": "data -r",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
@@ -64,7 +64,7 @@
     },
     "Data update | Refresh data | Yeller": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rs Yeller",
+      "commandLineArgs": "data -rs Yeller",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
@@ -78,7 +78,7 @@
     },
     "Data update | Refresh data | Lab": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rs Lab",
+      "commandLineArgs": "data -rs Lab",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
@@ -92,7 +92,7 @@
     },
     "Data update | Refresh data | Lather": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rs Lather",
+      "commandLineArgs": "data -rs Lather",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
@@ -106,7 +106,7 @@
     },
     "Data update | Refresh data | Leased": {
       "commandName": "Project",
-      "commandLineArgs": "data -Rs Leased",
+      "commandLineArgs": "data -rs Leased",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }

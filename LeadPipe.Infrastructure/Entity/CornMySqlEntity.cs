@@ -29,5 +29,7 @@ public class CornMySqlEntity
     public string? referringURL { get; set; }
     public string? contactAcceptance { get; set; }
     public bool? commercial { get; set; }
+    public string? utmContent { get; set; }
+    public string? utmTerm { get; set; }
 #pragma warning restore IDE1006
 }

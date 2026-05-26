@@ -17,7 +17,12 @@ internal sealed class CornFormulaToCornEntity : IVoToEntity<CornFormula, CornEnt
             UnixDate = c.Date.ToUnixTime(),
             Payload = c.PayLoad,
             MetaData = c.MetaData,
-            Source = c.Source
+            Source = c.Source,
+            UtmSource = c.UtmSource,
+            UtmMedium = c.UtmMedium,
+            UtmCampaign = c.UtmCampaign,
+            UtmContent = c.UtmContent,
+            UtmTerm = c.UtmTerm
         };
         return result;
     }

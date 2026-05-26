@@ -17,6 +17,11 @@ public class CornEntity : IEntity, IPhoneDateIdEntity
         Payload = c.Payload;
         MetaData = c.MetaData;
         Source = c.Source;
+        UtmSource = c.UtmSource;
+        UtmMedium = c.UtmMedium;
+        UtmCampaign = c.UtmCampaign;
+        UtmContent = c.UtmContent;
+        UtmTerm = c.UtmTerm;
 
         CustardCornLinks = [.. c.CustardCornLinks.Select(c => c)];
         SandCornLinks = [.. c.SandCornLinks.Select(c => c)];
@@ -30,6 +35,11 @@ public class CornEntity : IEntity, IPhoneDateIdEntity
     public required string Payload { get; set; }
     public required string MetaData { get; set; }
     public required string Source { get; set; }
+    public string? UtmSource { get; set; }
+    public string? UtmMedium { get; set; }
+    public string? UtmCampaign { get; set; }
+    public string? UtmContent { get; set; }
+    public string? UtmTerm { get; set; }
 
     public ICollection<CustardCornLink> CustardCornLinks { get; set; } = [];
     public ICollection<SandCornLink> SandCornLinks { get; set; } = [];

@@ -27,5 +27,20 @@ internal sealed class CornConfiguration : IEntityTypeConfiguration<CornEntity>
         corn.Property(c => c.PhoneNumber)
             .HasConversion(PlumbingConversionsHelper.PhoneNumberAndLongConversion)
             .Metadata.SetValueComparer(PlumbingConversionsHelper.PhoneNumberComparer);
+        corn.Property(c => c.UtmSource)
+            .IsRequired(false)
+            .HasMaxLength(45);
+        corn.Property(c => c.UtmMedium)
+            .IsRequired(false)
+            .HasMaxLength(45);
+        corn.Property(c => c.UtmCampaign)
+            .IsRequired(false)
+            .HasMaxLength(45); 
+        corn.Property(c => c.UtmContent)
+            .IsRequired(false)
+            .HasMaxLength(45);
+        corn.Property(c => c.UtmTerm)
+            .IsRequired(false)
+            .HasMaxLength(45);
     }
 }

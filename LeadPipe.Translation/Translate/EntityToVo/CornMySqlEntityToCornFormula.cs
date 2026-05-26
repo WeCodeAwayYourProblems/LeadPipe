@@ -3,7 +3,6 @@ using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Translation.Translate.VoToEntity;
-using System.Text;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
@@ -26,15 +25,12 @@ internal sealed class CornMySqlEntityToCornFormula(IInfrastructureSettings setti
         string form = entity.form ?? "None";
         string referring = entity.referringURL ?? "None";
         string metadata = $"{CornMySqlEntityTranslationHelper.FormValue}{form}{CornMySqlEntityTranslationHelper.Delimiter}{CornMySqlEntityTranslationHelper.ReferringValue}{referring}";
-        
+
         // Find sources
-        StringBuilder source = new();
+        List<string> source = [];
         foreach (var s in _sources)
             if (form.Contains(s) || referring.Contains(s))
-            {
-                source.Append(s);
-                source.Append(" | ");
-            }
+                source.Add(s);
 
         CornFormula result = new(
             Id: entity.id,
@@ -42,7 +38,12 @@ internal sealed class CornMySqlEntityToCornFormula(IInfrastructureSettings setti
             Date: date,
             PayLoad: payload,
             MetaData: metadata,
-            Source: source.ToString()
+            Source: string.Join(" | ", source),
+            UtmSource: entity.source,
+            UtmMedium: entity.medium,
+            UtmCampaign: entity.campaign,
+            UtmContent: entity.utmContent,
+            UtmTerm: entity.utmTerm
         );
 
         return result;

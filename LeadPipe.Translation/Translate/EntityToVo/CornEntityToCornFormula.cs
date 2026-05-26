@@ -18,7 +18,12 @@ internal sealed class CornEntityToCornFormula : IEntityToVo<CornEntity, CornForm
                 Date: date,
                 PayLoad: entity.Payload,
                 MetaData: entity.MetaData,
-                Source: entity.Source
+                Source: entity.Source,
+                UtmSource: entity.UtmSource,
+                UtmMedium: entity.UtmMedium,
+                UtmCampaign: entity.UtmCampaign,
+                UtmContent: entity.UtmContent,
+                UtmTerm: entity.UtmTerm
             );
         return result;
     }

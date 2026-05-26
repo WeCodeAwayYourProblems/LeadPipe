@@ -25,8 +25,6 @@ internal class DataUpdateReportVerb : IVerbAsync
         Lather
         """)]
     public Source Source { get; set; } = Source.Test;
-    [Option('u', "update", Required = false, HelpText = "Whether to update.")]
-    public bool Update { get; set; } = false;
     [Option('R', "refresh", Required = false, HelpText = "Whether or not to perform a data refresh. If refresh, the process is likely to take less time, but the data may not be full.")]
     public bool Refresh { get; set; } = false;
     [Option('f', "force", Required = false, HelpText = "Whether or not to force the run. Will run updates even if it was already run recently")]

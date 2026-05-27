@@ -26,9 +26,9 @@ public class Data
     public int unfiltered_total { get; set; }
 }
 
+[JsonConverter(typeof(ItemConverter))]
 public class Item
 {
-    [JsonPropertyName(LabDtoAttributeNames.LabDtoAttributeName)]
     public LabDto? labDto { get; set; }
     public Created_At? created_at { get; set; }
     public Quote? quote { get; set; }
@@ -200,6 +200,41 @@ public class SingleOrArrayConverter<T> : JsonConverter<List<T>>
     }
 
     public override void Write(Utf8JsonWriter writer, List<T> value, JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(writer, value, options);
+    }
+}
+
+public class ItemConverter : JsonConverter<Item>
+{
+    public override Item? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        using var doc = JsonDocument.ParseValue(ref reader);
+        var root = doc.RootElement;
+        var item = new Item();
+
+        if (root.TryGetProperty(LabDtoAttributeNames.LabDtoAttributeName, out var labElement) ||
+            root.TryGetProperty(LabDtoAttributeNames.LabDtoAttributeNamePlural, out labElement))
+        {
+            item.labDto = labElement.Deserialize<LabDto>(options);
+        }
+
+        if (root.TryGetProperty("created_at", out var createdAt))
+            item.created_at = createdAt.Deserialize<Created_At>(options);
+
+        if (root.TryGetProperty("quote", out var quote))
+            item.quote = quote.Deserialize<Quote>(options);
+
+        if (root.TryGetProperty("note", out var note))
+            item.note = note.GetString();
+
+        if (root.TryGetProperty("last_message", out var lastMessage))
+            item.last_message = lastMessage.Deserialize<Last_Message>(options);
+
+        return item;
+    }
+
+    public override void Write(Utf8JsonWriter writer, Item value, JsonSerializerOptions options)
     {
         JsonSerializer.Serialize(writer, value, options);
     }

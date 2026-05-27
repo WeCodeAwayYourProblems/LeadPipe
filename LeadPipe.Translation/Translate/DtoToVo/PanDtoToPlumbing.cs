@@ -1,17 +1,15 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Translate;
-using LeadPipe.Translation.Primitives;
 
 namespace LeadPipe.Translation.Translate.DtoToVo;
 
-internal class PanDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<PanDto, Plumbing>
+internal class PanDtoToPlumbing : IDtoToVo<PanDto, Plumbing>
 {
-    private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(PanDto data)
     {
         PhoneNumber number = PhoneNumber.TryParse(data.Number, out var ph) ? ph : PhoneNumber.DefaultPhoneNumber;
-        DateTime d = DateTime.TryParse(data.Date, out DateTime r)
+        DateTime d = DateTime.TryParse($"{data.Date} {data.Time}", out DateTime r)
             ? r
             : DateTime.MaxValue;
         DateTimeOffset date = new(DateTime.SpecifyKind(d, DateTimeKind.Utc), TimeSpan.Zero);

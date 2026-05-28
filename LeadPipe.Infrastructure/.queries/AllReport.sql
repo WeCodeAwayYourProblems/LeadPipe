@@ -7,6 +7,7 @@ with sand as (
 ), rankedPlumbing as (
     select *, dense_rank() over (partition by phonenumber order by date asc) as plumbingRank
     from plumbingentities
+    where phonenumber > 0
 )
 
 select 
@@ -40,8 +41,8 @@ select
 /*For debugging*/
     p.id AS `PlumbingId`,
     ranking
-FROM plumbingentities AS p
+FROM rankedPlumbing AS p
 LEFT JOIN custardentities AS c ON p.phonenumber IN (c.phonenumber, c.phonenumber2)
 LEFT JOIN sand AS s ON s.custardid = c.id and ranking = 1
-WHERE p.phonenumber > 0 and plumbingRank = 1
+WHERE p.plumbingRank = 1
 ORDER BY p.id ASC;

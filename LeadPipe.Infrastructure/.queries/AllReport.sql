@@ -1,4 +1,15 @@
 /*All Report*/
+with sand as (
+    /* sqlite doesn't have a timezone database, but since we're stripping the time out anyway, it doesn't actually matter
+             * date() strips the time out of the datetime value*/
+    select *, dense_rank() over (partition by custardid order by date(datetime(s.date, '-7 hours'))) as sandRank
+    from sandentities s
+), rankedPlumbing as (
+    select *, dense_rank() over (partition by phonenumber order by date asc) as plumbingRank
+    from plumbingentities
+    where phonenumber > 0
+)
+
 select 
     p.phonenumber AS `Phone Number`, 
     p.date AS `Date of Message`, 
@@ -16,7 +27,7 @@ select
     s.date AS `Subscription Start Date`, 
     s.unixcanceldate AS `Subscription unix cxl date`,
     s.type AS `Service Type`, 
-    CASE WHEN p.unixdate < s.unixdate AND p.unixdate < c.unixdate AND s.active = 1 THEN 1 ELSE 0 END AS `Sale`,
+    CASE WHEN p.unixdate < s.unixdate AND p.unixdate < c.unixdate AND s.complete = 1 THEN 1 ELSE 0 END AS `Sale`,
     CASE 
         WHEN instr(p.metadata, 'Emails:') > 0 
             THEN substr(p.metadata, instr(p.metadata, 'Emails:') + 7)
@@ -28,9 +39,10 @@ select
     END AS `Metadata`,
 
 /*For debugging*/
-    p.id AS `PlumbingId`
-FROM plumbingentities AS p
+    p.id AS `PlumbingId`,
+    sandRank, p.plumbingRank
+FROM rankedPlumbing AS p
 LEFT JOIN custardentities AS c ON p.phonenumber IN (c.phonenumber, c.phonenumber2)
-LEFT JOIN sandentities AS s ON s.custardid = c.id AND s.active = 1
-WHERE p.phonenumber > 0
+LEFT JOIN sand AS s ON s.custardid = c.id and sandRank = 1
+WHERE p.plumbingRank = 1
 ORDER BY p.id ASC;

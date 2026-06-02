@@ -80,7 +80,8 @@ internal sealed class AttributionTestBuilder
             Date = DateTime.UtcNow,
             Payload = "x",
             MetaData = "x",
-            Source = "x"
+            Source = "x",
+            ReferralSource = "x",
         };
 
         var link = new CustardCornLink

@@ -2,8 +2,10 @@
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository;
 using LeadPipe.Infrastructure.Sqlite.Context;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SQLitePCL;
 using System.Data;
 using System.Linq.Expressions;
 
@@ -21,24 +23,20 @@ public abstract class PlumbingContextBaseRepository<TEntity, TRepo>
     protected readonly ILogger<TRepo> _logger = logger;
 
     #region Protected
-    protected static string Clean(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-            return string.Empty;
-
-        return value
-            .Replace("\0", string.Empty)
-            .Replace("'", "''");
-    }
-    protected static void AssertNotString<T>(string propertyName)
-    {
-        var type = typeof(T).GetProperty(propertyName)!.PropertyType;
-
-        if (type == typeof(string))
-            throw new InvalidOperationException(
-                $"{typeof(T).Name}.{propertyName} must not be string when used in raw SQL upsert.");
-    }
     protected static string IsoString { get; } = "yyyy-MM-dd HH:mm:ss";
+    protected int? _parameterLimit;
+    protected int ParameterLimit => _parameterLimit ??= GetParameterLimit();
+    protected int GetParameterLimit()
+    {
+        if (_context.Database.GetDbConnection() is not SqliteConnection conn)
+            return 999; // Historical Paramter limit
+
+        if (conn.State != System.Data.ConnectionState.Open)
+            conn.Open();
+
+        // Passing -1 queries the current limit without changing it
+        return raw.sqlite3_limit(conn.Handle, raw.SQLITE_LIMIT_VARIABLE_NUMBER, -1);
+    }
     #endregion
 
     public async Task<Result<List<TEntity>>> GetAllWithDetailsAsync(CancellationToken ct = default)

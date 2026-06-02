@@ -42,5 +42,8 @@ internal sealed class CornConfiguration : IEntityTypeConfiguration<CornEntity>
         corn.Property(c => c.UtmTerm)
             .IsRequired(false)
             .HasMaxLength(45);
+        corn.Property(c => c.ReferralSource)
+            .IsRequired(false)
+            .HasMaxLength(45);
     }
 }

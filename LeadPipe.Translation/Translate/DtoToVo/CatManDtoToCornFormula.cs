@@ -8,6 +8,7 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
 {
     public CornFormula Translate(CatManDto data)
     {
+        const string referralsource = "referralsource";
         const string source = "utm_source";
         const string medium = "utm_medium";
         const string campaign = "utm_campaign";
@@ -24,8 +25,8 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
 
         var meta = (data.form?.custom ?? [])
             .Where(c =>
-                !string.IsNullOrWhiteSpace(c.id) &&
-                !string.IsNullOrWhiteSpace(c.value) &&
+                !string.IsNullOrWhiteSpace(c.id) ||
+                !string.IsNullOrWhiteSpace(c.value) ||
                 !string.IsNullOrWhiteSpace(c.label))
             .Select(LabelIdValue)
             .ToList();
@@ -38,6 +39,7 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
         string metaData = string.Join(" | ",
             meta.Select(v => v.ToString())
                 .Where(v => !string.IsNullOrWhiteSpace(v)));
+        string referralSource = string.Join(" | ", ExtractValue(referralsource, meta));
         string utmSource = string.Join(" | ", ExtractValue(source, meta));
         string utmMedium = string.Join(" | ", ExtractValue(medium, meta));
         string utmCampaign = string.Join(" | ", ExtractValue(campaign, meta));
@@ -55,8 +57,9 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
             UtmMedium: utmMedium,
             UtmCampaign: utmCampaign,
             UtmContent: utmContent,
-            UtmTerm: utmTerm
-            );
+            UtmTerm: utmTerm,
+            ReferralSource: referralSource
+        );
 
         return result;
     }

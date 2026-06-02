@@ -45,6 +45,6 @@ select
     sandRank, p.plumbingRank
 FROM rankedPlumbing AS p
 LEFT JOIN custardentities AS c ON p.phonenumber IN (c.phonenumber, c.phonenumber2)
-LEFT JOIN sand AS s ON s.custardid = c.id and sandRank = 1
+RIGHT JOIN sand AS s ON s.custardid = c.id /* Right join ensures that no customers without a subscription are shown*/
 WHERE p.plumbingRank = 1
 ORDER BY p.id ASC;

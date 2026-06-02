@@ -36,7 +36,8 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
             return Result.Success(entities);
         }
 
-        int batchSize = 999 / EntityDetails.ColumnCount;
+        int safeMax = ParameterLimit / EntityDetails.ColumnCount;
+        int currentBatchSize = safeMax;
         const int minBatchSize = 1;
         int stagedCount = 0;
         int skipped = 0;
@@ -44,14 +45,12 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
         try
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
-
             await _context.Database.ExecuteSqlRawAsync(DropTempTable, ct);
-
             await _context.Database.ExecuteSqlRawAsync(CreateTempTable, ct);
 
             for (int index = 0; index < entities.Count;)
             {
-                int take = Math.Min(batchSize, entities.Count - index);
+                int take = Math.Min(currentBatchSize, entities.Count - index);
                 var batch = entities.GetRange(index, take);
 
                 try
@@ -60,8 +59,8 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
                     stagedCount += batch.Count;
                     index += take; // manual increment only
 
-                    if (batchSize < 200)
-                        batchSize = Math.Min(batchSize * 2, 200);
+                    if (currentBatchSize < safeMax)
+                        currentBatchSize = Math.Min(currentBatchSize * 2, safeMax);
                 }
                 catch (Exception ex)
                 {
@@ -69,17 +68,17 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
                         ex,
                         "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
                         EntityDetails.EntityName,
-                        batchSize);
+                        currentBatchSize);
 
-                    if (batchSize == minBatchSize)
+                    if (currentBatchSize == minBatchSize)
                     {
                         skipped++;
                         index++;
-                        batchSize = 100;
+                        currentBatchSize = safeMax;
                     }
                     else
                     {
-                        batchSize = Math.Max(minBatchSize, batchSize / 2);
+                        currentBatchSize = Math.Max(minBatchSize, currentBatchSize / 2);
                     }
                 }
             }

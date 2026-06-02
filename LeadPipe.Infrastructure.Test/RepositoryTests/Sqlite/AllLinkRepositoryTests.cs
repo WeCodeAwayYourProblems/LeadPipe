@@ -27,7 +27,8 @@ public class AllLinkRepositoryTests
             UnixDate = UnixNow,
             Payload = "",
             MetaData = "",
-            Source = ""
+            Source = "",
+            ReferralSource = ""
         };
 
     private static PlumbingEntity CreatePlumbing(long id = 2) =>

@@ -19,7 +19,8 @@ public sealed class CornFormulaToCornEntityTests
             UtmMedium: null,
             UtmCampaign: null,
             UtmContent: null,
-            UtmTerm: null            
+            UtmTerm: null,
+            ReferralSource: null
         );
 
     [Fact]

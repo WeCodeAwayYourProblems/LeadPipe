@@ -45,14 +45,21 @@ namespace Analyzer
                 // Thread-safe set of declared members we want to check
                 var declared = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
 
+                // Collect semantic models as Roslyn computes them rather than requesting
+                // them ourselves, which would bypass caching and violate RS1030
+                var semanticModels = new ConcurrentBag<SemanticModel>();
+
                 compilationContext.RegisterSymbolAction(
                     symbolContext => CollectDeclaredMembers(symbolContext, declared),
                     SymbolKind.Method,
                     SymbolKind.Field,
                     SymbolKind.Property);
 
+                compilationContext.RegisterSemanticModelAction(
+                    semanticModelContext => semanticModels.Add(semanticModelContext.SemanticModel));
+
                 compilationContext.RegisterCompilationEndAction(
-                    endContext => ReportUnreferenced(endContext, declared));
+                    endContext => ReportUnreferenced(endContext, declared, semanticModels));
             });
         }
 
@@ -108,15 +115,16 @@ namespace Analyzer
 
         private static void ReportUnreferenced(
             CompilationAnalysisContext context,
-            ConcurrentDictionary<ISymbol, bool> declared)
+            ConcurrentDictionary<ISymbol, bool> declared,
+            ConcurrentBag<SemanticModel> semanticModels)
         {
             if (declared.IsEmpty)
                 return;
 
-            // Walk every syntax tree and resolve all identifier references
-            foreach (var tree in context.Compilation.SyntaxTrees)
+            // Walk every syntax tree using the models Roslyn already computed
+            foreach (var semanticModel in semanticModels)
             {
-                var semanticModel = context.Compilation.GetSemanticModel(tree);
+                var tree = semanticModel.SyntaxTree;
                 var root = tree.GetRoot(context.CancellationToken);
 
                 foreach (var identifier in root.DescendantTokens())

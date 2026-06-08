@@ -97,7 +97,13 @@ namespace Analyzer
                 ctor.MethodKind == MethodKind.Constructor)
                 return;
 
-            // Skip interface implementations — the member is reachable via the interface
+            // Skip local functions - they are scoped to a method body and references
+            // to them won't resolve correctly in the compilation-level identifier walk
+            if (symbol is IMethodSymbol localFunc &&
+                localFunc.MethodKind == MethodKind.LocalFunction)
+                return;
+
+            // Skip interface implementations - the member is reachable via the interface
             if (symbol is IMethodSymbol ifaceMethod &&
                 !ifaceMethod.ExplicitInterfaceImplementations.IsEmpty)
                 return;

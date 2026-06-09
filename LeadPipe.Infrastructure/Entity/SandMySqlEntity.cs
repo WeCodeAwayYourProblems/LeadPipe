@@ -1,11 +1,12 @@
 ﻿namespace LeadPipe.Infrastructure.Entity;
 
+#pragma warning disable IDE1006 // Naming Styles
 public class SandMySqlEntity
 {
-#pragma warning disable IDE1006 // Naming Styles
     public int subscriptionID { get; set; }
     public int customerID { get; set; }
     public DateTime? dateAdded { get; set; }
+    public DateTime? dateAddedDate { get; set; }
     public int? active { get; set; }
     public decimal contractValue { get; set; }
     public string? serviceType { get; set; }
@@ -21,5 +22,5 @@ public class SandMySqlEntity
     public CustardMySqlEntity? customer { get; set; }
     public OffermanMySqlEntity? offerman { get; set; }
 
-#pragma warning restore IDE1006 // Naming Styles
 }
+#pragma warning restore IDE1006 // Naming Styles

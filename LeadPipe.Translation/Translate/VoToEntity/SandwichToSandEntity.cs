@@ -17,6 +17,7 @@ internal class SandwichToSandEntity : IVoToEntity<Sandwich, SandEntity>
             Id = s.SandId,
             CustardId = s.CustardId,
             Date = s.Date.UtcDateTime,
+            DateAddedDate = s.DateAddedDate,
             UnixDate = s.Date.ToUnixTime(),
             UnixCancelDate = dateCancelled,
             Active = s.Active,

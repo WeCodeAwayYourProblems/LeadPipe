@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Entity;
+﻿using LeadPipe.Infrastructure.Database.Converter;
+using LeadPipe.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,5 +19,9 @@ internal sealed class SandConfiguration : IEntityTypeConfiguration<SandEntity>
         sub.Property(s => s.Id).ValueGeneratedNever(); // External id
         sub.Property(s => s.Type);
         builder.Ignore(c => c.CancelDate);
+        sub.Property(s => s.DateAddedDate)
+            .HasConversion<DateOnlyConverterNullable>()
+            .HasColumnType("TEXT");
+        sub.HasIndex(s => new { s.CustardId, s.DateAddedDate });
     }
 }

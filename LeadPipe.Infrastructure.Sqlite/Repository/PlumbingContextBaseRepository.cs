@@ -24,6 +24,7 @@ public abstract class PlumbingContextBaseRepository<TEntity, TRepo>
 
     #region Protected
     protected static string IsoString { get; } = "yyyy-MM-dd HH:mm:ss";
+    protected static string DateOnlyIsoString { get; } = "yyyy-MM-dd";
     protected int? _parameterLimit;
     protected int ParameterLimit => _parameterLimit ??= GetParameterLimit();
     protected int GetParameterLimit()

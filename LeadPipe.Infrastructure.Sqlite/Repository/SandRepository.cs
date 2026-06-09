@@ -31,7 +31,7 @@ public sealed class SandRepository
         TableName: TableNames.SandEntitiesName,
         TempTable: $"temp_{TableNames.SandEntitiesName}",
         EntityName: nameof(SandEntity),
-        ColumnCount: 13
+        ColumnCount: 14
         );
 
     protected override string CreateTempTable => $"""
@@ -39,6 +39,7 @@ public sealed class SandRepository
             {nameof(SandEntity.Id)} INTEGER PRIMARY KEY,
             {nameof(SandEntity.CustardId)} INTEGER NOT NULL,
             {nameof(SandEntity.Date)} TEXT,
+            {nameof(SandEntity.DateAddedDate)} TEXT,
             {nameof(SandEntity.UnixDate)} INTEGER,
             {nameof(SandEntity.UnixCancelDate)} INTEGER,
             {nameof(SandEntity.Active)} INTEGER,
@@ -58,6 +59,7 @@ public sealed class SandRepository
         SET
             {nameof(SandEntity.CustardId)} = temp.{nameof(SandEntity.CustardId)},
             {nameof(SandEntity.Date)} = temp.{nameof(SandEntity.Date)},
+            {nameof(SandEntity.DateAddedDate)} = temp.{nameof(SandEntity.DateAddedDate)},
             {nameof(SandEntity.UnixDate)} = temp.{nameof(SandEntity.UnixDate)},
             {nameof(SandEntity.UnixCancelDate)} = temp.{nameof(SandEntity.UnixCancelDate)},
             {nameof(SandEntity.Active)} = temp.{nameof(SandEntity.Active)},
@@ -77,6 +79,7 @@ public sealed class SandRepository
             {nameof(SandEntity.Id)}, 
             {nameof(SandEntity.CustardId)}, 
             {nameof(SandEntity.Date)}, 
+            {nameof(SandEntity.DateAddedDate)},
             {nameof(SandEntity.UnixDate)}, 
             {nameof(SandEntity.UnixCancelDate)}, 
             {nameof(SandEntity.Active)}, 
@@ -92,6 +95,7 @@ public sealed class SandRepository
             temp.{nameof(SandEntity.Id)}, 
             temp.{nameof(SandEntity.CustardId)}, 
             temp.{nameof(SandEntity.Date)}, 
+            temp.{nameof(SandEntity.DateAddedDate)},
             temp.{nameof(SandEntity.UnixDate)}, 
             temp.{nameof(SandEntity.UnixCancelDate)}, 
             temp.{nameof(SandEntity.Active)}, 
@@ -131,6 +135,7 @@ public sealed class SandRepository
             values.Add(e.Id);
             values.Add(e.CustardId);
             values.Add(e.Date.ToString(IsoString));
+            values.Add(e.DateAddedDate?.ToString(DateOnlyIsoString));
             values.Add(e.UnixDate);
             values.Add(e.UnixCancelDate);
             values.Add(e.Active ? 1 : 0);
@@ -149,6 +154,7 @@ public sealed class SandRepository
                 {nameof(SandEntity.Id)},
                 {nameof(SandEntity.CustardId)},
                 {nameof(SandEntity.Date)},
+                {nameof(SandEntity.DateAddedDate)},
                 {nameof(SandEntity.UnixDate)},
                 {nameof(SandEntity.UnixCancelDate)},
                 {nameof(SandEntity.Active)},

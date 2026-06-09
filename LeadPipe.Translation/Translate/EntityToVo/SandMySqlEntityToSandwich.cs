@@ -43,6 +43,9 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
             ? _dt.Convert((DateTime)entity.dateCancelled, ETimeZone.Pacific)
             : null;
 
+        // Convert dateaddeddate
+        DateOnly? dateAddedDate = entity.dateAddedDate is null ? null : new DateOnly(entity.dateAddedDate.Value.Year, entity.dateAddedDate.Value.Month, entity.dateAddedDate.Value.Day);
+
         // Get offerman
         string offerman = entity.offerman.branchName is null ? "Unknown" : entity.offerman.branchName;
 
@@ -51,6 +54,7 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
             CustardId: entity.customerID,
             Custard: ce,
             Date: subDate,
+            DateAddedDate: dateAddedDate,
             DateCancelled: cancelDate,
             Active: entity.active == 1,
             Complete: entity.initialStatus == 1,

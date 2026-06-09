@@ -6,6 +6,7 @@ public record Sandwich
     long CustardId,
     Custard Custard,
     DateTimeOffset Date,
+    DateOnly? DateAddedDate,
     DateTimeOffset? DateCancelled,
     bool Active,
     bool Complete,

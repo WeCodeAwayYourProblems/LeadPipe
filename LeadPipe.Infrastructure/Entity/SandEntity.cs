@@ -34,6 +34,7 @@ public class SandEntity : IEntity
     public required long Id { get; set; }
     public required long CustardId { get; set; }
     public DateTime Date { get; set; }
+    public DateOnly? DateAddedDate { get; set; }
     public long UnixDate { get; set; }
     private DateTime? _cancelDate;
     public DateTime? CancelDate => _cancelDate ??= UnixCancelDate is null ? null : DateTimeOffsetExt.FromUnixTime(UnixCancelDate.Value).UtcDateTime;

@@ -31,6 +31,7 @@ with sand as (
     select id as customerid, phonenumber2 as phone10 from custardentities where phonenumber2 > 0
 )
 
+-- /*
 select
     p.phonenumber                                                              AS `Phone Number`,
     p.date                                                                     AS `Date of Message`,
@@ -61,7 +62,9 @@ select
 FROM rankedPlumbing AS p
 JOIN cust_norm     AS cn ON cn.phone10  = p.phonenumber      -- equijoin, index-eligible
 JOIN sub_status    AS s  ON s.custardid = cn.customerid
-WHERE p.plumbingRank = 1
+where p.plumbingRank = 1
+    and s.complete   = 1
+    and p.unixdate < s.unixdate
 ORDER BY p.id ASC;
 -- */
 
@@ -82,7 +85,7 @@ group by
 -- ============================================================
 -- TOGGLE: by year, month, source, status  (touch-date grain = p.date)
 -- ============================================================
-/*
+ /*
 select
     strftime('%Y', p.date)              as year,
     strftime('%m', p.date)              as month,
@@ -91,11 +94,11 @@ select
     count(*)                            as total_sales,
     printf('%.2f', sum(s.value))        as total_contract_value
 from rankedPlumbing p
-left join custardentities c on p.phonenumber in (c.phonenumber, c.phonenumber2)
-right join sub_status  s on s.custardid = c.id
+join cust_norm  cn ON cn.phone10  = p.phonenumber
+join sub_status s  ON s.custardid = cn.customerid
 where p.plumbingRank = 1
+  and s.complete     = 1
   and p.unixdate < s.unixdate
-  and s.complete  = 1
 group by year, month, source, status
 order by year, month, source, status;
 -- */

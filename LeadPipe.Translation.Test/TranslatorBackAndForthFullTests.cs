@@ -214,11 +214,13 @@ public class TranslatorBackAndForthFullTests
             DateCancelled: new DateTimeOffset(2025, 12, 31, 23, 59, 59, TimeSpan.Zero)
         );
 
+        var date = new DateTimeOffset(2025, 6, 1, 12, 0, 0, TimeSpan.Zero);
         var sandwichVo = new Sandwich(
             SandId: 99,
             CustardId: 10,
             Custard: custardVo,
-            Date: new DateTimeOffset(2025, 6, 1, 12, 0, 0, TimeSpan.Zero),
+            Date: date,
+            DateAddedDate: DateOnly.FromDateTime(date.UtcDateTime),
             DateCancelled: new DateTimeOffset(2025, 12, 31, 23, 59, 59, TimeSpan.Zero),
             Active: true,
             Complete: true,

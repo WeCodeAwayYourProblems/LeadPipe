@@ -65,7 +65,7 @@ public sealed class TransformYellerReport_new(
         // Find first touch entity
         //*************************************************************************
         // Hydrate links with entities. Only hydrate the first touch per link type
-        var firsttouches = custards.Value
+        List<FirstTouchEntityCustard> firsttouches = custards.Value
             .Select(c =>
             {
                 CustardPlumbingLink? cPlumb = FirstTouch(c.CustardPlumbingLinks);
@@ -140,21 +140,7 @@ public sealed class TransformYellerReport_new(
 
     private static FirstTouchEntityCustard FirstTouch(CustardPlumbingLink? cPlumb, CustardCaliperLink? cCal, CustardCornLink? cCorn, CustardEntity c)
     {
-        return (cPlumb, cCal, cCorn) switch
-        {
-            (null, null, null) => new(null, c),
-
-            (not null, null, null) => new(cPlumb.Plumbing, c),
-            (null, not null, null) => new(cCal.Caliper, c),
-            (null, null, not null) => new(cCorn.Corn, c),
-
-            (not null, not null, null) => new(cPlumb.UnixMatchDate <= cCal.UnixMatchDate ? cPlumb.Plumbing : cCal.Caliper, c),
-            (not null, null, not null) => new(cPlumb.UnixMatchDate <= cCorn.UnixMatchDate ? cPlumb.Plumbing : cCorn.Corn, c),
-            (null, not null, not null) => new(cCal.UnixMatchDate <= cCorn.UnixMatchDate ? cCal.Caliper : cCorn.Corn, c),
-
-            (not null, not null, not null) => new(find(cPlumb, cCal, cCorn), c),
-        };
-
+        #region local static
         static IPhoneDateIdEntity? find(CustardPlumbingLink cPlumb, CustardCaliperLink cCal, CustardCornLink cCorn)
         {
             // Clear winners
@@ -187,8 +173,23 @@ public sealed class TransformYellerReport_new(
                 return cCal.Caliper;
 
             return null;
-
         }
+        #endregion
+
+        return (cPlumb, cCal, cCorn) switch
+        {
+            (null, null, null) => new(null, c),
+
+            (not null, null, null) => new(cPlumb.Plumbing, c),
+            (null, not null, null) => new(cCal.Caliper, c),
+            (null, null, not null) => new(cCorn.Corn, c),
+
+            (not null, not null, null) => new(cPlumb.UnixMatchDate <= cCal.UnixMatchDate ? cPlumb.Plumbing : cCal.Caliper, c),
+            (not null, null, not null) => new(cPlumb.UnixMatchDate <= cCorn.UnixMatchDate ? cPlumb.Plumbing : cCorn.Corn, c),
+            (null, not null, not null) => new(cCal.UnixMatchDate <= cCorn.UnixMatchDate ? cCal.Caliper : cCorn.Corn, c),
+
+            (not null, not null, not null) => new(find(cPlumb, cCal, cCorn), c),
+        };
     }
 
 

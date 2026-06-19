@@ -58,7 +58,7 @@ select
     END                                                                        AS `Metadata`,
     -- For debugging
     p.id                                                                       AS `PlumbingId`,
-    s.sandRank, p.plumbingRank, s.status
+    s.sandRank, p.plumbingRank, s.status, year(s.dateaddeddate) as year, month(s.dateaddeddate) as month
 FROM rankedPlumbing AS p
 JOIN cust_norm     AS cn ON cn.phone10  = p.phonenumber      -- equijoin, index-eligible
 JOIN sub_status    AS s  ON s.custardid = cn.customerid

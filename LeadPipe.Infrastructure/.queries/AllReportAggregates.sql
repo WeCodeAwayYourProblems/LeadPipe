@@ -99,6 +99,6 @@ join sub_status s  ON s.custardid = cn.customerid
 where p.plumbingRank = 1
   and s.complete     = 1
   and p.unixdate < s.unixdate
-group by year, month, source, status
+group by year, month, source-- , status
 order by year, month, source, status;
 -- */
